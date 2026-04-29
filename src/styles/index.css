@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-sasp-bg text-sasp-ink font-sans antialiased;
+    background-image:
+      radial-gradient(ellipse at top, rgba(27, 42, 78, 0.55), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(15, 20, 32, 0.9), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif tracking-tight;
+  }
+
+  /* Subtle scanline-style focus ring tied to police equipment vibe */
+  :focus-visible {
+    @apply outline-none ring-2 ring-sasp-tan ring-offset-2 ring-offset-sasp-bg;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border border-sasp-navy-light bg-sasp-navy/70 shadow-lg backdrop-blur-sm;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
+      transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-sasp-tan text-sasp-bg hover:bg-sasp-gold;
+  }
+  .btn-secondary {
+    @apply btn border border-sasp-tan/50 text-sasp-ink hover:border-sasp-tan hover:bg-sasp-navy-light;
+  }
+  .btn-danger {
+    @apply btn border border-sasp-red text-sasp-red hover:bg-sasp-red hover:text-sasp-ink;
+  }
+
+  .chip {
+    @apply relative flex h-12 select-none items-center justify-center rounded border font-mono
+      text-sm transition;
+  }
+}

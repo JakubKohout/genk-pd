@@ -1,0 +1,26 @@
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+*.tsbuildinfo
+
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/e2e-results/
+
+# Confidential source material (parsed app data is fine, raw manual is not)
+/docs/sasp-manual.md
