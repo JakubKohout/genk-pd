@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCodeProgress } from '../state/useCodeProgress';
+import { trackEvent } from '@/shared/analytics';
 
 export function ResetButton() {
   const { reset } = useCodeProgress();
@@ -29,6 +30,7 @@ export function ResetButton() {
             type="button"
             className="btn-danger"
             onClick={() => {
+              trackEvent('reset');
               reset();
               setConfirming(false);
             }}

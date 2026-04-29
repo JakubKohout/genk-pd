@@ -1,10 +1,16 @@
+import { useEffect } from 'react';
 import { ResetButton } from './ResetButton';
 import { useSettings } from '../state/useSettings';
+import { trackEvent } from '@/shared/analytics';
 
 export function CongratsBanner() {
   const { importanceFilter, setImportance } = useSettings();
   const allOn =
     importanceFilter.mandatory && importanceFilter.rare && importanceFilter.unnecessary;
+
+  useEffect(() => {
+    trackEvent('complete', allOn ? 'all' : 'partial');
+  }, [allOn]);
 
   return (
     <div

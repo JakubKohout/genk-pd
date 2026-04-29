@@ -18,6 +18,11 @@ export type SeedInput = {
  * Use BEFORE page.goto(). Reads are picked up by storage.ts and rng.ts at module load.
  */
 export async function seed(page: Page, input: SeedInput): Promise<void> {
+  // Belt-and-suspenders: even though VITE_GOATCOUNTER_URL is unset in CI, abort any
+  // GoatCounter request so a stray dev .env can't pollute the analytics dashboard.
+  await page.route('**/gc.zgo.at/**', (route) => route.abort());
+  await page.route('**/*.goatcounter.com/**', (route) => route.abort());
+
   const persisted = {
     schemaVersion: 1 as const,
     codes: {

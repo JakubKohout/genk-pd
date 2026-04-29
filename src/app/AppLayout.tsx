@@ -1,5 +1,7 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { BadgeIcon } from '@/shared/ui/BadgeIcon';
+import { trackPageview } from '@/shared/analytics';
 
 const navItems = [
   { to: '/codes', label: 'Desítkové kódy', enabled: true },
@@ -8,6 +10,11 @@ const navItems = [
 ];
 
 export function AppLayout() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageview(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+
   return (
     <div className="min-h-full flex flex-col">
       <header className="border-b border-sasp-navy-light bg-sasp-bg/80 backdrop-blur sticky top-0 z-20">

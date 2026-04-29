@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_GOATCOUNTER_URL: https://jakubkohout.goatcounter.com/count
       - uses: actions/configure-pages@v5
         with:
           enablement: true
