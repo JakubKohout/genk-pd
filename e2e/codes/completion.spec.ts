@@ -18,7 +18,7 @@ test.describe('Completion state', () => {
       importanceFilter: { mandatory: false, rare: true, unnecessary: false },
       randomSeed: 1,
     });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('congrats-banner')).toBeVisible();
     await expect(page.getByTestId('progress-bar')).toHaveAttribute('data-complete', 'true');
@@ -39,7 +39,7 @@ test.describe('Completion state', () => {
       importanceFilter: { mandatory: false, rare: true, unnecessary: false },
       randomSeed: 1,
     });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('congrats-banner')).toBeVisible();
 

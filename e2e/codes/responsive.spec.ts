@@ -4,7 +4,7 @@ import { pinNextQuestion, seed } from '../fixtures/seed';
 test.describe('Responsive @responsive', () => {
   test('mobile: side panel is collapsible', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     // The mobile sheet uses a <details> with summary "Přehled kódů — X% splněno".
     const summary = page.locator('summary');
@@ -22,7 +22,7 @@ test.describe('Responsive @responsive', () => {
 
   test('mobile: question card and input are usable', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('question-meaning')).toBeVisible();
     await page.getByTestId('code-input').fill('0');

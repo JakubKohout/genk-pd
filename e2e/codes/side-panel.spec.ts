@@ -11,7 +11,7 @@ test.describe('Side panel — chip colors and progress', () => {
       },
       randomSeed: 1,
     });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('chip-10-0')).toHaveAttribute('data-score', '3');
     await expect(page.getByTestId('chip-10-0')).toHaveAttribute('data-done', 'true');
@@ -28,7 +28,7 @@ test.describe('Side panel — chip colors and progress', () => {
       },
       randomSeed: 1,
     });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     const percentText = await page.getByTestId('progress-percent').textContent();
     expect(percentText).toMatch(/^\d+%$/);
@@ -49,7 +49,7 @@ test.describe('Side panel — chip colors and progress', () => {
     ];
     for (const id of mandatoryIds) progress[id] = { score: 3, lastAskedAtTurn: 0 };
     await seed(page, { progress, randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     const bar = page.getByTestId('progress-bar');
     await expect(bar).toHaveAttribute('data-pct', '100');

@@ -4,7 +4,7 @@ import { pinNextQuestion, seed } from '../fixtures/seed';
 test.describe('Mode 2 — výběr významu', () => {
   test('shows the code and 5 options', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 7 });
-    await page.goto('/codes/choose');
+    await page.goto('/#/codes/choose');
 
     await expect(page.getByTestId('question-code')).toHaveText('10-0');
     const options = page.getByTestId('options').getByRole('button');
@@ -13,7 +13,7 @@ test.describe('Mode 2 — výběr významu', () => {
 
   test('correct choice → green feedback', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-50'), randomSeed: 7 });
-    await page.goto('/codes/choose');
+    await page.goto('/#/codes/choose');
 
     await expect(page.getByTestId('question-code')).toHaveText('10-50');
     await page.getByTestId('option-10-50').click();
@@ -24,7 +24,7 @@ test.describe('Mode 2 — výběr významu', () => {
 
   test('wrong choice highlights the correct answer', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-50'), randomSeed: 7 });
-    await page.goto('/codes/choose');
+    await page.goto('/#/codes/choose');
 
     await expect(page.getByTestId('question-code')).toHaveText('10-50');
 
@@ -44,7 +44,7 @@ test.describe('Mode 2 — výběr významu', () => {
   test('options include codes from the same decade when decade is rich', async ({ page }) => {
     // 10-50's decade (50..59) has 10-50, 10-51, 10-52, 10-53, 10-54, 10-55 — plenty.
     await seed(page, { progress: pinNextQuestion('10-50'), randomSeed: 42 });
-    await page.goto('/codes/choose');
+    await page.goto('/#/codes/choose');
 
     const optionIds = await page
       .getByTestId('options')

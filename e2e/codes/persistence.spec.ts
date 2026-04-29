@@ -4,7 +4,7 @@ import { pinNextQuestion, seed } from '../fixtures/seed';
 test.describe('Persistence', () => {
   test('answer survives a page reload', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await page.getByTestId('code-input').fill('0');
     await page.getByTestId('submit-button').click();
@@ -22,7 +22,7 @@ test.describe('Persistence', () => {
       progress: { '10-0': { score: 2, lastAskedAtTurn: 0 } },
       randomSeed: 1,
     });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('chip-10-0')).toHaveAttribute('data-score', '2');
 

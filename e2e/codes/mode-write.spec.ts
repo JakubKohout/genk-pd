@@ -4,7 +4,7 @@ import { pinNextQuestion, seed } from '../fixtures/seed';
 test.describe('Mode 1 — psaní kódu', () => {
   test('correct answer shows green feedback', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('question-meaning')).toHaveText('Vizuální kontakt ztracen');
     await page.getByTestId('code-input').fill('0');
@@ -20,7 +20,7 @@ test.describe('Mode 1 — psaní kódu', () => {
     // 10-44 is "rare" so it's not in the default mandatory-only filter pool —
     // it is, however, still recognized as a real code when looked up by number.
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('question-meaning')).toHaveText('Vizuální kontakt ztracen');
     await page.getByTestId('code-input').fill('44'); // valid but wrong
@@ -34,7 +34,7 @@ test.describe('Mode 1 — psaní kódu', () => {
 
   test('nonexistent code shows neexistující kód feedback', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await expect(page.getByTestId('question-meaning')).toHaveText('Vizuální kontakt ztracen');
     await page.getByTestId('code-input').fill('999');
@@ -47,7 +47,7 @@ test.describe('Mode 1 — psaní kódu', () => {
 
   test('Enter submits and Enter on Next advances', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
-    await page.goto('/codes/write');
+    await page.goto('/#/codes/write');
 
     await page.getByTestId('code-input').fill('0');
     await page.getByTestId('code-input').press('Enter');
