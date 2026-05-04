@@ -25,7 +25,11 @@ describe('analytics', () => {
     expect(mp.init).toHaveBeenCalledTimes(1);
     expect(mp.init).toHaveBeenCalledWith(
       '67f19825269daf33fc9e5da1c85f568c',
-      expect.objectContaining({ track_pageview: false, persistence: 'localStorage' }),
+      expect.objectContaining({
+        api_host: 'https://api-eu.mixpanel.com',
+        track_pageview: false,
+        persistence: 'localStorage',
+      }),
     );
   });
 

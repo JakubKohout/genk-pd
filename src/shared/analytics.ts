@@ -8,6 +8,7 @@ export function initAnalytics(): void {
   if (initialized) return;
   if (typeof window === 'undefined') return;
   mixpanel.init(TOKEN, {
+    api_host: 'https://api-eu.mixpanel.com',
     debug: import.meta.env.DEV,
     track_pageview: false,
     persistence: 'localStorage',
