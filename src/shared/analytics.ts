@@ -1,48 +1,55 @@
-/**
- * GoatCounter integration. No-op unless VITE_GOATCOUNTER_URL is set at build time —
- * dev/test builds therefore make zero network calls and need no stubbing.
- *
- * GoatCounter treats events as pageviews with `event:true`; the `path` field becomes
- * the event name, so we use short kebab-case identifiers (e.g. `mode-write-correct`).
- */
+import mixpanel from 'mixpanel-browser';
 
-type GoatCounterPayload = {
-  path?: string;
-  title?: string;
-  event?: boolean;
-  referrer?: string;
-};
+const TOKEN = '67f19825269daf33fc9e5da1c85f568c';
 
-declare global {
-  interface Window {
-    goatcounter?: {
-      count?: (payload: GoatCounterPayload) => void;
-    };
-  }
-}
-
-const SCRIPT_SRC = 'https://gc.zgo.at/count.js';
+let initialized = false;
 
 export function initAnalytics(): void {
-  if (typeof document === 'undefined') return;
-  const url = import.meta.env.VITE_GOATCOUNTER_URL;
-  if (!url) return;
-  if (document.querySelector('script[data-goatcounter]')) return;
-
-  const s = document.createElement('script');
-  s.async = true;
-  s.src = SCRIPT_SRC;
-  s.dataset.goatcounter = url;
-  s.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
-  document.head.appendChild(s);
+  if (initialized) return;
+  if (typeof window === 'undefined') return;
+  mixpanel.init(TOKEN, {
+    debug: import.meta.env.DEV,
+    track_pageview: false,
+    persistence: 'localStorage',
+    ignore_dnt: true,
+  });
+  initialized = true;
 }
 
 export function trackPageview(path: string): void {
-  if (typeof window === 'undefined') return;
-  window.goatcounter?.count?.({ path });
+  if (!initialized) return;
+  mixpanel.track_pageview({ url: window.location.origin + '/#' + path });
 }
 
-export function trackEvent(name: string, title?: string): void {
-  if (typeof window === 'undefined') return;
-  window.goatcounter?.count?.({ event: true, path: name, title });
+export function trackCodeAnswered(props: {
+  mode: 'write' | 'choose';
+  success: boolean;
+  code_id: string;
+}): void {
+  if (!initialized) return;
+  mixpanel.track('code_answered', props);
+}
+
+export function trackLawAnswered(props: {
+  success: boolean;
+  question_id: string;
+}): void {
+  if (!initialized) return;
+  mixpanel.track('law_answered', props);
+}
+
+export function trackProgressReset(props: { module: 'codes' | 'lea' }): void {
+  if (!initialized) return;
+  mixpanel.track('progress_reset', props);
+}
+
+export function trackCodesCompleted(props: { scope: 'all' | 'partial' }): void {
+  if (!initialized) return;
+  mixpanel.track('codes_completed', props);
+}
+
+// Lets unit tests reset the module-level guard between tests so each test
+// starts uninitialized.
+export function __resetForTests(): void {
+  initialized = false;
 }

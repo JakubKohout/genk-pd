@@ -5,7 +5,7 @@ import { useSettings } from '../state/useSettings';
 import { isComplete, pickNextCode } from '../state/selection';
 import { buildOptions } from '../state/distractors';
 import { CongratsBanner } from './CongratsBanner';
-import { trackEvent } from '@/shared/analytics';
+import { trackCodeAnswered } from '@/shared/analytics';
 
 type Choice = { kind: 'correct' } | { kind: 'wrong'; chosenId: string };
 
@@ -43,7 +43,7 @@ export function ModeChoose() {
       const chosen = options[idx]!;
       const correct = chosen.id === current.id;
       recordAnswer(current.id, correct);
-      trackEvent(correct ? 'mode-choose-correct' : 'mode-choose-wrong', current.id);
+      trackCodeAnswered({ mode: 'choose', success: correct, code_id: current.id });
       setChoice(correct ? { kind: 'correct' } : { kind: 'wrong', chosenId: chosen.id });
     };
     window.addEventListener('keydown', onKey);
@@ -65,7 +65,7 @@ export function ModeChoose() {
     if (choice) return;
     const correct = chosen.id === current.id;
     recordAnswer(current.id, correct);
-    trackEvent(correct ? 'mode-choose-correct' : 'mode-choose-wrong', current.id);
+    trackCodeAnswered({ mode: 'choose', success: correct, code_id: current.id });
     setChoice(correct ? { kind: 'correct' } : { kind: 'wrong', chosenId: chosen.id });
   };
 

@@ -19,8 +19,8 @@ export type SeedInput = {
  * Use BEFORE page.goto(). Reads are picked up by storage.ts and rng.ts at module load.
  */
 export async function seed(page: Page, input: SeedInput): Promise<void> {
-  await page.route('**/gc.zgo.at/**', (route) => route.abort());
-  await page.route('**/*.goatcounter.com/**', (route) => route.abort());
+  await page.route('**/api*.mixpanel.com/**', (route) => route.abort());
+  await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
     schemaVersion: 2 as const,

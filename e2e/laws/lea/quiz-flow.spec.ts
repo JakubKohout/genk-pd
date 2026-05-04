@@ -9,7 +9,7 @@ test.describe('LEA quiz happy path', () => {
     });
 
     await page.goto('/');
-    await page.getByRole('link', { name: /zákony/i }).click();
+    await page.getByRole('link', { name: 'Zákony', exact: true }).click();
     await expect(page).toHaveURL(/#\/laws$/);
     await page.getByRole('link', { name: /law enforcement act/i }).click();
     await expect(page).toHaveURL(/#\/laws\/lea$/);

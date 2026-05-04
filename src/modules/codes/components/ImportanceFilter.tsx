@@ -1,6 +1,5 @@
 import { useSettings } from '../state/useSettings';
 import { IMPORTANCE_LABELS, type Importance } from '../data/codes';
-import { trackEvent } from '@/shared/analytics';
 
 const ORDER: Importance[] = ['mandatory', 'rare', 'unnecessary'];
 
@@ -23,10 +22,7 @@ export function ImportanceFilter() {
             type="checkbox"
             data-testid={`filter-${imp}`}
             checked={importanceFilter[imp]}
-            onChange={(e) => {
-              setImportance(imp, e.target.checked);
-              trackEvent(`filter-${imp}-${e.target.checked ? 'on' : 'off'}`);
-            }}
+            onChange={(e) => setImportance(imp, e.target.checked)}
             className="h-4 w-4 accent-sasp-tan"
           />
           {IMPORTANCE_LABELS[imp]}

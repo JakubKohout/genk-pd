@@ -4,7 +4,7 @@ import { useCodeProgress } from '../state/useCodeProgress';
 import { useSettings } from '../state/useSettings';
 import { isComplete, pickNextCode } from '../state/selection';
 import { CongratsBanner } from './CongratsBanner';
-import { trackEvent } from '@/shared/analytics';
+import { trackCodeAnswered } from '@/shared/analytics';
 
 type Feedback =
   | { kind: 'correct'; current: Code }
@@ -62,7 +62,7 @@ export function ModeWrite() {
     }
     const correct = num === current.number;
     recordAnswer(current.id, correct);
-    trackEvent(correct ? 'mode-write-correct' : 'mode-write-wrong', current.id);
+    trackCodeAnswered({ mode: 'write', success: correct, code_id: current.id });
     if (correct) {
       setFeedback({ kind: 'correct', current });
       return;

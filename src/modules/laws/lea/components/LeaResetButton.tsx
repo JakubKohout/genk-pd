@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLeaProgress } from '../state/useLeaProgress';
-import { trackEvent } from '@/shared/analytics';
+import { trackProgressReset } from '@/shared/analytics';
 
 export function LeaResetButton() {
   const { reset } = useLeaProgress();
@@ -30,7 +30,7 @@ export function LeaResetButton() {
             type="button"
             className="btn-danger"
             onClick={() => {
-              trackEvent('lea-reset');
+              trackProgressReset({ module: 'lea' });
               reset();
               setConfirming(false);
             }}

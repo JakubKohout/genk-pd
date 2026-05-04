@@ -9,6 +9,7 @@ import { AnswerList, type AnswerEntry } from './AnswerList';
 import { LeaResetButton } from './LeaResetButton';
 import { SidePanel } from './SidePanel';
 import { SubmitFooter } from './SubmitFooter';
+import { trackLawAnswered } from '@/shared/analytics';
 
 type Phase = 'answering' | 'revealed';
 
@@ -80,6 +81,7 @@ export function LeaQuizPage() {
     const perfect =
       wrongCount === 0 && dupCount === 0 && found.length === current.items.length;
     recordSubmit(current.id, { perfect });
+    trackLawAnswered({ success: perfect, question_id: current.id });
     setPhase('revealed');
   };
 

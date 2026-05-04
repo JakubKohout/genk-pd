@@ -1,55 +1,91 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { initAnalytics, trackEvent, trackPageview } from './analytics';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import mixpanel from 'mixpanel-browser';
+import {
+  __resetForTests,
+  initAnalytics,
+  trackCodeAnswered,
+  trackCodesCompleted,
+  trackLawAnswered,
+  trackPageview,
+  trackProgressReset,
+} from './analytics';
+
+const mp = vi.mocked(mixpanel);
 
 describe('analytics', () => {
-  afterEach(() => {
-    delete (window as { goatcounter?: unknown }).goatcounter;
-    document.querySelectorAll('script[data-goatcounter]').forEach((n) => n.remove());
-    vi.unstubAllEnvs();
+  beforeEach(() => {
+    __resetForTests();
+    mp.init.mockClear();
+    mp.track.mockClear();
+    mp.track_pageview.mockClear();
   });
 
-  it('trackPageview is a silent no-op without window.goatcounter', () => {
-    expect(() => trackPageview('/foo')).not.toThrow();
-  });
-
-  it('trackEvent is a silent no-op without window.goatcounter', () => {
-    expect(() => trackEvent('mode-write-correct', '10-44')).not.toThrow();
-  });
-
-  it('trackPageview forwards path to goatcounter.count when present', () => {
-    const count = vi.fn();
-    (window as { goatcounter?: unknown }).goatcounter = { count };
-    trackPageview('/codes/write');
-    expect(count).toHaveBeenCalledWith({ path: '/codes/write' });
-  });
-
-  it('trackEvent forwards event:true with path/title to goatcounter.count', () => {
-    const count = vi.fn();
-    (window as { goatcounter?: unknown }).goatcounter = { count };
-    trackEvent('reset', 'mandatory');
-    expect(count).toHaveBeenCalledWith({ event: true, path: 'reset', title: 'mandatory' });
-  });
-
-  it('initAnalytics injects no script when env var is empty', () => {
-    vi.stubEnv('VITE_GOATCOUNTER_URL', '');
+  it('initAnalytics calls mixpanel.init with the project token', () => {
     initAnalytics();
-    expect(document.querySelector('script[data-goatcounter]')).toBeNull();
-  });
-
-  it('initAnalytics injects script tag when env var is set', () => {
-    vi.stubEnv('VITE_GOATCOUNTER_URL', 'https://example.goatcounter.com/count');
-    initAnalytics();
-    const s = document.querySelector('script[data-goatcounter]') as HTMLScriptElement | null;
-    expect(s).not.toBeNull();
-    expect(s?.dataset.goatcounter).toBe('https://example.goatcounter.com/count');
-    expect(s?.src).toContain('gc.zgo.at/count.js');
-    expect(s?.dataset.goatcounterSettings).toContain('"no_onload":true');
+    expect(mp.init).toHaveBeenCalledTimes(1);
+    expect(mp.init).toHaveBeenCalledWith(
+      '67f19825269daf33fc9e5da1c85f568c',
+      expect.objectContaining({ track_pageview: false, persistence: 'localStorage' }),
+    );
   });
 
   it('initAnalytics is idempotent', () => {
-    vi.stubEnv('VITE_GOATCOUNTER_URL', 'https://example.goatcounter.com/count');
     initAnalytics();
     initAnalytics();
-    expect(document.querySelectorAll('script[data-goatcounter]').length).toBe(1);
+    expect(mp.init).toHaveBeenCalledTimes(1);
+  });
+
+  it('trackPageview is a silent no-op before initAnalytics', () => {
+    expect(() => trackPageview('/codes/write')).not.toThrow();
+    expect(mp.track_pageview).not.toHaveBeenCalled();
+  });
+
+  it('trackPageview constructs a hash-prefixed URL', () => {
+    initAnalytics();
+    trackPageview('/codes/write');
+    expect(mp.track_pageview).toHaveBeenCalledWith({
+      url: window.location.origin + '/#/codes/write',
+    });
+  });
+
+  it('trackCodeAnswered forwards props to mixpanel.track', () => {
+    initAnalytics();
+    trackCodeAnswered({ mode: 'write', success: true, code_id: '10-44' });
+    expect(mp.track).toHaveBeenCalledWith('code_answered', {
+      mode: 'write',
+      success: true,
+      code_id: '10-44',
+    });
+  });
+
+  it('trackLawAnswered forwards props to mixpanel.track', () => {
+    initAnalytics();
+    trackLawAnswered({ success: false, question_id: 'lea.16.B' });
+    expect(mp.track).toHaveBeenCalledWith('law_answered', {
+      success: false,
+      question_id: 'lea.16.B',
+    });
+  });
+
+  it('trackProgressReset forwards module to mixpanel.track', () => {
+    initAnalytics();
+    trackProgressReset({ module: 'lea' });
+    expect(mp.track).toHaveBeenCalledWith('progress_reset', { module: 'lea' });
+  });
+
+  it('trackCodesCompleted forwards scope to mixpanel.track', () => {
+    initAnalytics();
+    trackCodesCompleted({ scope: 'partial' });
+    expect(mp.track).toHaveBeenCalledWith('codes_completed', { scope: 'partial' });
+  });
+
+  it('all track* are silent no-ops before initAnalytics', () => {
+    expect(() => {
+      trackCodeAnswered({ mode: 'choose', success: false, code_id: '10-99' });
+      trackLawAnswered({ success: true, question_id: 'lea.7' });
+      trackProgressReset({ module: 'codes' });
+      trackCodesCompleted({ scope: 'all' });
+    }).not.toThrow();
+    expect(mp.track).not.toHaveBeenCalled();
   });
 });
