@@ -4,6 +4,8 @@ import { HomePage } from './HomePage';
 import { CodesPage } from '@/modules/codes/components/CodesPage';
 import { ModeWrite } from '@/modules/codes/components/ModeWrite';
 import { ModeChoose } from '@/modules/codes/components/ModeChoose';
+import { LawsIndex } from '@/modules/laws/components/LawsIndex';
+import { LeaQuizPage } from '@/modules/laws/lea/components/LeaQuizPage';
 import { ComingSoonPage } from './ComingSoonPage';
 
 export const router = createHashRouter([
@@ -21,7 +23,8 @@ export const router = createHashRouter([
           { path: 'choose', element: <ModeChoose /> },
         ],
       },
-      { path: 'laws', element: <ComingSoonPage title="Zákony" /> },
+      { path: 'laws', element: <LawsIndex /> },
+      { path: 'laws/lea', element: <LeaQuizPage /> },
       { path: 'sasp', element: <ComingSoonPage title="SASP příručka" /> },
     ],
   },

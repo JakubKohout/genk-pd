@@ -6,7 +6,7 @@ import { saveState, loadState, type PersistedState } from '@/shared/storage';
 
 function seed(progress: PersistedState['codes']['progress']): void {
   saveState({
-    schemaVersion: 1,
+    schemaVersion: 2,
     codes: {
       progress,
       turn: 5,
@@ -14,6 +14,7 @@ function seed(progress: PersistedState['codes']['progress']): void {
         importanceFilter: { mandatory: true, rare: true, unnecessary: false },
       },
     },
+    lea: { progress: {}, turn: 0 },
   });
 }
 

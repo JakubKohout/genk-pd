@@ -23,12 +23,13 @@ function seedSinglePool(codeId: string, score = 0): void {
   if (score !== 0) progress[codeId] = { score, lastAskedAtTurn: -10 };
 
   saveState({
-    schemaVersion: 1,
+    schemaVersion: 2,
     codes: {
       progress,
       turn: 0,
       settings: { importanceFilter: { mandatory: true, rare: false, unnecessary: false } },
     },
+    lea: { progress: {}, turn: 0 },
   });
 }
 

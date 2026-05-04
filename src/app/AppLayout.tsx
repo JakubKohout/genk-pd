@@ -5,7 +5,7 @@ import { trackPageview } from '@/shared/analytics';
 
 const navItems = [
   { to: '/codes', label: 'Desítkové kódy', enabled: true },
-  { to: '/laws', label: 'Zákony', enabled: false },
+  { to: '/laws', label: 'Zákony', enabled: true },
   { to: '/sasp', label: 'SASP příručka', enabled: false },
 ];
 

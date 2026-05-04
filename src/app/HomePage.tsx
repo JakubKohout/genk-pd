@@ -11,7 +11,7 @@ const modules = [
     to: '/laws',
     title: 'Zákony',
     description: 'Penal Code, Law Enforcement Act, Firearm Act — vědomostní testy nad zákony.',
-    enabled: false,
+    enabled: true,
   },
   {
     to: '/sasp',

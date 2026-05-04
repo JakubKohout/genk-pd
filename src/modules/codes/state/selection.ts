@@ -1,9 +1,8 @@
 import type { Code } from '../data/codes';
 import type { ImportanceFilter, ProgressEntry } from '@/shared/storage';
-import { weightedRandom } from '@/shared/rng';
+import { pickNextFromPool } from '@/shared/quiz/pickNextFromPool';
 
 const MAX_SCORE = 3;
-const COOLDOWN_TURNS = 2;
 
 export type SelectionState = {
   progress: Record<string, ProgressEntry>;
@@ -23,17 +22,7 @@ export function pickNextCode(
   state: SelectionState,
   allCodes: readonly Code[],
 ): Code | null {
-  const eligible = eligibleCodes(state, allCodes);
-  if (eligible.length === 0) return null;
-
-  const cooled = eligible.filter((c) => {
-    const last = state.progress[c.id]?.lastAskedAtTurn ?? Number.NEGATIVE_INFINITY;
-    return state.turn - last >= COOLDOWN_TURNS;
-  });
-  const pool = cooled.length > 0 ? cooled : eligible;
-
-  const weights = pool.map((c) => 4 - (state.progress[c.id]?.score ?? 0));
-  return weightedRandom(pool, weights);
+  return pickNextFromPool(eligibleCodes(state, allCodes), state.progress, state.turn);
 }
 
 export function isComplete(state: SelectionState, allCodes: readonly Code[]): boolean {

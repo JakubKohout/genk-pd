@@ -5,7 +5,7 @@ import { saveState, type PersistedState } from '@/shared/storage';
 
 function seed(state: Partial<PersistedState['codes']>): void {
   const full: PersistedState = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     codes: {
       progress: state.progress ?? {},
       turn: state.turn ?? 0,
@@ -13,6 +13,7 @@ function seed(state: Partial<PersistedState['codes']>): void {
         importanceFilter: { mandatory: true, rare: false, unnecessary: false },
       },
     },
+    lea: { progress: {}, turn: 0 },
   };
   saveState(full);
 }

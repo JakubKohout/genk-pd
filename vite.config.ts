@@ -10,4 +10,7 @@ export default defineConfig(({ command }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    allowedHosts: ['.ngrok-free.app', '.ngrok.app', '.trycloudflare.com'],
+  },
 }));

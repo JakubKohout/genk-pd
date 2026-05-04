@@ -16,19 +16,27 @@ export type ProgressEntry = {
   lastAskedAtTurn: number;
 };
 
-export type PersistedState = {
-  schemaVersion: 1;
-  codes: {
-    progress: Record<string, ProgressEntry>;
-    turn: number;
-    settings: {
-      importanceFilter: ImportanceFilter;
-    };
+export type CodesSlice = {
+  progress: Record<string, ProgressEntry>;
+  turn: number;
+  settings: {
+    importanceFilter: ImportanceFilter;
   };
 };
 
+export type LeaSlice = {
+  progress: Record<string, ProgressEntry>;
+  turn: number;
+};
+
+export type PersistedState = {
+  schemaVersion: 2;
+  codes: CodesSlice;
+  lea: LeaSlice;
+};
+
 export const initialState: PersistedState = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   codes: {
     progress: {},
     turn: 0,
@@ -40,20 +48,46 @@ export const initialState: PersistedState = {
       },
     },
   },
+  lea: {
+    progress: {},
+    turn: 0,
+  },
 };
 
 let cachedSnapshot: PersistedState | null = null;
 const listeners = new Set<() => void>();
+
+type StoredV1 = {
+  schemaVersion: 1;
+  codes: CodesSlice;
+};
+
+function migrateV1ToV2(v1: StoredV1): PersistedState {
+  return {
+    schemaVersion: 2,
+    codes: {
+      progress: v1.codes?.progress ?? {},
+      turn: v1.codes?.turn ?? 0,
+      settings: {
+        importanceFilter: {
+          ...initialState.codes.settings.importanceFilter,
+          ...(v1.codes?.settings?.importanceFilter ?? {}),
+        },
+      },
+    },
+    lea: { progress: {}, turn: 0 },
+  };
+}
 
 function readFromStorage(): PersistedState {
   if (typeof localStorage === 'undefined') return cloneInitial();
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return cloneInitial();
   try {
-    const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    if (parsed?.schemaVersion === 1 && parsed.codes) {
+    const parsed = JSON.parse(raw) as Partial<PersistedState | StoredV1>;
+    if (parsed?.schemaVersion === 2 && parsed.codes) {
       return {
-        schemaVersion: 1,
+        schemaVersion: 2,
         codes: {
           progress: parsed.codes.progress ?? {},
           turn: parsed.codes.turn ?? 0,
@@ -64,7 +98,14 @@ function readFromStorage(): PersistedState {
             },
           },
         },
+        lea: {
+          progress: parsed.lea?.progress ?? {},
+          turn: parsed.lea?.turn ?? 0,
+        },
       };
+    }
+    if (parsed?.schemaVersion === 1 && parsed.codes) {
+      return migrateV1ToV2(parsed as StoredV1);
     }
   } catch {
     // fall through

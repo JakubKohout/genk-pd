@@ -10,6 +10,7 @@ export type SeedInput = {
   progress?: SeedProgress;
   turn?: number;
   importanceFilter?: { mandatory?: boolean; rare?: boolean; unnecessary?: boolean };
+  lea?: { progress?: SeedProgress; turn?: number };
   randomSeed?: number;
 };
 
@@ -18,13 +19,11 @@ export type SeedInput = {
  * Use BEFORE page.goto(). Reads are picked up by storage.ts and rng.ts at module load.
  */
 export async function seed(page: Page, input: SeedInput): Promise<void> {
-  // Belt-and-suspenders: even though VITE_GOATCOUNTER_URL is unset in CI, abort any
-  // GoatCounter request so a stray dev .env can't pollute the analytics dashboard.
   await page.route('**/gc.zgo.at/**', (route) => route.abort());
   await page.route('**/*.goatcounter.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -36,12 +35,14 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
         },
       },
     },
+    lea: {
+      progress: input.lea?.progress ?? {},
+      turn: input.lea?.turn ?? 0,
+    },
   };
   await page.addInitScript(
     ({ persisted, randomSeed, storageKey, rngSeedKey }) => {
       try {
-        // Seed only on the FIRST navigation of the test. Subsequent reloads must keep
-        // whatever the app wrote to localStorage so we can verify persistence.
         if (sessionStorage.getItem('genk-pd:seeded') === '1') return;
         sessionStorage.setItem('genk-pd:seeded', '1');
         localStorage.clear();
@@ -81,6 +82,46 @@ export function saturateAll(importance: 'mandatory' | 'rare' | 'unnecessary'): S
     if (c.importance === importance) {
       progress[c.id] = { score: 3, lastAskedAtTurn: 0 };
     }
+  }
+  return progress;
+}
+
+/**
+ * Build a LEA progress map that pins the next question to `targetQuestionId` by saturating
+ * all other LEA questions at +3. Target itself starts at 0 (or `targetScore` if given).
+ *
+ * The full set of LEA question IDs (17 questions) is hard-coded here to avoid runtime imports
+ * — this fixture is loaded by Playwright before the app bundle exists.
+ */
+export const LEA_QUESTION_IDS = [
+  'lea.7',
+  'lea.9.A',
+  'lea.9.B',
+  'lea.10',
+  'lea.11',
+  'lea.12.A',
+  'lea.12.C',
+  'lea.15',
+  'lea.16.B',
+  'lea.17.A',
+  'lea.18.A',
+  'lea.19.A',
+  'lea.21.A',
+  'lea.23.B',
+  'lea.37',
+  'lea.zbrojni-prukaz',
+  'lea.ridicsky-prukaz',
+] as const;
+
+export function pinNextLeaQuestion(targetQuestionId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of LEA_QUESTION_IDS) {
+    if (id !== targetQuestionId) {
+      progress[id] = { score: 3, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetQuestionId] = { score: targetScore, lastAskedAtTurn: -10 };
   }
   return progress;
 }
