@@ -43,7 +43,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **149 unit/component + 35 E2E = 184 testů**.
+`npm run test:all` musí být zelené: **150 unit/component + 35 E2E = 185 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 ## Adresářová struktura
@@ -85,7 +85,8 @@ src/
     quiz/pickNextFromPool.ts        # Generic weighted-random + cooldown picker
     ui/BadgeIcon.tsx                # SVG hvězda s "PD"
     analytics.ts                    # Mixpanel wrapper (init + typed track* fns,
-                                    # no-op před initAnalytics, mockovaný v testech)
+                                    # no-op před initAnalytics, mockovaný v testech,
+                                    # vypnutý v E2E přes window.__GENK_E2E__ flag)
   styles/index.css                  # Tailwind directives + .card / .btn-* / .chip
                                     # (codes only) / .answer-input* / .answer-list*
                                     # /.answer-row* (4 stavy: correct/duplicate/wrong/

@@ -41,6 +41,18 @@ describe('analytics', () => {
     expect(mp.init).toHaveBeenCalledTimes(1);
   });
 
+  it('initAnalytics is a no-op when window.__GENK_E2E__ is set', () => {
+    window.__GENK_E2E__ = true;
+    try {
+      initAnalytics();
+      expect(mp.init).not.toHaveBeenCalled();
+      expect(mp.identify).not.toHaveBeenCalled();
+      expect(mp.people.set_once).not.toHaveBeenCalled();
+    } finally {
+      delete window.__GENK_E2E__;
+    }
+  });
+
   it('initAnalytics self-identifies with the device distinct_id before seeding profile', () => {
     initAnalytics();
     expect(mp.identify).toHaveBeenCalledWith('$device:test-uuid');

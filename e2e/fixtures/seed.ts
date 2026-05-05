@@ -42,6 +42,9 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   };
   await page.addInitScript(
     ({ persisted, randomSeed, storageKey, rngSeedKey }) => {
+      // Set unconditionally on every navigation so analytics stays disabled
+      // even after sessionStorage seed-once short-circuits below.
+      (window as Window & { __GENK_E2E__?: boolean }).__GENK_E2E__ = true;
       try {
         if (sessionStorage.getItem('genk-pd:seeded') === '1') return;
         sessionStorage.setItem('genk-pd:seeded', '1');

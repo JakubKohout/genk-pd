@@ -7,6 +7,7 @@ let initialized = false;
 export function initAnalytics(): void {
   if (initialized) return;
   if (typeof window === 'undefined') return;
+  if (window.__GENK_E2E__) return;
   mixpanel.init(TOKEN, {
     api_host: 'https://api-eu.mixpanel.com',
     debug: import.meta.env.DEV,
