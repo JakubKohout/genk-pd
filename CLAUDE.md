@@ -31,6 +31,7 @@ schemaVersion 2).
   `#/laws/lea` formát)
 - Vitest 2 (unit + component, jsdom)
 - Playwright 1 (E2E, chromium-desktop + chromium-mobile)
+- Mixpanel browser 2.78 (analytics, frontend-only, EU-resident)
 
 ## Příkazy
 
@@ -275,6 +276,47 @@ chips s ID kódu. LEA panel: vertikální `<ul>` s jedním řádkem na otázku �
 vpravo když mastered (score=3). Každý řádek má `data-testid="chip-<id>"`,
 `data-score`, `data-done` pro budoucí E2E.
 
+## Analytika (Mixpanel)
+
+`src/shared/analytics.ts` je tenký typed wrapper nad `mixpanel-browser`.
+Init v `src/main.tsx` přes `initAnalytics()`, project token je hardcoded
+konstanta (Mixpanel FE tokeny jsou public-by-design).
+
+**Eventy** (per-event typed funkce, ne generický `trackEvent`):
+
+| Funkce | Event name | Properties | Trigger |
+|---|---|---|---|
+| `trackCodeAnswered` | `code_answered` | `mode: 'write'\|'choose'`, `success`, `code_id` | ModeWrite/ModeChoose po vyhodnocení |
+| `trackLawAnswered` | `law_answered` | `success` (= perfect), `question_id` | LeaQuizPage `handleSubmit` |
+| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'` | ResetButton/LeaResetButton confirm |
+| `trackCodesCompleted` | `codes_completed` | `scope: 'all'\|'partial'` | CongratsBanner mount |
+| `trackPageview` | _(Mixpanel pageview)_ | `url` (origin + `#` + path) | AppLayout useEffect na route change |
+
+**Init pipeline** (po `mixpanel.init`):
+1. `mixpanel.identify(mixpanel.get_distinct_id())` — self-identify s anonymním
+   device id; bez toho Simplified Identity Merge dropne anonymní `people.*` calls
+2. `mixpanel.people.set_once({ $created })` — vytvoří profil v Users tab
+
+**Init config:**
+- `api_host: 'https://api-eu.mixpanel.com'` — projekt je EU-resident
+- `track_pageview: false` — hash router (`#/path`) by autotracker zaznamenal
+  všechno na `/`, proto pageview manuálně z AppLayoutu
+- `debug: import.meta.env.DEV` — v devtools console viditelné `Mixpanel: ...`
+  logy
+- `persistence: 'localStorage'`, `ignore_dnt: true`
+
+**Test mock:** `src/test/setup.ts` má globální `vi.mock('mixpanel-browser')`
+se stub objektem (`init`, `track`, `track_pageview`, `identify`,
+`get_distinct_id`, `people.set`, `people.set_once`, `register`, `reset`).
+Komponentové testy o tom nevědí; explicitní aserce jen v `analytics.test.ts`.
+Volání `trackX` před `initAnalytics` je no-op (modul-level `initialized` flag),
+takže testy nevolající init si dál fungují.
+
+**E2E vypnuto:** `seed()` nastaví `window.__GENK_E2E__ = true` v `addInitScript`
+(mimo session-once guard, takže perzistuje přes reload). `initAnalytics()` na
+flagu vrátí no-op před `mixpanel.init`. Plus belt-and-suspenders route blocks
+na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
+
 ## LEA UI flow
 
 `LeaQuizPage` (`src/modules/laws/lea/components/LeaQuizPage.tsx`):
@@ -396,6 +438,26 @@ vpravo když mastered (score=3). Každý řádek má `data-testid="chip-<id>"`,
     napsání aliasu nebo přesného quote (např. "maják") commitne jedním Enterem;
     napsání zkratky ("varo") naplní vybranou suggestion (druhý Enter commitne).
     Šipky ↑↓ jen mění highlight (žádný `hasNavigated` state už neexistuje).
+
+18. **Mixpanel projekt je EU-resident** — `api_host: 'https://api-eu.mixpanel.com'`
+    MUSÍ zůstat v `mixpanel.init()` configu. Bez toho SDK posílá na default
+    `api-js.mixpanel.com` (US) → server vrátí HTTP 200, ale eventy se v EU
+    instanci nikdy neobjeví (v Live View by bylo prázdno, v Network OK). Symptom
+    je nezáludný — proto se snadno přehlédne.
+
+19. **Simplified Identity Merge dropuje anonymní `people.*` calls** — Mixpanel
+    od ~2024 default. `mixpanel.identify(mixpanel.get_distinct_id())` PŘED
+    `people.set_once` v `initAnalytics` to obchází: self-identify s `$device:...`
+    ID „povýší" anonymní distinct_id na stabilní identitu, profil se v Users
+    tab vytvoří. **Neodstranit ten řádek** (eventy by chodily, profily ne — to
+    se debugguje hodiny).
+
+20. **E2E vypíná Mixpanel přes `window.__GENK_E2E__`** — `seed()` flag nastaví
+    v `addInitScript` (mimo session-once guard, takže perzistuje přes reload).
+    `initAnalytics()` na flagu vrátí no-op před `mixpanel.init`. Všechny E2E
+    specy volají `seed()`, takže to platí univerzálně. Pokud bys někdy psal
+    spec bez `seed()`, Mixpanel by bootnul a route blocks v `seed()` by chyběly
+    → reálné requesty by ucházely.
 
 ## Konvence
 
