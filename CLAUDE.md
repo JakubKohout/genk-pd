@@ -68,7 +68,7 @@ src/
         data/
           types.ts                  # AnswerItem, Question rozhraní
                                     # (Question má description: krátký popis pro SidePanel)
-          questions.ts              # LEA_QUESTIONS — 17 otázek, 94 položek, ~490 aliasů
+          questions.ts              # LEA_QUESTIONS — 17 otázek, 95 položek, ~505 aliasů
         logic/
           match.ts                  # matchAnswer — exact equality po normalize
           suggest.ts                # suggestItems — autocomplete, min 4 znaky, max 5 návrhů
@@ -165,7 +165,7 @@ Zdroj pravdy = `docs/codes.md`, parsováno **ručně** do TS literálu, ne za b�
 
 ### LEA data
 
-`LEA_QUESTIONS` (17 otázek, 94 položek) v `src/modules/laws/lea/data/questions.ts`.
+`LEA_QUESTIONS` (17 otázek, 95 položek) v `src/modules/laws/lea/data/questions.ts`.
 Každá otázka má `{ id, prompt, description, ref, items[] }`, každá položka má
 `{ id, quote, aliases[], ref }`. `description` je krátký popis (~20–35 znaků,
 nominalizace) zobrazený v SidePanelu vedle §ref.

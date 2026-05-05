@@ -387,7 +387,7 @@ Skóre per otázka: rozsah `-3..+3`, delta `+2 / -2`, mastered (vypadne z poolu)
 
 **ref:** §34, §36, §37, §58 PC
 
-**items (4):**
+**items (5):**
 
 1. `§37 c) PC` — quote: *„překročení rychlosti od 31 mph"*
    - aliases: `překročení rychlosti`, `překročení rychlosti od 31 mph`, `překročení rychlosti o 31 mph`, `překročení o 31 mph`, `rychlost od 31 mph`, `31 mph`, `rychlost nad 31 mph`, `překročení limitu o 31`, `§37c`
@@ -397,6 +397,8 @@ Skóre per otázka: rozsah `-3..+3`, delta `+2 / -2`, mastered (vypadne z poolu)
    - aliases: `řízení pod vlivem`, `řízení pod vlivem alkoholu`, `řízení pod vlivem drog`, `řízení pod vlivem návykové látky`, `řízení opilý`, `jízda pod vlivem`, `řidič pod vlivem`, `pod vlivem alkoholu`, `pod vlivem drog`, `pod vlivem návykové látky`, `§36`
 4. `§58 PC` — quote: *„útěk řidiče vozidla"*
    - aliases: `útěk`, `útěk řidiče`, `útěk vozidlem`, `útěk před policií`, `útěk před hlídkou`, `únik vozidlem`, `unikání vozidlem`, `unikání`, `§58`, `§58b`
+5. `§34 d) PC` — quote: *„zavinění dopravní nehody pod vlivem alkoholu nebo omamných látek"*
+   - aliases: `zavinění nehody pod vlivem`, `zavinění nehody pod vlivem alkoholu`, `zavinění dopravní nehody pod vlivem`, `zavinění dopravní nehody pod vlivem alkoholu`, `dopravní nehoda pod vlivem`, `dopravní nehoda pod vlivem alkoholu`, `dopravní nehoda pod vlivem drog`, `nehoda pod vlivem`, `nehoda pod vlivem alkoholu`, `nehoda pod vlivem drog`, `nehoda pod vlivem návykové látky`, `nehoda pod vlivem omamné látky`, `nehoda pod vlivem psychotropní látky`, `opilý řidič způsobí nehodu`, `§34d`
 
 ---
 

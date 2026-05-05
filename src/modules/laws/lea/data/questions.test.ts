@@ -3,10 +3,10 @@ import { LEA_QUESTIONS } from './questions';
 import { normalize } from '@/shared/text/normalize';
 
 describe('LEA_QUESTIONS', () => {
-  it('contains 17 questions and 94 answer items in total', () => {
+  it('contains 17 questions and 95 answer items in total', () => {
     expect(LEA_QUESTIONS).toHaveLength(17);
     const totalItems = LEA_QUESTIONS.reduce((sum, q) => sum + q.items.length, 0);
-    expect(totalItems).toBe(94);
+    expect(totalItems).toBe(95);
   });
 
   it('has unique question IDs', () => {
