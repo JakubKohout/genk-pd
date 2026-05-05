@@ -18,6 +18,7 @@ describe('analytics', () => {
     mp.init.mockClear();
     mp.track.mockClear();
     mp.track_pageview.mockClear();
+    vi.mocked(mp.people.set_once).mockClear();
   });
 
   it('initAnalytics calls mixpanel.init with the project token', () => {
@@ -37,6 +38,13 @@ describe('analytics', () => {
     initAnalytics();
     initAnalytics();
     expect(mp.init).toHaveBeenCalledTimes(1);
+  });
+
+  it('initAnalytics seeds an anonymous profile via people.set_once', () => {
+    initAnalytics();
+    expect(mp.people.set_once).toHaveBeenCalledWith(
+      expect.objectContaining({ $created: expect.any(String) }),
+    );
   });
 
   it('trackPageview is a silent no-op before initAnalytics', () => {

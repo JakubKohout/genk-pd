@@ -43,7 +43,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **148 unit/component + 35 E2E = 183 testů**.
+`npm run test:all` musí být zelené: **149 unit/component + 35 E2E = 184 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 ## Adresářová struktura

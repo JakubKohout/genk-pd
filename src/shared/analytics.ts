@@ -14,6 +14,9 @@ export function initAnalytics(): void {
     persistence: 'localStorage',
     ignore_dnt: true,
   });
+  // Create an anonymous profile for the current distinct_id so the Users tab
+  // is populated; set_once leaves $created intact on subsequent visits.
+  mixpanel.people.set_once({ $created: new Date().toISOString() });
   initialized = true;
 }
 
