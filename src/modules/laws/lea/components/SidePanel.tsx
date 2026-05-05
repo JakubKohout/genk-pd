@@ -14,9 +14,11 @@ const SCORE_CLASS: Record<number, string> = {
 interface Props {
   questions: readonly Question[];
   progress: Record<string, ProgressEntry>;
+  onSelectQuestion?: (questionId: string) => void;
+  currentId?: string;
 }
 
-export function SidePanel({ questions, progress }: Props) {
+export function SidePanel({ questions, progress, onSelectQuestion, currentId }: Props) {
   const total = questions.length;
   const clampedSum = questions.reduce(
     (sum, q) => sum + Math.max(0, progress[q.id]?.score ?? 0),
@@ -36,21 +38,47 @@ export function SidePanel({ questions, progress }: Props) {
         {questions.map((q) => {
           const score = progress[q.id]?.score ?? 0;
           const done = score >= 3;
-          return (
-            <li
-              key={q.id}
-              data-testid={`chip-${q.id}`}
-              data-score={score}
-              data-done={done}
-              title={q.prompt}
-              className={[
-                'flex items-center gap-3 rounded border px-2.5 py-1.5 text-sm transition',
-                SCORE_CLASS[score] ?? SCORE_CLASS[0]!,
-              ].join(' ')}
-            >
+          const isCurrent = currentId === q.id;
+          const baseClass = [
+            'flex w-full items-center gap-3 rounded border px-2.5 py-1.5 text-sm transition text-left',
+            SCORE_CLASS[score] ?? SCORE_CLASS[0]!,
+          ].join(' ');
+          const interactiveClass = onSelectQuestion
+            ? 'cursor-pointer hover:brightness-110 aria-[current=true]:ring-2 aria-[current=true]:ring-sasp-tan aria-[current=true]:ring-offset-2 aria-[current=true]:ring-offset-sasp-bg'
+            : '';
+          const inner = (
+            <>
               <span className="font-mono text-xs shrink-0 w-14">{q.ref}</span>
               <span className="flex-1 min-w-0">{q.description}</span>
               {done && <span aria-hidden className="text-xs">✓</span>}
+            </>
+          );
+          return (
+            <li key={q.id}>
+              {onSelectQuestion ? (
+                <button
+                  type="button"
+                  data-testid={`chip-${q.id}`}
+                  data-score={score}
+                  data-done={done}
+                  title={q.prompt}
+                  aria-current={isCurrent ? 'true' : undefined}
+                  onClick={() => onSelectQuestion(q.id)}
+                  className={[baseClass, interactiveClass].join(' ')}
+                >
+                  {inner}
+                </button>
+              ) : (
+                <div
+                  data-testid={`chip-${q.id}`}
+                  data-score={score}
+                  data-done={done}
+                  title={q.prompt}
+                  className={baseClass}
+                >
+                  {inner}
+                </div>
+              )}
             </li>
           );
         })}

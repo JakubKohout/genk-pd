@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { SidePanel } from './SidePanel';
 import type { Question } from '../data/types';
 
@@ -62,5 +62,30 @@ describe('LEA SidePanel', () => {
     );
     expect(screen.getByTestId('chip-a')).toHaveAttribute('data-score', '-2');
     expect(screen.getByTestId('chip-b')).toHaveAttribute('data-score', '1');
+  });
+
+  it('renders chips as non-interactive when onSelectQuestion is not provided', () => {
+    render(<SidePanel questions={Q} progress={{}} />);
+    expect(screen.getByTestId('chip-a').tagName).toBe('DIV');
+  });
+
+  it('renders chips as buttons when onSelectQuestion is provided', () => {
+    render(<SidePanel questions={Q} progress={{}} onSelectQuestion={() => {}} />);
+    expect(screen.getByTestId('chip-a').tagName).toBe('BUTTON');
+  });
+
+  it('calls onSelectQuestion with the question id on click', () => {
+    const onSelect = vi.fn();
+    render(<SidePanel questions={Q} progress={{}} onSelectQuestion={onSelect} />);
+    fireEvent.click(screen.getByTestId('chip-a'));
+    expect(onSelect).toHaveBeenCalledWith('a');
+  });
+
+  it('marks the active row with aria-current when currentId matches', () => {
+    render(
+      <SidePanel questions={Q} progress={{}} onSelectQuestion={() => {}} currentId="a" />,
+    );
+    expect(screen.getByTestId('chip-a')).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByTestId('chip-b')).not.toHaveAttribute('aria-current');
   });
 });

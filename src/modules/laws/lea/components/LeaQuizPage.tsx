@@ -35,7 +35,15 @@ export function LeaQuizPage() {
     setCurrent(next);
   }, [current, phase, progress, turn]);
 
-  if (isLeaComplete({ progress, turn }, LEA_QUESTIONS)) {
+  const handleSelectQuestion = (questionId: string) => {
+    const selected = LEA_QUESTIONS.find((q) => q.id === questionId);
+    if (!selected || selected.id === current?.id) return;
+    setChips([]);
+    setPhase('answering');
+    setCurrent(selected);
+  };
+
+  if (isLeaComplete({ progress, turn }, LEA_QUESTIONS) && !current) {
     return (
       <div className="lea-page">
         <div className="card congrats p-6 sm:p-8" data-testid="lea-congrats">
@@ -46,9 +54,17 @@ export function LeaQuizPage() {
           </button>
         </div>
         {isDesktop ? (
-          <SidePanel questions={LEA_QUESTIONS} progress={progress} />
+          <SidePanel
+            questions={LEA_QUESTIONS}
+            progress={progress}
+            onSelectQuestion={handleSelectQuestion}
+          />
         ) : (
-          <LeaMobilePanel questions={LEA_QUESTIONS} progress={progress} />
+          <LeaMobilePanel
+            questions={LEA_QUESTIONS}
+            progress={progress}
+            onSelectQuestion={handleSelectQuestion}
+          />
         )}
       </div>
     );
@@ -157,9 +173,19 @@ export function LeaQuizPage() {
         </div>
       </div>
       {isDesktop ? (
-        <SidePanel questions={LEA_QUESTIONS} progress={progress} />
+        <SidePanel
+          questions={LEA_QUESTIONS}
+          progress={progress}
+          onSelectQuestion={handleSelectQuestion}
+          currentId={current.id}
+        />
       ) : (
-        <LeaMobilePanel questions={LEA_QUESTIONS} progress={progress} />
+        <LeaMobilePanel
+          questions={LEA_QUESTIONS}
+          progress={progress}
+          onSelectQuestion={handleSelectQuestion}
+          currentId={current.id}
+        />
       )}
     </div>
   );
@@ -168,9 +194,13 @@ export function LeaQuizPage() {
 function LeaMobilePanel({
   questions,
   progress,
+  onSelectQuestion,
+  currentId,
 }: {
   questions: typeof LEA_QUESTIONS;
   progress: ReturnType<typeof useLeaProgress>['progress'];
+  onSelectQuestion?: (id: string) => void;
+  currentId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const total = questions.length;
@@ -179,6 +209,13 @@ function LeaMobilePanel({
     0,
   );
   const pct = total === 0 ? 0 : Math.round((clampedSum / (3 * total)) * 100);
+
+  const handleSelect = onSelectQuestion
+    ? (id: string) => {
+        setOpen(false);
+        onSelectQuestion(id);
+      }
+    : undefined;
 
   return (
     <details
@@ -197,7 +234,12 @@ function LeaMobilePanel({
         </span>
       </summary>
       <div className="mt-2">
-        <SidePanel questions={questions} progress={progress} />
+        <SidePanel
+          questions={questions}
+          progress={progress}
+          onSelectQuestion={handleSelect}
+          currentId={currentId}
+        />
       </div>
     </details>
   );

@@ -106,4 +106,22 @@ describe('LeaQuizPage', () => {
     expect(screen.getAllByTestId('chip-missed').length).toBeGreaterThan(0);
     expect(screen.getByTestId('answer-input')).toBeDisabled();
   });
+
+  it('switches the active question when a chip in the side panel is clicked', () => {
+    renderPage();
+    expect(screen.getByTestId('question-ref')).toHaveTextContent('§16 B');
+    fireEvent.click(screen.getByTestId('chip-lea.7'));
+    expect(screen.getByTestId('question-ref')).toHaveTextContent('§7 A');
+  });
+
+  it('clears in-progress answers when switching question via chip click', () => {
+    renderPage();
+    const input = screen.getByTestId('answer-input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'maják' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(screen.getByTestId('chip-correct')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('chip-lea.7'));
+    expect(screen.queryByTestId('chip-correct')).not.toBeInTheDocument();
+    expect(screen.getByTestId('answer-input')).not.toBeDisabled();
+  });
 });
