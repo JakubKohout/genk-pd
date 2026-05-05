@@ -7,8 +7,8 @@ import {
   subscribeState,
 } from '@/shared/storage';
 
-const MIN_SCORE = -3;
-const MAX_SCORE = 3;
+const MIN_SCORE = -2;
+const MAX_SCORE = 2;
 
 export function clampScore(s: number): number {
   if (s < MIN_SCORE) return MIN_SCORE;
@@ -24,6 +24,23 @@ export function useCodeProgress() {
     const entry = current.codes.progress[codeId] ?? { score: 0, lastAskedAtTurn: -1 };
     const nextEntry: ProgressEntry = {
       score: clampScore(entry.score + (correct ? 1 : -1)),
+      lastAskedAtTurn: current.codes.turn,
+    };
+    const next: PersistedState = {
+      ...current,
+      codes: {
+        ...current.codes,
+        progress: { ...current.codes.progress, [codeId]: nextEntry },
+        turn: current.codes.turn + 1,
+      },
+    };
+    saveState(next);
+  }, []);
+
+  const recordSkip = useCallback((codeId: string) => {
+    const current = loadState();
+    const nextEntry: ProgressEntry = {
+      score: MAX_SCORE,
       lastAskedAtTurn: current.codes.turn,
     };
     const next: PersistedState = {
@@ -54,6 +71,7 @@ export function useCodeProgress() {
     progress: state.codes.progress,
     turn: state.codes.turn,
     recordAnswer,
+    recordSkip,
     reset,
   };
 }

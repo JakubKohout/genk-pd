@@ -2,18 +2,18 @@ import { expect, test } from '@playwright/test';
 import { seed } from '../fixtures/seed';
 
 test.describe('Completion state', () => {
-  test('shows congrats banner when all eligible codes are at +3', async ({ page }) => {
+  test('shows congrats banner when all eligible codes are at +2', async ({ page }) => {
     // Saturate the rare set, filter to rare only
     await seed(page, {
       progress: {
-        '10-2': { score: 3, lastAskedAtTurn: 0 },
-        '10-6': { score: 3, lastAskedAtTurn: 0 },
-        '10-24': { score: 3, lastAskedAtTurn: 0 },
-        '10-44': { score: 3, lastAskedAtTurn: 0 },
-        '10-49': { score: 3, lastAskedAtTurn: 0 },
-        '10-54': { score: 3, lastAskedAtTurn: 0 },
-        '10-55': { score: 3, lastAskedAtTurn: 0 },
-        '10-71': { score: 3, lastAskedAtTurn: 0 },
+        '10-2': { score: 2, lastAskedAtTurn: 0 },
+        '10-6': { score: 2, lastAskedAtTurn: 0 },
+        '10-24': { score: 2, lastAskedAtTurn: 0 },
+        '10-44': { score: 2, lastAskedAtTurn: 0 },
+        '10-49': { score: 2, lastAskedAtTurn: 0 },
+        '10-54': { score: 2, lastAskedAtTurn: 0 },
+        '10-55': { score: 2, lastAskedAtTurn: 0 },
+        '10-71': { score: 2, lastAskedAtTurn: 0 },
       },
       importanceFilter: { mandatory: false, rare: true, unnecessary: false },
       randomSeed: 1,
@@ -27,14 +27,14 @@ test.describe('Completion state', () => {
   test('reset returns to a normal question from the congrats state', async ({ page }) => {
     await seed(page, {
       progress: {
-        '10-2': { score: 3, lastAskedAtTurn: 0 },
-        '10-6': { score: 3, lastAskedAtTurn: 0 },
-        '10-24': { score: 3, lastAskedAtTurn: 0 },
-        '10-44': { score: 3, lastAskedAtTurn: 0 },
-        '10-49': { score: 3, lastAskedAtTurn: 0 },
-        '10-54': { score: 3, lastAskedAtTurn: 0 },
-        '10-55': { score: 3, lastAskedAtTurn: 0 },
-        '10-71': { score: 3, lastAskedAtTurn: 0 },
+        '10-2': { score: 2, lastAskedAtTurn: 0 },
+        '10-6': { score: 2, lastAskedAtTurn: 0 },
+        '10-24': { score: 2, lastAskedAtTurn: 0 },
+        '10-44': { score: 2, lastAskedAtTurn: 0 },
+        '10-49': { score: 2, lastAskedAtTurn: 0 },
+        '10-54': { score: 2, lastAskedAtTurn: 0 },
+        '10-55': { score: 2, lastAskedAtTurn: 0 },
+        '10-71': { score: 2, lastAskedAtTurn: 0 },
       },
       importanceFilter: { mandatory: false, rare: true, unnecessary: false },
       randomSeed: 1,

@@ -18,16 +18,16 @@ describe('useCodeProgress', () => {
     expect(result.current.progress['10-44']?.score).toBe(0);
   });
 
-  it('clamps score to +3 / -3', () => {
+  it('clamps score to +2 / -2', () => {
     const { result } = renderHook(() => useCodeProgress());
     for (let i = 0; i < 10; i++) {
       act(() => result.current.recordAnswer('10-44', true));
     }
-    expect(result.current.progress['10-44']?.score).toBe(3);
+    expect(result.current.progress['10-44']?.score).toBe(2);
     for (let i = 0; i < 20; i++) {
       act(() => result.current.recordAnswer('10-44', false));
     }
-    expect(result.current.progress['10-44']?.score).toBe(-3);
+    expect(result.current.progress['10-44']?.score).toBe(-2);
   });
 
   it('increments turn after each answer', () => {
@@ -45,6 +45,24 @@ describe('useCodeProgress', () => {
     expect(result.current.progress['10-44']?.lastAskedAtTurn).toBe(0);
     act(() => result.current.recordAnswer('10-50', true));
     expect(result.current.progress['10-50']?.lastAskedAtTurn).toBe(1);
+  });
+
+  it('recordSkip sets score to MAX (+2), bumps turn, sets lastAskedAtTurn', () => {
+    const { result } = renderHook(() => useCodeProgress());
+    expect(result.current.turn).toBe(0);
+    act(() => result.current.recordSkip('10-44'));
+    expect(result.current.progress['10-44']?.score).toBe(2);
+    expect(result.current.progress['10-44']?.lastAskedAtTurn).toBe(0);
+    expect(result.current.turn).toBe(1);
+  });
+
+  it('recordSkip overrides a previously negative score to +2', () => {
+    const { result } = renderHook(() => useCodeProgress());
+    act(() => result.current.recordAnswer('10-44', false));
+    act(() => result.current.recordAnswer('10-44', false));
+    expect(result.current.progress['10-44']?.score).toBe(-2);
+    act(() => result.current.recordSkip('10-44'));
+    expect(result.current.progress['10-44']?.score).toBe(2);
   });
 
   it('reset clears progress and turn but keeps settings', () => {

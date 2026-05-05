@@ -9,9 +9,9 @@ const Q: Question[] = [
 ];
 
 describe('eligibleQuestions', () => {
-  it('keeps only questions with score < 3', () => {
+  it('keeps only questions with score < 2', () => {
     const state = {
-      progress: { a: { score: 3, lastAskedAtTurn: 0 }, b: { score: 1, lastAskedAtTurn: 0 } },
+      progress: { a: { score: 2, lastAskedAtTurn: 0 }, b: { score: 1, lastAskedAtTurn: 0 } },
       turn: 5,
     };
     expect(eligibleQuestions(state, Q).map((q) => q.id)).toEqual(['b']);
@@ -21,13 +21,13 @@ describe('eligibleQuestions', () => {
 describe('isLeaComplete', () => {
   it('is true when no questions remain', () => {
     const state = {
-      progress: { a: { score: 3, lastAskedAtTurn: 0 }, b: { score: 3, lastAskedAtTurn: 0 } },
+      progress: { a: { score: 2, lastAskedAtTurn: 0 }, b: { score: 2, lastAskedAtTurn: 0 } },
       turn: 0,
     };
     expect(isLeaComplete(state, Q)).toBe(true);
   });
 
-  it('is false when at least one question is below 3', () => {
+  it('is false when at least one question is below 2', () => {
     const state = { progress: { a: { score: 2, lastAskedAtTurn: 0 } }, turn: 0 };
     expect(isLeaComplete(state, Q)).toBe(false);
   });
@@ -46,7 +46,7 @@ describe('pickNextQuestion', () => {
 
   it('returns null when all questions are mastered', () => {
     const state = {
-      progress: { a: { score: 3, lastAskedAtTurn: 0 }, b: { score: 3, lastAskedAtTurn: 0 } },
+      progress: { a: { score: 2, lastAskedAtTurn: 0 }, b: { score: 2, lastAskedAtTurn: 0 } },
       turn: 0,
     };
     expect(pickNextQuestion(state, Q)).toBeNull();

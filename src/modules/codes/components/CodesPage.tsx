@@ -68,9 +68,9 @@ function MobilePanel() {
   const { importanceFilter } = useSettings();
 
   const filtered = CODES.filter((c) => importanceFilter[c.importance]);
-  const maxScore = filtered.length * 3;
+  const maxScore = filtered.length * 2;
   const earned = filtered.reduce(
-    (sum, c) => sum + Math.max(0, progress[c.id]?.score ?? 0),
+    (sum, c) => sum + Math.min(2, Math.max(0, progress[c.id]?.score ?? 0)),
     0,
   );
   const pct = maxScore === 0 ? 0 : Math.round((earned / maxScore) * 100);

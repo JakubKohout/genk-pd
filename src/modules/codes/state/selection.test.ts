@@ -25,9 +25,9 @@ describe('eligibleCodes', () => {
     expect(all.length).toBe(CODES.length);
   });
 
-  it('excludes codes at +3', () => {
+  it('excludes codes at +2', () => {
     const state: SelectionState = {
-      progress: { '10-44': { score: 3, lastAskedAtTurn: 0 } },
+      progress: { '10-44': { score: 2, lastAskedAtTurn: 0 } },
       turn: 5,
       filter: { mandatory: true, rare: true, unnecessary: false },
     };
@@ -79,8 +79,8 @@ describe('pickNextCode', () => {
   it('weights toward lower scores (lowest-score code appears more often)', () => {
     const state: SelectionState = {
       progress: {
-        '10-0': { score: -3, lastAskedAtTurn: -10 },
-        '10-1': { score: 2, lastAskedAtTurn: -10 },
+        '10-0': { score: -2, lastAskedAtTurn: -10 },
+        '10-1': { score: 1, lastAskedAtTurn: -10 },
       },
       turn: 0,
       filter: { mandatory: true, rare: false, unnecessary: false },
@@ -95,15 +95,15 @@ describe('pickNextCode', () => {
       if (pick.id === '10-0') lowScoreHits++;
       else if (pick.id === '10-1') highScoreHits++;
     }
-    // weight(-3)=7, weight(+2)=2. Low-score should win clearly.
+    // weight(-2)=5, weight(+1)=2. Low-score should win clearly.
     expect(lowScoreHits).toBeGreaterThan(highScoreHits * 2);
   });
 
-  it('never picks a code at +3', () => {
+  it('never picks a code at +2', () => {
     const state: SelectionState = {
       progress: Object.fromEntries(
         CODES.filter((c) => c.importance === 'mandatory').map((c, i) =>
-          i === 0 ? [c.id, { score: 3, lastAskedAtTurn: -10 }] : [c.id, { score: 0, lastAskedAtTurn: -10 }],
+          i === 0 ? [c.id, { score: 2, lastAskedAtTurn: -10 }] : [c.id, { score: 0, lastAskedAtTurn: -10 }],
         ),
       ),
       turn: 100,
@@ -121,10 +121,10 @@ describe('isComplete', () => {
     expect(isComplete(emptyState(), CODES)).toBe(false);
   });
 
-  it('returns true when all eligible codes reached +3', () => {
+  it('returns true when all eligible codes reached +2', () => {
     const progress: Record<string, { score: number; lastAskedAtTurn: number }> = {};
     for (const c of CODES) {
-      if (c.importance === 'mandatory') progress[c.id] = { score: 3, lastAskedAtTurn: 0 };
+      if (c.importance === 'mandatory') progress[c.id] = { score: 2, lastAskedAtTurn: 0 };
     }
     const state: SelectionState = { progress, turn: 100, filter: allMandatory };
     expect(isComplete(state, CODES)).toBe(true);

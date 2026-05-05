@@ -33,15 +33,15 @@ describe('pickNextFromPool', () => {
     setRng(mulberry32(42));
     const pool: Item[] = [{ id: 'low' }, { id: 'high' }];
     const progress = {
-      low: { score: -3, lastAskedAtTurn: -100 },
-      high: { score: 2, lastAskedAtTurn: -100 },
+      low: { score: -2, lastAskedAtTurn: -100 },
+      high: { score: 1, lastAskedAtTurn: -100 },
     };
     let lowCount = 0;
     for (let i = 0; i < 1000; i++) {
       if (pickNextFromPool(pool, progress, 0)?.id === 'low') lowCount++;
     }
-    // weights: low = 4 - (-3) = 7, high = 4 - 2 = 2; expected lowCount ≈ 7/9 ≈ 778
-    expect(lowCount).toBeGreaterThan(700);
-    expect(lowCount).toBeLessThan(850);
+    // weights: low = 3 - (-2) = 5, high = 3 - 1 = 2; expected lowCount ≈ 5/7 ≈ 714
+    expect(lowCount).toBeGreaterThan(640);
+    expect(lowCount).toBeLessThan(800);
   });
 });

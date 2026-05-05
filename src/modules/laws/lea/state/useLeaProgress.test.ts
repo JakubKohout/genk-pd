@@ -34,15 +34,32 @@ describe('useLeaProgress', () => {
     expect(result.current.progress['lea.7'].score).toBe(-2);
   });
 
-  it('clamps score to ±3', () => {
+  it('clamps score to ±2', () => {
     const { result } = renderHook(() => useLeaProgress());
     act(() => result.current.recordSubmit('lea.7', { perfect: true }));
     act(() => result.current.recordSubmit('lea.7', { perfect: true }));
-    expect(result.current.progress['lea.7'].score).toBe(3);
+    expect(result.current.progress['lea.7'].score).toBe(2);
 
     act(() => result.current.recordSubmit('lea.9.A', { perfect: false }));
     act(() => result.current.recordSubmit('lea.9.A', { perfect: false }));
-    expect(result.current.progress['lea.9.A'].score).toBe(-3);
+    expect(result.current.progress['lea.9.A'].score).toBe(-2);
+  });
+
+  it('recordSkip sets score to MAX (+2), bumps turn, sets lastAskedAtTurn', () => {
+    const { result } = renderHook(() => useLeaProgress());
+    expect(result.current.turn).toBe(0);
+    act(() => result.current.recordSkip('lea.7'));
+    expect(result.current.progress['lea.7'].score).toBe(2);
+    expect(result.current.progress['lea.7'].lastAskedAtTurn).toBe(0);
+    expect(result.current.turn).toBe(1);
+  });
+
+  it('recordSkip overrides a prior imperfect submit to +2', () => {
+    const { result } = renderHook(() => useLeaProgress());
+    act(() => result.current.recordSubmit('lea.7', { perfect: false }));
+    expect(result.current.progress['lea.7'].score).toBe(-2);
+    act(() => result.current.recordSkip('lea.7'));
+    expect(result.current.progress['lea.7'].score).toBe(2);
   });
 
   it('reset clears progress and turn but leaves codes slice alone', () => {

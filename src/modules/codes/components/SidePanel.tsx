@@ -23,9 +23,9 @@ export function SidePanel() {
     [importanceFilter],
   );
 
-  const maxScore = filteredCodes.length * 3;
+  const maxScore = filteredCodes.length * 2;
   const earnedScore = filteredCodes.reduce(
-    (sum, c) => sum + Math.max(0, progress[c.id]?.score ?? 0),
+    (sum, c) => sum + Math.min(2, Math.max(0, progress[c.id]?.score ?? 0)),
     0,
   );
   const pct = maxScore === 0 ? 0 : Math.round((earnedScore / maxScore) * 100);
@@ -96,7 +96,7 @@ function CodeGrid({
     >
       {filteredCodes.map((c) => {
         const score = progress[c.id]?.score ?? 0;
-        const done = score >= 3;
+        const done = score >= 2;
         return (
           <div
             key={c.id}

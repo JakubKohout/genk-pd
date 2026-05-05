@@ -4,7 +4,7 @@ import { useCodeProgress } from '../state/useCodeProgress';
 import { useSettings } from '../state/useSettings';
 import { isComplete, pickNextCode } from '../state/selection';
 import { CongratsBanner } from './CongratsBanner';
-import { trackCodeAnswered } from '@/shared/analytics';
+import { trackCodeAnswered, trackQuestionSkipped } from '@/shared/analytics';
 
 type Feedback =
   | { kind: 'correct'; current: Code }
@@ -12,7 +12,7 @@ type Feedback =
   | { kind: 'wrong-nonexistent'; current: Code; rawInput: string };
 
 export function ModeWrite() {
-  const { progress, turn, recordAnswer } = useCodeProgress();
+  const { progress, turn, recordAnswer, recordSkip } = useCodeProgress();
   const { importanceFilter } = useSettings();
   const [current, setCurrent] = useState<Code | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -80,6 +80,15 @@ export function ModeWrite() {
     setCurrent(null);
   };
 
+  const handleSkip = () => {
+    if (!current) return;
+    recordSkip(current.id);
+    trackQuestionSkipped({ module: 'codes', question_id: current.id });
+    setFeedback(null);
+    setInput('');
+    setCurrent(null);
+  };
+
   const showFeedback = feedback !== null;
 
   return (
@@ -132,7 +141,15 @@ export function ModeWrite() {
         </div>
 
         {!showFeedback && (
-          <div className="flex justify-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleSkip}
+              data-testid="codes-skip"
+            >
+              Přeskakovat tuhle otázku
+            </button>
             <button type="submit" className="btn-primary" data-testid="submit-button">
               Odeslat <kbd className="text-xs opacity-70">⏎</kbd>
             </button>
@@ -140,7 +157,12 @@ export function ModeWrite() {
         )}
 
         {feedback && (
-          <FeedbackBlock feedback={feedback} onNext={handleNext} nextRef={nextBtnRef} />
+          <FeedbackBlock
+            feedback={feedback}
+            onNext={handleNext}
+            onSkip={handleSkip}
+            nextRef={nextBtnRef}
+          />
         )}
       </form>
     </div>
@@ -150,15 +172,39 @@ export function ModeWrite() {
 function FeedbackBlock({
   feedback,
   onNext,
+  onSkip,
   nextRef,
 }: {
   feedback: Feedback;
   onNext: () => void;
+  onSkip: () => void;
   nextRef: React.Ref<HTMLButtonElement>;
 }) {
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') onNext();
   };
+  const actions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={onSkip}
+        data-testid="codes-skip"
+      >
+        Přeskakovat tuhle otázku
+      </button>
+      <button
+        ref={nextRef}
+        type="button"
+        onClick={onNext}
+        onKeyDown={onKey}
+        className="btn-primary"
+        data-testid="next-button"
+      >
+        Další <kbd className="text-xs opacity-70">⏎</kbd>
+      </button>
+    </div>
+  );
   if (feedback.kind === 'correct') {
     return (
       <div
@@ -169,16 +215,7 @@ function FeedbackBlock({
         <p className="text-emerald-300">
           <strong>Správně!</strong> {feedback.current.id} — {feedback.current.meaning}.
         </p>
-        <button
-          ref={nextRef}
-          type="button"
-          onClick={onNext}
-          onKeyDown={onKey}
-          className="btn-primary"
-          data-testid="next-button"
-        >
-          Další <kbd className="text-xs opacity-70">⏎</kbd>
-        </button>
+        {actions}
       </div>
     );
   }
@@ -203,16 +240,7 @@ function FeedbackBlock({
           Vy jste zadal <span className="font-mono">10-{feedback.rawInput}</span> (neexistující kód).
         </p>
       )}
-      <button
-        ref={nextRef}
-        type="button"
-        onClick={onNext}
-        onKeyDown={onKey}
-        className="btn-primary"
-        data-testid="next-button"
-      >
-        Další <kbd className="text-xs opacity-70">⏎</kbd>
-      </button>
+      {actions}
     </div>
   );
 }

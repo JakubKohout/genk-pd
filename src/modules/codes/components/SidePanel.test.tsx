@@ -31,12 +31,12 @@ describe('<SidePanel />', () => {
   it('shows the right score color via data-score attribute', () => {
     seed({
       progress: {
-        '10-0': { score: 3, lastAskedAtTurn: 0 },
+        '10-0': { score: 2, lastAskedAtTurn: 0 },
         '10-1': { score: -2, lastAskedAtTurn: 0 },
       },
     });
     render(<SidePanel />);
-    expect(screen.getByTestId('chip-10-0').dataset['score']).toBe('3');
+    expect(screen.getByTestId('chip-10-0').dataset['score']).toBe('2');
     expect(screen.getByTestId('chip-10-0').dataset['done']).toBe('true');
     expect(screen.getByTestId('chip-10-1').dataset['score']).toBe('-2');
   });
@@ -44,8 +44,8 @@ describe('<SidePanel />', () => {
   it('shows percentage in the header', () => {
     seed({
       progress: {
-        '10-0': { score: 3, lastAskedAtTurn: 0 },
-        '10-1': { score: 3, lastAskedAtTurn: 0 },
+        '10-0': { score: 2, lastAskedAtTurn: 0 },
+        '10-1': { score: 2, lastAskedAtTurn: 0 },
         '10-2': { score: 0, lastAskedAtTurn: 0 }, // rare → not counted in default filter
       },
     });
@@ -57,20 +57,20 @@ describe('<SidePanel />', () => {
     expect(bar.dataset['complete']).toBe('false');
   });
 
-  it('marks 100% complete when every code in filter is at +3', () => {
+  it('marks 100% complete when every code in filter is at +2', () => {
     seed({
       settings: {
         importanceFilter: { mandatory: false, rare: true, unnecessary: false },
       },
       progress: {
-        '10-2': { score: 3, lastAskedAtTurn: 0 },
-        '10-6': { score: 3, lastAskedAtTurn: 0 },
-        '10-24': { score: 3, lastAskedAtTurn: 0 },
-        '10-44': { score: 3, lastAskedAtTurn: 0 },
-        '10-49': { score: 3, lastAskedAtTurn: 0 },
-        '10-54': { score: 3, lastAskedAtTurn: 0 },
-        '10-55': { score: 3, lastAskedAtTurn: 0 },
-        '10-71': { score: 3, lastAskedAtTurn: 0 },
+        '10-2': { score: 2, lastAskedAtTurn: 0 },
+        '10-6': { score: 2, lastAskedAtTurn: 0 },
+        '10-24': { score: 2, lastAskedAtTurn: 0 },
+        '10-44': { score: 2, lastAskedAtTurn: 0 },
+        '10-49': { score: 2, lastAskedAtTurn: 0 },
+        '10-54': { score: 2, lastAskedAtTurn: 0 },
+        '10-55': { score: 2, lastAskedAtTurn: 0 },
+        '10-71': { score: 2, lastAskedAtTurn: 0 },
       },
     });
     render(<SidePanel />);

@@ -18,17 +18,17 @@ describe('LEA SidePanel', () => {
     render(
       <SidePanel
         questions={Q}
-        progress={{ a: { score: -3, lastAskedAtTurn: 0 }, b: { score: 0, lastAskedAtTurn: 0 } }}
+        progress={{ a: { score: -2, lastAskedAtTurn: 0 }, b: { score: 0, lastAskedAtTurn: 0 } }}
       />,
     );
     expect(screen.getByTestId('lea-progress-percent')).toHaveTextContent('0%');
   });
 
-  it('computes percent from sum of clamped scores over 3 × N', () => {
+  it('computes percent from sum of clamped scores over 2 × N', () => {
     render(
       <SidePanel
         questions={Q}
-        progress={{ a: { score: 3, lastAskedAtTurn: 0 }, b: { score: 0, lastAskedAtTurn: 0 } }}
+        progress={{ a: { score: 2, lastAskedAtTurn: 0 }, b: { score: 0, lastAskedAtTurn: 0 } }}
       />,
     );
     expect(screen.getByTestId('lea-progress-percent')).toHaveTextContent('50%');
@@ -46,7 +46,7 @@ describe('LEA SidePanel', () => {
     render(
       <SidePanel
         questions={Q}
-        progress={{ a: { score: 3, lastAskedAtTurn: 0 } }}
+        progress={{ a: { score: 2, lastAskedAtTurn: 0 } }}
       />,
     );
     expect(screen.getByTestId('chip-a')).toHaveAttribute('data-done', 'true');

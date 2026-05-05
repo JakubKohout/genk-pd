@@ -116,14 +116,14 @@ přidej route v `src/app/routes.tsx`, přidej do `LawsIndex.tsx`. Sdílené util
 {
   schemaVersion: 2,
   codes: {
-    progress: { [codeId]: { score: -3..+3, lastAskedAtTurn: number } },
+    progress: { [codeId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number,
     settings: {
       importanceFilter: { mandatory: bool, rare: bool, unnecessary: bool }
     }
   },
   lea: {
-    progress: { [questionId]: { score: -3..+3, lastAskedAtTurn: number } },
+    progress: { [questionId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number
   }
 }
@@ -141,18 +141,28 @@ prázdnou lea slice — žádná data ztrát. (Test `storage.test.ts`.)
 
 ### Codes scoring
 
-Skóre `-3..+3`, sdílené mezi oběma módy. Delta ±1 per answer. Kód na `+3` vypadne
+Skóre `-2..+2`, sdílené mezi oběma módy. Delta ±1 per answer. Kód na `+2` vypadne
 z poolu. Pool prázdný → `<CongratsBanner />`. Reset maže `progress` a `turn`,
 **zachovává** settings.
 
+**Skip** (`recordSkip(codeId)`): nastaví score = MAX (`+2`) absolutně, bumpne
+turn, kód okamžitě vypadne z poolu. Tlačítko `data-testid="codes-skip"`,
+text „Přeskočit otázku", styl `btn-secondary`. Dostupné v ModeWrite i ModeChoose,
+v obou fázích (před odpovědí i v feedback bloku — v druhém případě override-uje
+skóre nastavené `recordAnswer`).
+
 ### LEA scoring
 
-Skóre `-3..+3` per otázka. Delta **±2** (NE ±1 jako u codes). Mastered na `+3`
-(= 2 perfect submits z 0). `recordSubmit({ perfect: bool })` mění skóre. **Skip
-funkcionalita byla odstraněna** — uživatel musí každou otázku vyhodnotit.
+Skóre `-2..+2` per otázka. Delta **±2** (NE ±1 jako u codes). Mastered na `+2`
+(= 1 perfect submit z 0). `recordSubmit({ perfect: bool })` mění skóre.
 Reset maže jen `lea` slice, codes zůstávají. Reset je vystaven přes
 `LeaResetButton` (pod kvízem vpravo, confirm dialog) a přes „Začít znovu"
 na completion screen.
+
+**Skip** (`recordSkip(questionId)`): stejná sémantika jako u codes — score=MAX
+(+2) absolutně, override-uje `recordSubmit`. Tlačítko v `SubmitFooter`
+(`data-testid="lea-skip"`) v obou fázích `answering` i `revealed`. Skip v
+revealed přepíše právě nastavené skóre z `handleSubmit` na +2.
 
 Default `importanceFilter` v `initialState` je **všechno true**. E2E `seed()` má
 fallback `mandatory:true, rest:false` — záměrně, ať jsou spec soubory deterministické.
@@ -203,7 +213,7 @@ parafráze, které se zdají správné, neodpovídají právnímu významu (nap�
 
 **`pickNextCode(state, allCodes)`** (`src/modules/codes/state/selection.ts`)
 deleguje na `pickNextFromPool` ze `@/shared/quiz/pickNextFromPool`. Před tím
-filtruje codes přes `eligibleCodes` (importance filter + score < 3).
+filtruje codes přes `eligibleCodes` (importance filter + score < 2).
 
 **`buildOptions(correct, allCodes)`** (`src/modules/codes/state/distractors.ts`):
 1 správná + 2 ze stejné dekády (`10-40..10-49` pro `10-44`) + 2 náhodné. Distraktory
@@ -220,7 +230,7 @@ modifikátory a `INPUT/TEXTAREA/contenteditable` cíle.
 (`src/shared/quiz/pickNextFromPool.ts`):
 1. Eligibilní = `pool` (volající už profiltroval). Když prázdný → null.
 2. Cooldown: `turn - lastAskedAtTurn >= 2`. Když by cooldown vyprázdnil pool, ruší ho.
-3. Vážený výběr: `weight = 4 - score` (od `-3` váha 7, od `+2` váha 2). Používá
+3. Vážený výběr: `weight = 3 - score` (od `-2` váha 5, od `+1` váha 2). Používá
    `weightedRandom` z `@/shared/rng`.
 
 **`normalize(s: string)`** (`src/shared/text/normalize.ts`): `lowercase` + `NFD` decompose
@@ -246,12 +256,14 @@ Jinak když je nabídka otevřená a nějaká je → naplní input vybranou sugg
 "wrong". Šipky ↑↓ jen mění `highlight`, Tab vždy fillne, Esc zavře nabídku.
 
 **`pickNextQuestion(state, all)`** = `pickNextFromPool(eligibleQuestions(state, all), ...)`,
-kde `eligibleQuestions` filtruje `score < 3`. (LEA nemá importance filter.)
+kde `eligibleQuestions` filtruje `score < 2`. (LEA nemá importance filter.)
 
 ### Progress bar (oba moduly)
 
-`pct = Σ max(0, score(c)) / (3·N)` přes filtrované položky. Mínusové skóre se klampuje
-na 0 jen pro UI (storage uchovává `-3..+3`, selection na něj spoléhá).
+`pct = Σ min(2, max(0, score(c))) / (2·N)` přes filtrované položky. Záporné
+skóre se klampuje na 0 jen pro UI; legacy hodnoty `score > 2` (z původního
+rozsahu `-3..+3`) jsou taky zclampované na 2, takže pct nikdy nepřekročí 100 %.
+Storage uchovává nově `-2..+2`, selection filtruje `score < 2`.
 
 - **Codes desktop SidePanel**: testid `progress-percent` ("X%" v `<span>`,
   "Splněno" v sourozenci nad)
@@ -260,20 +272,22 @@ na 0 jen pro UI (storage uchovává `-3..+3`, selection na něj spoléhá).
   "Splněno" v sourozenci nad — sjednoceno s codes panelem)
 - **LEA mobile summary**: testid `lea-mobile-progress-percent` ("Přehled otázek — X% splněno")
 
-`isComplete` ⟺ všechny filtrované items na +3.
+`isComplete` ⟺ všechny filtrované items na +2.
 
 ### SidePanel layout (codes i LEA sjednoceno)
 
 Oba boční panely sdílí vizuální jazyk: `card flex flex-col gap-3 p-4` wrapper +
 `ProgressHeader` (uppercase tracking-wider "Splněno" vlevo, percent vpravo, bar
 pod) + score-based barva pozadí podle stejné `SCORE_CLASS` mapy (`-3..+3`).
-Mapa je duplikovaná v obou souborech (codes `SidePanel.tsx` + LEA `SidePanel.tsx`),
-záměrně neabstraktováno — YAGNI dokud nebudou 3+ panely (Penal Code, Firearm Act).
+Mapa zůstává s rozsahem `-3..+3` pro zpětnou kompatibilitu s legacy daty;
+nové skóre používá jen `-2..+2`. Duplikovaná v obou souborech (codes
+`SidePanel.tsx` + LEA `SidePanel.tsx`), záměrně neabstraktováno — YAGNI dokud
+nebudou 3+ panely (Penal Code, Firearm Act).
 
 Codes panel: dense grid `grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4`
 chips s ID kódu. LEA panel: vertikální `<ul>` s jedním řádkem na otázku — mono
 `§ref` v pevné šířce `w-14` vlevo, `description` flex-grow uprostřed, ✓ badge
-vpravo když mastered (score=3). Každý řádek má `data-testid="chip-<id>"`,
+vpravo když mastered (`score >= 2`). Každý řádek má `data-testid="chip-<id>"`,
 `data-score`, `data-done` pro budoucí E2E.
 
 ## Analytika (Mixpanel)
@@ -290,6 +304,7 @@ konstanta (Mixpanel FE tokeny jsou public-by-design).
 | `trackLawAnswered` | `law_answered` | `success` (= perfect), `question_id` | LeaQuizPage `handleSubmit` |
 | `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'` | ResetButton/LeaResetButton confirm |
 | `trackCodesCompleted` | `codes_completed` | `scope: 'all'\|'partial'` | CongratsBanner mount |
+| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'lea'`, `question_id` | ModeWrite/ModeChoose/LeaQuizPage `handleSkip` |
 | `trackPageview` | _(Mixpanel pageview)_ | `url` (origin + `#` + path) | AppLayout useEffect na route change |
 
 **Init pipeline** (po `mixpanel.init`):
@@ -321,7 +336,7 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 
 `LeaQuizPage` (`src/modules/laws/lea/components/LeaQuizPage.tsx`):
 
-1. `useLeaProgress` poskytuje `{ progress, turn, recordSubmit, reset }`.
+1. `useLeaProgress` poskytuje `{ progress, turn, recordSubmit, recordSkip, reset }`.
 2. `current: Question | null` v `useState`. Picker běží v `useEffect` jen když
    `current === null && phase === 'answering'` (NE v `useMemo` — to byl bug, viz Gotchas).
 3. Phase = `'answering'` | `'revealed'`. Submit změní phase, NEvyresetuje `current`.
@@ -338,8 +353,10 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
    `reveal-perfect`) se ukáže jen když nejsou ani wrong ani missed ani duplicate.
 7. `AnswerInput` má input + tlačítko "Přidat" (vpravo, `data-testid="answer-add"`,
    disabled při prázdném inputu) + jednořádkový hint pod inputem. SubmitFooter
-   používá `submit-footer--end` v obou fázích (jen jedno tlačítko vpravo —
-   "Vyhodnotit otázku" v answering, "Další otázka" v revealed).
+   používá `submit-footer--end` v obou fázích — vlevo „Přeskočit otázku"
+   (`btn-secondary`, `data-testid="lea-skip"`), vpravo hlavní CTA
+   ("Vyhodnotit otázku" v answering, "Další otázka" v revealed). Skip volá
+   `handleSkip` (override score na +2, advance).
 8. `LeaResetButton` (`flex justify-end` wrapper pod `<main>` v levém sloupci
    gridu) je dostupný v obou fázích. Confirm dialog s `role="alertdialog"`,
    testidy `lea-reset-button`/`lea-reset-confirm`/`lea-reset-cancel`/
@@ -385,7 +402,7 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
    reveal zmizel dřív, než ho user viděl. Fix: `current` v `useState`,
    `useEffect` pickne jen když `current === null && phase === 'answering'`.
    `handleSubmit` necheche `current` netknuté, jen mění phase. Test masking: existující
-   E2E používaly `pinNextLeaQuestion` (saturoval 16/17 otázek na +3), takže pool po
+   E2E používaly `pinNextLeaQuestion` (saturoval 16/17 otázek na +2), takže pool po
    cooldownu měl jen 1 kandidáta a re-pick vrátil tu samou otázku → bug se zamaskoval.
    **Při přidání nové otázky do `LEA_QUESTIONS` MUSÍŠ rozšířit i seznam ID v
    `e2e/fixtures/seed.ts` (`LEA_QUESTION_IDS`) a v `LeaQuizPage.test.tsx`
@@ -458,6 +475,22 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
     specy volají `seed()`, takže to platí univerzálně. Pokud bys někdy psal
     spec bez `seed()`, Mixpanel by bootnul a route blocks v `seed()` by chyběly
     → reálné requesty by ucházely.
+
+21. **Skip override-uje feedback skóre** — v ModeWrite/ModeChoose i v LEA
+    `revealed` phase je tlačítko Skip stále aktivní. Stisk po `recordAnswer`
+    (codes) nebo `recordSubmit` (LEA) přepíše skóre absolutně na MAX (`+2`).
+    To je úmyslné UX: uživatel řekne „znám, dej mi další". `recordSkip`
+    zapisuje absolutní hodnotu, ne deltu, takže prior wrong submit (-2) /
+    wrong answer (-1) je vyresetován. Při ladění: pokud chceš zachovat
+    skip-only-before-answer chování, schovej tlačítko podmínkou na `feedback`/
+    `phase`.
+
+22. **UI clamp earnedScore na MAX_SCORE (2)** — progress-bar pct počítá
+    `Σ min(2, max(0, score))` namísto `Σ max(0, score)`. Bez horního clampu
+    by legacy `score=3` (z rozsahu `-3..+3`) dával pct > 100 % (test viděl
+    150 %). Tři místa: codes `SidePanel.tsx`, codes `CodesPage.tsx` MobilePanel,
+    LEA `SidePanel.tsx`, LEA `LeaQuizPage.tsx` LeaMobilePanel. Při bumpu range
+    nezapomenout všechny čtyři.
 
 ## Konvence
 

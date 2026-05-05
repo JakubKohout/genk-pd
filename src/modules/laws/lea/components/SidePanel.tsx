@@ -21,10 +21,10 @@ interface Props {
 export function SidePanel({ questions, progress, onSelectQuestion, currentId }: Props) {
   const total = questions.length;
   const clampedSum = questions.reduce(
-    (sum, q) => sum + Math.max(0, progress[q.id]?.score ?? 0),
+    (sum, q) => sum + Math.min(2, Math.max(0, progress[q.id]?.score ?? 0)),
     0,
   );
-  const pct = total === 0 ? 0 : Math.round((clampedSum / (3 * total)) * 100);
+  const pct = total === 0 ? 0 : Math.round((clampedSum / (2 * total)) * 100);
   const isComplete = total > 0 && pct === 100;
 
   return (
@@ -37,7 +37,7 @@ export function SidePanel({ questions, progress, onSelectQuestion, currentId }: 
       <ul className="flex flex-col gap-1.5 list-none p-0 m-0" role="list">
         {questions.map((q) => {
           const score = progress[q.id]?.score ?? 0;
-          const done = score >= 3;
+          const done = score >= 2;
           const isCurrent = currentId === q.id;
           const baseClass = [
             'flex w-full items-center gap-3 rounded border px-2.5 py-1.5 text-sm transition text-left',

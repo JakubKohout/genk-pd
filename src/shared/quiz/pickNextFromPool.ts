@@ -16,6 +16,6 @@ export function pickNextFromPool<T extends { id: string }>(
   });
   const candidates = cooled.length > 0 ? cooled : pool;
 
-  const weights = candidates.map((item) => 4 - (progress[item.id]?.score ?? 0));
+  const weights = candidates.map((item) => 3 - (progress[item.id]?.score ?? 0));
   return weightedRandom(candidates, weights);
 }

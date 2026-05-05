@@ -2,7 +2,7 @@ import type { Question } from '../data/types';
 import type { ProgressEntry } from '@/shared/storage';
 import { pickNextFromPool } from '@/shared/quiz/pickNextFromPool';
 
-const MAX_SCORE = 3;
+const MAX_SCORE = 2;
 
 export type LeaSelectionState = {
   progress: Record<string, ProgressEntry>;

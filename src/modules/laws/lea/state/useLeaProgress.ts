@@ -7,8 +7,8 @@ import {
   type ProgressEntry,
 } from '@/shared/storage';
 
-const MIN_SCORE = -3;
-const MAX_SCORE = 3;
+const MIN_SCORE = -2;
+const MAX_SCORE = 2;
 
 function clamp(n: number): number {
   return Math.max(MIN_SCORE, Math.min(MAX_SCORE, n));
@@ -43,10 +43,27 @@ export function useLeaProgress() {
     [],
   );
 
+  const recordSkip = useCallback((questionId: string) => {
+    const current = loadState();
+    const next = { ...current };
+    next.lea = {
+      ...current.lea,
+      turn: current.lea.turn + 1,
+      progress: {
+        ...current.lea.progress,
+        [questionId]: {
+          score: MAX_SCORE,
+          lastAskedAtTurn: current.lea.turn,
+        },
+      },
+    };
+    saveState(next);
+  }, []);
+
   const reset = useCallback(() => {
     const current = loadState();
     saveState({ ...current, lea: { progress: {}, turn: 0 } });
   }, []);
 
-  return { progress, turn, recordSubmit, reset };
+  return { progress, turn, recordSubmit, recordSkip, reset };
 }

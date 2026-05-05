@@ -63,13 +63,13 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
 
 /**
  * Build a progress map that pins the next question to `targetCodeId` by saturating every
- * other mandatory code at +3. The target itself starts at score 0 (or `targetScore` if given).
+ * other mandatory code at +2. The target itself starts at score 0 (or `targetScore` if given).
  */
 export function pinNextQuestion(targetCodeId: string, targetScore = 0): SeedProgress {
   const progress: SeedProgress = {};
   for (const c of CODES) {
     if (c.importance === 'mandatory' && c.id !== targetCodeId) {
-      progress[c.id] = { score: 3, lastAskedAtTurn: -10 };
+      progress[c.id] = { score: 2, lastAskedAtTurn: -10 };
     }
   }
   if (targetScore !== 0) {
@@ -83,7 +83,7 @@ export function saturateAll(importance: 'mandatory' | 'rare' | 'unnecessary'): S
   const progress: SeedProgress = {};
   for (const c of CODES) {
     if (c.importance === importance) {
-      progress[c.id] = { score: 3, lastAskedAtTurn: 0 };
+      progress[c.id] = { score: 2, lastAskedAtTurn: 0 };
     }
   }
   return progress;
@@ -120,7 +120,7 @@ export function pinNextLeaQuestion(targetQuestionId: string, targetScore = 0): S
   const progress: SeedProgress = {};
   for (const id of LEA_QUESTION_IDS) {
     if (id !== targetQuestionId) {
-      progress[id] = { score: 3, lastAskedAtTurn: -10 };
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
     }
   }
   if (targetScore !== 0) {

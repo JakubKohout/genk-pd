@@ -9,7 +9,7 @@ import { AnswerList, type AnswerEntry } from './AnswerList';
 import { LeaResetButton } from './LeaResetButton';
 import { SidePanel } from './SidePanel';
 import { SubmitFooter } from './SubmitFooter';
-import { trackLawAnswered } from '@/shared/analytics';
+import { trackLawAnswered, trackQuestionSkipped } from '@/shared/analytics';
 
 type Phase = 'answering' | 'revealed';
 
@@ -22,7 +22,7 @@ interface AnsweredChip {
 
 export function LeaQuizPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
-  const { progress, turn, recordSubmit, reset } = useLeaProgress();
+  const { progress, turn, recordSubmit, recordSkip, reset } = useLeaProgress();
 
   const [current, setCurrent] = useState<ReturnType<typeof pickNextQuestion>>(null);
   const [chips, setChips] = useState<AnsweredChip[]>([]);
@@ -107,6 +107,15 @@ export function LeaQuizPage() {
     setCurrent(null);
   };
 
+  const handleSkip = () => {
+    if (!current) return;
+    recordSkip(current.id);
+    trackQuestionSkipped({ module: 'lea', question_id: current.id });
+    setChips([]);
+    setPhase('answering');
+    setCurrent(null);
+  };
+
   const entries: AnswerEntry[] = chips.map((c) => {
     if (c.itemId === null) {
       return { key: c.key, status: 'wrong', text: c.raw, meta: 'žádná shoda' };
@@ -166,7 +175,12 @@ export function LeaQuizPage() {
             onRemove={phase === 'answering' ? handleRemove : undefined}
             showMissedHeading={phase === 'revealed' && hasMissed}
           />
-          <SubmitFooter phase={phase} onSubmit={handleSubmit} onNext={handleNext} />
+          <SubmitFooter
+            phase={phase}
+            onSubmit={handleSubmit}
+            onNext={handleNext}
+            onSkip={handleSkip}
+          />
         </main>
         <div className="flex justify-end">
           <LeaResetButton />
@@ -205,10 +219,10 @@ function LeaMobilePanel({
   const [open, setOpen] = useState(false);
   const total = questions.length;
   const clampedSum = questions.reduce(
-    (sum, q) => sum + Math.max(0, progress[q.id]?.score ?? 0),
+    (sum, q) => sum + Math.min(2, Math.max(0, progress[q.id]?.score ?? 0)),
     0,
   );
-  const pct = total === 0 ? 0 : Math.round((clampedSum / (3 * total)) * 100);
+  const pct = total === 0 ? 0 : Math.round((clampedSum / (2 * total)) * 100);
 
   const handleSelect = onSelectQuestion
     ? (id: string) => {

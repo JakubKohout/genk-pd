@@ -5,7 +5,7 @@ test.describe('Side panel — chip colors and progress', () => {
   test('chip data-score reflects stored score', async ({ page }) => {
     await seed(page, {
       progress: {
-        '10-0': { score: 3, lastAskedAtTurn: 0 },
+        '10-0': { score: 2, lastAskedAtTurn: 0 },
         '10-1': { score: -2, lastAskedAtTurn: 0 },
         '10-3': { score: 1, lastAskedAtTurn: 0 },
       },
@@ -13,7 +13,7 @@ test.describe('Side panel — chip colors and progress', () => {
     });
     await page.goto('/#/codes/write');
 
-    await expect(page.getByTestId('chip-10-0')).toHaveAttribute('data-score', '3');
+    await expect(page.getByTestId('chip-10-0')).toHaveAttribute('data-score', '2');
     await expect(page.getByTestId('chip-10-0')).toHaveAttribute('data-done', 'true');
     await expect(page.getByTestId('chip-10-1')).toHaveAttribute('data-score', '-2');
     await expect(page.getByTestId('chip-10-3')).toHaveAttribute('data-score', '1');
@@ -22,8 +22,8 @@ test.describe('Side panel — chip colors and progress', () => {
   test('progress percent reflects accumulated score in the active filter', async ({ page }) => {
     await seed(page, {
       progress: {
-        '10-0': { score: 3, lastAskedAtTurn: 0 },
-        '10-1': { score: 3, lastAskedAtTurn: 0 },
+        '10-0': { score: 2, lastAskedAtTurn: 0 },
+        '10-1': { score: 2, lastAskedAtTurn: 0 },
         '10-3': { score: 0, lastAskedAtTurn: 0 },
       },
       randomSeed: 1,
@@ -47,7 +47,7 @@ test.describe('Side panel — chip colors and progress', () => {
       '10-23','10-25','10-32','10-41','10-42','10-50','10-51','10-52','10-53','10-62',
       '10-67','10-68','10-69','10-70','10-80','10-95','10-97','10-98','10-99','10-100',
     ];
-    for (const id of mandatoryIds) progress[id] = { score: 3, lastAskedAtTurn: 0 };
+    for (const id of mandatoryIds) progress[id] = { score: 2, lastAskedAtTurn: 0 };
     await seed(page, { progress, randomSeed: 1 });
     await page.goto('/#/codes/write');
 

@@ -13,7 +13,7 @@ function seedSinglePool(codeId: string): void {
   const progress: PersistedState['codes']['progress'] = {};
   for (const c of CODES) {
     if (c.importance === 'mandatory' && c.id !== codeId) {
-      progress[c.id] = { score: 3, lastAskedAtTurn: -10 };
+      progress[c.id] = { score: 2, lastAskedAtTurn: -10 };
     }
   }
   saveState({

@@ -21,7 +21,7 @@ test.describe('LEA side panel direct selection', () => {
   test('clicking a mastered chip on the completion screen reactivates the quiz', async ({ page }) => {
     const fullySaturated: SeedProgress = {};
     for (const id of LEA_QUESTION_IDS) {
-      fullySaturated[id] = { score: 3, lastAskedAtTurn: -10 };
+      fullySaturated[id] = { score: 2, lastAskedAtTurn: -10 };
     }
     await seed(page, {
       lea: { progress: fullySaturated, turn: 0 },

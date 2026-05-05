@@ -2,7 +2,7 @@ import type { Code } from '../data/codes';
 import type { ImportanceFilter, ProgressEntry } from '@/shared/storage';
 import { pickNextFromPool } from '@/shared/quiz/pickNextFromPool';
 
-const MAX_SCORE = 3;
+const MAX_SCORE = 2;
 
 export type SelectionState = {
   progress: Record<string, ProgressEntry>;

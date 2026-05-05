@@ -17,7 +17,7 @@ beforeEach(() => {
     'lea.17.A', 'lea.18.A', 'lea.19.A', 'lea.21.A', 'lea.23.B', 'lea.37',
     'lea.zbrojni-prukaz', 'lea.ridicsky-prukaz',
   ]) {
-    next.lea.progress[id] = { score: 3, lastAskedAtTurn: 0 };
+    next.lea.progress[id] = { score: 2, lastAskedAtTurn: 0 };
   }
   saveState(next);
 });
@@ -123,5 +123,28 @@ describe('LeaQuizPage', () => {
     fireEvent.click(screen.getByTestId('chip-lea.7'));
     expect(screen.queryByTestId('chip-correct')).not.toBeInTheDocument();
     expect(screen.getByTestId('answer-input')).not.toBeDisabled();
+  });
+
+  it('skip in answering phase masters the current question (+2) and advances', () => {
+    renderPage();
+    expect(screen.getByTestId('question-ref')).toHaveTextContent('§16 B');
+    fireEvent.click(screen.getByTestId('lea-skip'));
+    // Only lea.16.B is eligible; after skip it's mastered → completion screen.
+    expect(screen.getByTestId('lea-congrats')).toBeInTheDocument();
+    const stored = JSON.parse(localStorage.getItem('genk-pd:v1') ?? '{}');
+    expect(stored.lea.progress['lea.16.B'].score).toBe(2);
+  });
+
+  it('skip in revealed phase overrides recordSubmit and advances', () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /vyhodnotit otázku/i }));
+    // Imperfect submit → score for lea.16.B should now be -2.
+    const beforeSkip = JSON.parse(localStorage.getItem('genk-pd:v1') ?? '{}');
+    expect(beforeSkip.lea.progress['lea.16.B'].score).toBe(-2);
+
+    fireEvent.click(screen.getByTestId('lea-skip'));
+    expect(screen.getByTestId('lea-congrats')).toBeInTheDocument();
+    const afterSkip = JSON.parse(localStorage.getItem('genk-pd:v1') ?? '{}');
+    expect(afterSkip.lea.progress['lea.16.B'].score).toBe(2);
   });
 });

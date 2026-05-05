@@ -5,12 +5,12 @@ import { useSettings } from '../state/useSettings';
 import { isComplete, pickNextCode } from '../state/selection';
 import { buildOptions } from '../state/distractors';
 import { CongratsBanner } from './CongratsBanner';
-import { trackCodeAnswered } from '@/shared/analytics';
+import { trackCodeAnswered, trackQuestionSkipped } from '@/shared/analytics';
 
 type Choice = { kind: 'correct' } | { kind: 'wrong'; chosenId: string };
 
 export function ModeChoose() {
-  const { progress, turn, recordAnswer } = useCodeProgress();
+  const { progress, turn, recordAnswer, recordSkip } = useCodeProgress();
   const { importanceFilter } = useSettings();
   const [current, setCurrent] = useState<Code | null>(null);
   const [options, setOptions] = useState<Code[]>([]);
@@ -70,6 +70,15 @@ export function ModeChoose() {
   };
 
   const handleNext = () => {
+    setChoice(null);
+    setCurrent(null);
+    setOptions([]);
+  };
+
+  const handleSkip = () => {
+    if (!current) return;
+    recordSkip(current.id);
+    trackQuestionSkipped({ module: 'codes', question_id: current.id });
     setChoice(null);
     setCurrent(null);
     setOptions([]);
@@ -152,15 +161,38 @@ export function ModeChoose() {
                 <em>{current.meaning}</em>.
               </p>
             )}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleSkip}
+                data-testid="codes-skip"
+              >
+                Přeskakovat tuhle otázku
+              </button>
+              <button
+                ref={nextBtnRef}
+                type="button"
+                onClick={handleNext}
+                onKeyDown={(e) => e.key === 'Enter' && handleNext()}
+                className="btn-primary"
+                data-testid="next-button"
+              >
+                Další <kbd className="text-xs opacity-70">⏎</kbd>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!choice && (
+          <div className="flex justify-end">
             <button
-              ref={nextBtnRef}
               type="button"
-              onClick={handleNext}
-              onKeyDown={(e) => e.key === 'Enter' && handleNext()}
-              className="btn-primary mt-3"
-              data-testid="next-button"
+              className="btn-secondary"
+              onClick={handleSkip}
+              data-testid="codes-skip"
             >
-              Další <kbd className="text-xs opacity-70">⏎</kbd>
+              Přeskakovat tuhle otázku
             </button>
           </div>
         )}

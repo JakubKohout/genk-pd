@@ -55,6 +55,14 @@ export function trackCodesCompleted(props: { scope: 'all' | 'partial' }): void {
   mixpanel.track('codes_completed', props);
 }
 
+export function trackQuestionSkipped(props: {
+  module: 'codes' | 'lea';
+  question_id: string;
+}): void {
+  if (!initialized) return;
+  mixpanel.track('question_skipped', props);
+}
+
 // Lets unit tests reset the module-level guard between tests so each test
 // starts uninitialized.
 export function __resetForTests(): void {
