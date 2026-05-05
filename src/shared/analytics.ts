@@ -14,8 +14,10 @@ export function initAnalytics(): void {
     persistence: 'localStorage',
     ignore_dnt: true,
   });
-  // Create an anonymous profile for the current distinct_id so the Users tab
-  // is populated; set_once leaves $created intact on subsequent visits.
+  // Simplified Identity Merge drops people calls made on a $device: distinct_id;
+  // self-identifying with the existing anonymous id promotes it to a stable
+  // identity so people.set_once actually creates a profile in the Users tab.
+  mixpanel.identify(mixpanel.get_distinct_id());
   mixpanel.people.set_once({ $created: new Date().toISOString() });
   initialized = true;
 }

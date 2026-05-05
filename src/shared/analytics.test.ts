@@ -18,6 +18,7 @@ describe('analytics', () => {
     mp.init.mockClear();
     mp.track.mockClear();
     mp.track_pageview.mockClear();
+    mp.identify.mockClear();
     vi.mocked(mp.people.set_once).mockClear();
   });
 
@@ -40,10 +41,14 @@ describe('analytics', () => {
     expect(mp.init).toHaveBeenCalledTimes(1);
   });
 
-  it('initAnalytics seeds an anonymous profile via people.set_once', () => {
+  it('initAnalytics self-identifies with the device distinct_id before seeding profile', () => {
     initAnalytics();
+    expect(mp.identify).toHaveBeenCalledWith('$device:test-uuid');
     expect(mp.people.set_once).toHaveBeenCalledWith(
       expect.objectContaining({ $created: expect.any(String) }),
+    );
+    expect(mp.identify.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(mp.people.set_once).mock.invocationCallOrder[0]!,
     );
   });
 

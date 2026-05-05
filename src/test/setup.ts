@@ -11,6 +11,7 @@ vi.mock('mixpanel-browser', () => ({
     identify: vi.fn(),
     register: vi.fn(),
     reset: vi.fn(),
+    get_distinct_id: vi.fn(() => '$device:test-uuid'),
     people: {
       set: vi.fn(),
       set_once: vi.fn(),
