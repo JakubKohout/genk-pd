@@ -29,14 +29,25 @@ export type LeaSlice = {
   turn: number;
 };
 
+export type PenalQuizSlice = {
+  progress: Record<string, ProgressEntry>;
+  turn: number;
+};
+
+export type PenalSlice = {
+  scenarios: PenalQuizSlice;
+  recall: PenalQuizSlice;
+};
+
 export type PersistedState = {
-  schemaVersion: 2;
+  schemaVersion: 3;
   codes: CodesSlice;
   lea: LeaSlice;
+  penal: PenalSlice;
 };
 
 export const initialState: PersistedState = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   codes: {
     progress: {},
     turn: 0,
@@ -52,6 +63,10 @@ export const initialState: PersistedState = {
     progress: {},
     turn: 0,
   },
+  penal: {
+    scenarios: { progress: {}, turn: 0 },
+    recall: { progress: {}, turn: 0 },
+  },
 };
 
 let cachedSnapshot: PersistedState | null = null;
@@ -62,7 +77,13 @@ type StoredV1 = {
   codes: CodesSlice;
 };
 
-function migrateV1ToV2(v1: StoredV1): PersistedState {
+type StoredV2 = {
+  schemaVersion: 2;
+  codes: CodesSlice;
+  lea?: LeaSlice;
+};
+
+function migrateV1ToV2(v1: StoredV1): StoredV2 {
   return {
     schemaVersion: 2,
     codes: {
@@ -79,33 +100,71 @@ function migrateV1ToV2(v1: StoredV1): PersistedState {
   };
 }
 
+function migrateV2ToV3(v2: StoredV2): PersistedState {
+  return {
+    schemaVersion: 3,
+    codes: {
+      progress: v2.codes?.progress ?? {},
+      turn: v2.codes?.turn ?? 0,
+      settings: {
+        importanceFilter: {
+          ...initialState.codes.settings.importanceFilter,
+          ...(v2.codes?.settings?.importanceFilter ?? {}),
+        },
+      },
+    },
+    lea: {
+      progress: v2.lea?.progress ?? {},
+      turn: v2.lea?.turn ?? 0,
+    },
+    penal: {
+      scenarios: { progress: {}, turn: 0 },
+      recall: { progress: {}, turn: 0 },
+    },
+  };
+}
+
 function readFromStorage(): PersistedState {
   if (typeof localStorage === 'undefined') return cloneInitial();
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return cloneInitial();
   try {
-    const parsed = JSON.parse(raw) as Partial<PersistedState | StoredV1>;
-    if (parsed?.schemaVersion === 2 && parsed.codes) {
+    const parsed = JSON.parse(raw) as Partial<PersistedState | StoredV2 | StoredV1>;
+    if (parsed?.schemaVersion === 3 && parsed.codes) {
+      const v3 = parsed as Partial<PersistedState>;
       return {
-        schemaVersion: 2,
+        schemaVersion: 3,
         codes: {
-          progress: parsed.codes.progress ?? {},
-          turn: parsed.codes.turn ?? 0,
+          progress: v3.codes?.progress ?? {},
+          turn: v3.codes?.turn ?? 0,
           settings: {
             importanceFilter: {
               ...initialState.codes.settings.importanceFilter,
-              ...(parsed.codes.settings?.importanceFilter ?? {}),
+              ...(v3.codes?.settings?.importanceFilter ?? {}),
             },
           },
         },
         lea: {
-          progress: parsed.lea?.progress ?? {},
-          turn: parsed.lea?.turn ?? 0,
+          progress: v3.lea?.progress ?? {},
+          turn: v3.lea?.turn ?? 0,
+        },
+        penal: {
+          scenarios: {
+            progress: v3.penal?.scenarios?.progress ?? {},
+            turn: v3.penal?.scenarios?.turn ?? 0,
+          },
+          recall: {
+            progress: v3.penal?.recall?.progress ?? {},
+            turn: v3.penal?.recall?.turn ?? 0,
+          },
         },
       };
     }
+    if (parsed?.schemaVersion === 2 && parsed.codes) {
+      return migrateV2ToV3(parsed as StoredV2);
+    }
     if (parsed?.schemaVersion === 1 && parsed.codes) {
-      return migrateV1ToV2(parsed as StoredV1);
+      return migrateV2ToV3(migrateV1ToV2(parsed as StoredV1));
     }
   } catch {
     // fall through

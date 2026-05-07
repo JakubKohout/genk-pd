@@ -11,6 +11,10 @@ export type SeedInput = {
   turn?: number;
   importanceFilter?: { mandatory?: boolean; rare?: boolean; unnecessary?: boolean };
   lea?: { progress?: SeedProgress; turn?: number };
+  penal?: {
+    scenarios?: { progress?: SeedProgress; turn?: number };
+    recall?: { progress?: SeedProgress; turn?: number };
+  };
   randomSeed?: number;
 };
 
@@ -23,7 +27,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -38,6 +42,16 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
     lea: {
       progress: input.lea?.progress ?? {},
       turn: input.lea?.turn ?? 0,
+    },
+    penal: {
+      scenarios: {
+        progress: input.penal?.scenarios?.progress ?? {},
+        turn: input.penal?.scenarios?.turn ?? 0,
+      },
+      recall: {
+        progress: input.penal?.recall?.progress ?? {},
+        turn: input.penal?.recall?.turn ?? 0,
+      },
     },
   };
   await page.addInitScript(
@@ -125,6 +139,85 @@ export function pinNextLeaQuestion(targetQuestionId: string, targetScore = 0): S
   }
   if (targetScore !== 0) {
     progress[targetQuestionId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+/**
+ * Penal scenario IDs hard-coded for E2E (must match src/modules/laws/penal/data/scenarios.ts).
+ */
+export const PENAL_SCENARIO_IDS = [
+  'penal.scenario.A1',
+  'penal.scenario.A2',
+  'penal.scenario.A3',
+  'penal.scenario.A4',
+  'penal.scenario.A5',
+  'penal.scenario.A6',
+  'penal.scenario.B1',
+  'penal.scenario.B2',
+  'penal.scenario.B3',
+  'penal.scenario.B4',
+  'penal.scenario.B5',
+  'penal.scenario.B6',
+  'penal.scenario.B7',
+  'penal.scenario.C1',
+  'penal.scenario.C2',
+  'penal.scenario.C3',
+  'penal.scenario.C4',
+  'penal.scenario.D2',
+  'penal.scenario.D3',
+  'penal.scenario.E1',
+  'penal.scenario.E2',
+  'penal.scenario.E3',
+  'penal.scenario.E4',
+  'penal.scenario.E5',
+  'penal.scenario.E6',
+  'penal.scenario.E7',
+  'penal.scenario.E8',
+  'penal.scenario.E9',
+] as const;
+
+/**
+ * Penal main paragraf IDs (must match src/modules/laws/penal/data/paragraphs.ts).
+ */
+export const PENAL_PARAGRAPH_IDS = [
+  'penal.1', 'penal.2', 'penal.3', 'penal.4', 'penal.5', 'penal.6',
+  'penal.7', 'penal.8', 'penal.9', 'penal.10', 'penal.11', 'penal.12',
+  'penal.13', 'penal.14', 'penal.15', 'penal.16', 'penal.17', 'penal.18',
+  'penal.19', 'penal.20', 'penal.21', 'penal.22', 'penal.23', 'penal.24',
+  'penal.25', 'penal.26', 'penal.27', 'penal.28', 'penal.29', 'penal.30',
+  'penal.31', 'penal.32', 'penal.33', 'penal.34', 'penal.35', 'penal.36',
+  'penal.37', 'penal.38', 'penal.39', 'penal.40', 'penal.41', 'penal.42',
+  'penal.43', 'penal.44', 'penal.45', 'penal.46', 'penal.47', 'penal.48',
+  'penal.49', 'penal.50', 'penal.51', 'penal.52', 'penal.53', 'penal.54',
+  'penal.55', 'penal.56', 'penal.57', 'penal.58', 'penal.59', 'penal.60',
+  'penal.61', 'penal.62', 'penal.68', 'penal.69', 'penal.70', 'penal.71',
+  'penal.72', 'penal.73', 'penal.74', 'penal.75', 'penal.76', 'penal.77',
+  'penal.100', 'penal.101', 'penal.102',
+] as const;
+
+export function pinNextPenalScenario(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of PENAL_SCENARIO_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+export function pinNextPenalParagraph(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of PENAL_PARAGRAPH_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
   }
   return progress;
 }

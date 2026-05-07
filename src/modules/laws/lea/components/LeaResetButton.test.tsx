@@ -6,7 +6,7 @@ import { saveState, loadState } from '@/shared/storage';
 
 function seedLea(): void {
   saveState({
-    schemaVersion: 2,
+    schemaVersion: 3,
     codes: {
       progress: { '10-4': { score: 2, lastAskedAtTurn: 0 } },
       turn: 5,
@@ -17,6 +17,10 @@ function seedLea(): void {
     lea: {
       progress: { 'lea.7': { score: 2, lastAskedAtTurn: 0 } },
       turn: 3,
+    },
+    penal: {
+      scenarios: { progress: {}, turn: 0 },
+      recall: { progress: {}, turn: 0 },
     },
   });
 }

@@ -23,13 +23,17 @@ function seedSinglePool(codeId: string, score = 0): void {
   if (score !== 0) progress[codeId] = { score, lastAskedAtTurn: -10 };
 
   saveState({
-    schemaVersion: 2,
+    schemaVersion: 3,
     codes: {
       progress,
       turn: 0,
       settings: { importanceFilter: { mandatory: true, rare: false, unnecessary: false } },
     },
     lea: { progress: {}, turn: 0 },
+    penal: {
+      scenarios: { progress: {}, turn: 0 },
+      recall: { progress: {}, turn: 0 },
+    },
   });
 }
 
@@ -95,13 +99,17 @@ describe('<ModeWrite />', () => {
       }
     }
     saveState({
-      schemaVersion: 2,
+      schemaVersion: 3,
       codes: {
         progress,
         turn: 0,
         settings: { importanceFilter: { mandatory: true, rare: false, unnecessary: false } },
       },
       lea: { progress: {}, turn: 0 },
+      penal: {
+        scenarios: { progress: {}, turn: 0 },
+        recall: { progress: {}, turn: 0 },
+      },
     });
     render(<ModeWrite />);
     await waitFor(() => screen.getByTestId('question-meaning'));

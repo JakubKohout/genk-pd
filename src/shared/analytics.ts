@@ -45,7 +45,9 @@ export function trackLawAnswered(props: {
   mixpanel.track('law_answered', props);
 }
 
-export function trackProgressReset(props: { module: 'codes' | 'lea' }): void {
+export function trackProgressReset(props: {
+  module: 'codes' | 'lea' | 'penal-scenario' | 'penal-recall';
+}): void {
   if (!initialized) return;
   mixpanel.track('progress_reset', props);
 }
@@ -56,11 +58,25 @@ export function trackCodesCompleted(props: { scope: 'all' | 'partial' }): void {
 }
 
 export function trackQuestionSkipped(props: {
-  module: 'codes' | 'lea';
+  module: 'codes' | 'lea' | 'penal-scenario' | 'penal-recall';
   question_id: string;
 }): void {
   if (!initialized) return;
   mixpanel.track('question_skipped', props);
+}
+
+export function trackPenalAnswered(props: {
+  mode: 'scenario' | 'recall';
+  success: boolean;
+  question_id: string;
+}): void {
+  if (!initialized) return;
+  mixpanel.track('penal_answered', props);
+}
+
+export function trackPenalCompleted(props: { mode: 'scenario' | 'recall' }): void {
+  if (!initialized) return;
+  mixpanel.track('penal_completed', props);
 }
 
 // Lets unit tests reset the module-level guard between tests so each test

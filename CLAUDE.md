@@ -14,13 +14,24 @@ funkční moduly:
    barevným okrajem + autocomplete s šipkovou navigací + sjednocený reveal,
    kde se po Vyhodnotit otázku přebarví existující řádky a doplní zapomenuté
    pod divider "Zapomněl jsi:".
+3. **Penal Code** (`/laws/penal`) — Trestní zákoník, dva režimy přepínané
+   tabs nahoře (analog `/codes`):
+   - **Scénky** (`/laws/penal/scenarios`, default index) — krátké policejní
+     popisy situace, uživatel doplňuje paragrafy včetně sub-paragrafu (`25b`,
+     `§14a`, `27`). Strict ID matching, autocomplete navrhuje paragrafy po ID
+     i názvu, "Hard mode" checkbox v submit-footeru autocomplete vypíná.
+   - **Recall** (`/laws/penal/recall`) — aplikace se ptá „Co je §X?",
+     uživatel doplní název paragrafu (alias matching jako LEA). Pool je
+     omezený jen na paragrafy, které se objeví v některé scénce (27 položek).
+   Side panel na recall obsahuje jen čísla paragrafů, na scénkách jejich `ref`
+   + zkrácený prompt.
 
-Rozcestník `/laws` (komponenta `LawsIndex`) má LEA aktivní, **Penal Code** a
-**Firearm Act** jsou disabled (`aria-disabled`, čekají na implementaci).
+Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
+**Firearm Act** je disabled (`aria-disabled`, čeká na implementaci).
 **SASP příručka** (`/sasp`) je ještě jako `<ComingSoonPage>`.
 
 Pure-frontend, žádný backend. Veškerý stav v `localStorage` (klíč `genk-pd:v1`,
-schemaVersion 2).
+schemaVersion 3).
 
 ## Stack
 
@@ -44,7 +55,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **150 unit/component + 35 E2E = 185 testů**.
+`npm run test:all` musí být zelené: **283 unit/component + 55 E2E = 338 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 ## Adresářová struktura
@@ -63,7 +74,7 @@ src/
       components/                   # CodesPage, ModeWrite, ModeChoose, SidePanel,
                                     # ImportanceFilter, ResetButton, CongratsBanner
     laws/                           # Modul zákonů
-      components/LawsIndex.tsx      # /laws rozcestník (LEA aktivní, ostatní disabled)
+      components/LawsIndex.tsx      # /laws rozcestník (LEA + Penal aktivní, Firearm disabled)
       lea/                          # LEA quiz sub-modul
         data/
           types.ts                  # AnswerItem, Question rozhraní
@@ -77,9 +88,32 @@ src/
           useLeaProgress.ts         # Skóre/turn pro lea slice (delta ±2)
         components/                 # LeaQuizPage, AnswerInput, AnswerList, AnswerRow,
                                     # SubmitFooter, SidePanel, LeaResetButton
+      penal/                        # Penal Code sub-modul (002-19), 2 sub-režimy
+        data/
+          types.ts                  # PenalParagraph, PenalScenario, ExpectedAnswer
+          paragraphs.ts             # PENAL_PARAGRAPHS — 75 paragrafů (§1–§77, §100–§102)
+          scenarios.ts              # PENAL_SCENARIOS — 28 scénář A1–E9
+          recallPool.ts             # RECALL_PARAGRAPHS — derivované, jen ty co jsou
+                                    # v některé scénce (27 paragrafů, vyloučeno §1–§6 atd.)
+        logic/
+          canonicalAnswerId.ts      # '§25 b' / '25B' / '25b' → '25b' (null pokud neparseable)
+          matchScenario.ts          # parse user inputu → ExpectedAnswer; strict, žádný
+                                    # partial credit. + expectedEquals pro porovnání.
+          matchParagraph.ts         # mode B alias matching, sdílí normalize s LEA
+          suggestParagraph.ts       # mode A autocomplete (ID prefix nebo name substring),
+                                    # expanduje paragraph na všechny sub-varianty
+        state/
+          selection.ts              # pickNextScenario, pickNextRecallParagraph,
+                                    # isScenariosComplete, isRecallComplete
+          usePenalProgress.ts       # Generický hook usePenalSliceProgress(key) →
+                                    # 2 veřejné: usePenalScenarioProgress, usePenalRecallProgress
+        components/                 # PenalLayout (tabs + Outlet, jako CodesPage),
+                                    # PenalScenarioPage, PenalRecallPage, PenalAnswerInput,
+                                    # PenalSidePanel (generický pro obě módy s {label, sublabel?,
+                                    # hoverTitle}), PenalSubmitFooter, PenalResetButton
   shared/
-    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 2,
-                                    # migrate v1→v2 při readu, lenient v2 read
+    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 3,
+                                    # chained migrate v1→v2→v3 při readu, lenient v3 read
     rng.ts                          # Pluggable RNG (mulberry32, seed přes localStorage)
     useMediaQuery.ts                # SSR-safe matchMedia hook
     text/normalize.ts               # NFD strip diakritiky + lowercase + whitespace collapse
@@ -97,24 +131,28 @@ src/
                                     # window.matchMedia stub (jsdom nemá)
 
 e2e/
-  fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?: {...}, randomSeed? })`
-                                    # Píše schemaVersion 2, exportuje LEA_QUESTION_IDS,
-                                    # pinNextQuestion (codes), pinNextLeaQuestion (lea)
+  fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?, penal?, randomSeed? })`
+                                    # Píše schemaVersion 3, exportuje LEA_QUESTION_IDS,
+                                    # PENAL_SCENARIO_IDS, PENAL_PARAGRAPH_IDS, pinNext{Question,
+                                    # LeaQuestion, PenalScenario, PenalParagraph}
   codes/*.spec.ts                   # 7 spec souborů, 20 testů
   laws/lea/*.spec.ts                # 6 spec souborů (quiz-flow, matching, autocomplete,
-                                    # submit-reveal, persistence, responsive), 15 testů
+                                    # submit-reveal, persistence, responsive), 16 testů
+  laws/penal/*.spec.ts              # 3 spec soubory (scenario-flow, recall-flow, persistence),
+                                    # 12 testů
 ```
 
-Nový modul (Penal Code, Firearm Act) → kopíruj strukturu `modules/laws/lea/`,
-přidej route v `src/app/routes.tsx`, přidej do `LawsIndex.tsx`. Sdílené utility
-(`normalize`, `pickNextFromPool`) jsou už generické.
+Nový modul (Firearm Act) → kopíruj strukturu `modules/laws/penal/` (která už ukazuje
+2-režim pattern s tabs), přidej route v `src/app/routes.tsx`, přidej do `LawsIndex.tsx`.
+Sdílené utility (`normalize`, `pickNextFromPool`) jsou generické. AnswerList/AnswerRow
+se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
 
 ## Datový model
 
 ```ts
 // localStorage["genk-pd:v1"]
 {
-  schemaVersion: 2,
+  schemaVersion: 3,
   codes: {
     progress: { [codeId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number,
@@ -125,16 +163,22 @@ přidej route v `src/app/routes.tsx`, přidej do `LawsIndex.tsx`. Sdílené util
   lea: {
     progress: { [questionId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number
+  },
+  penal: {
+    scenarios: { progress: { [scenarioId]: ProgressEntry }, turn: number },
+    recall:    { progress: { [paragraphId]: ProgressEntry }, turn: number }
   }
 }
 ```
 
-**Migrace v1 → v2** (`src/shared/storage.ts:migrateV1ToV2`): při readu se v1
-payload migruje v paměti — `codes` zachováno beze změny, `lea: { progress: {}, turn: 0 }`
-přidáno. `saveState` vždy zapisuje v2.
+**Migrace v1 → v2 → v3** (`src/shared/storage.ts:migrateV1ToV2`, `migrateV2ToV3`):
+při readu se starší payload chained-migruje v paměti. v1: codes zachováno, lea
+přidáno default. v2: codes+lea zachováno, penal přidáno default (obě sub-slices
+prázdné). `saveState` vždy zapisuje v3.
 
-**Lenient v2 read**: pokud v2 payload má `codes` ale chybí `lea`, dopočítáme defaultní
-prázdnou lea slice — žádná data ztrát. (Test `storage.test.ts`.)
+**Lenient v3 read**: pokud v3 payload chybí `penal` nebo některá sub-slice
+(`scenarios` / `recall`), dopočítáme prázdné defaults — žádná data ztrát.
+(Test `storage.test.ts`.)
 
 `STORAGE_KEY = 'genk-pd:v1'` se NEMĚNÍ při schema bumpu — jen JSON value uvnitř.
 "v1" v key je legacy; verzování je v `schemaVersion` field.
@@ -258,37 +302,83 @@ Jinak když je nabídka otevřená a nějaká je → naplní input vybranou sugg
 **`pickNextQuestion(state, all)`** = `pickNextFromPool(eligibleQuestions(state, all), ...)`,
 kde `eligibleQuestions` filtruje `score < 2`. (LEA nemá importance filter.)
 
-### Progress bar (oba moduly)
+### Penal Code
+
+**Mode A — scénka → paragrafy.** Každá scénka v `PENAL_SCENARIOS` má
+`expected: ExpectedAnswer[]` (1–3 položky), kde `ExpectedAnswer = { paragraphId,
+subId? }`. Sub-paragraf je povinný, pokud paragraf má `subs.length > 0`,
+a NESMÍ být zadaný, pokud `subs.length === 0`.
+
+**`canonicalAnswerId(input): string | null`** normalizuje vstupy `'§25 b'`,
+`'25B'`, `'25b'`, `'§25'`, `'27'` → `'25b'` / `'25'` / `'27'`. Strip `§`,
+lowercase, collapse whitespace, regex `^(\d+)([a-e]?)$`. Null pro neparseable.
+
+**`matchScenarioAnswer(input, paragraphs): ExpectedAnswer | null`**: parse přes
+canonicalAnswerId, najde paragraf podle ID, validuje sub. **Strict** — žádný
+partial credit. Špatný sub = wrong. Vrací null = page treats jako wrong chip.
+
+**`expectedEquals(a, b)`**: porovnání ExpectedAnswer. Used by page-level
+matching loop, který každý chip zkontroluje proti `scenario.expected[]`.
+
+**`suggestParagraphs(input, paragraphs, excludeKeys): ParagraphSuggestion[]`**:
+2 cesty matche.
+1. Numeric prefix (`25`, `25b`): rozšíří paragraf na všechny sub-varianty,
+   nebo když user napsal sub, jen tu jednu. Rank: kratší ID = výš.
+2. Text substring: substring přes title + aliasy po normalize. Rank: pozice
+   matche, pak délka title.
+`excludeKeys` (Set canonical IDs `'25b'`, `'27'`) skrývá už commitnuté chips.
+Min length 1, max 8 výsledků.
+
+**Hard mode** (`PenalScenarioPage` interní `useState`): checkbox v `submit-footer`
+vlevo, prop `disableSuggestions` na `PenalAnswerInput` zablokuje autocomplete
+úplně. Per-session, nepersistuje.
+
+**Mode B — recall.** Otázka „Co je §X?" pickne paragraf z **`RECALL_PARAGRAPHS`**
+(derivovaný subset z `PENAL_PARAGRAPHS` — jen ty co jsou v `PENAL_SCENARIOS.expected`,
+27 položek). Mode A pool je pořád celých 75 (uživatel může napsat libovolný §).
+
+**`matchParagraph(input, paragraphs): PenalParagraph | null`** = LEA-style alias
+match po normalize. V `PenalRecallPage` se volá s `[current]` (jen aktuální paragraf),
+ne s celým poolem — tj. korektní odpověď je jen jméno právě testovaného paragrafu.
+
+**`pickNextScenario`** / **`pickNextRecallParagraph`**: oba delegují na
+`pickNextFromPool` se score < 2 filterem.
+
+### Progress bar (všechny moduly)
 
 `pct = Σ min(2, max(0, score(c))) / (2·N)` přes filtrované položky. Záporné
 skóre se klampuje na 0 jen pro UI; legacy hodnoty `score > 2` (z původního
 rozsahu `-3..+3`) jsou taky zclampované na 2, takže pct nikdy nepřekročí 100 %.
 Storage uchovává nově `-2..+2`, selection filtruje `score < 2`.
 
-- **Codes desktop SidePanel**: testid `progress-percent` ("X%" v `<span>`,
-  "Splněno" v sourozenci nad)
-- **Codes mobile summary**: testid `mobile-progress-percent` ("Přehled kódů — X% splněno")
-- **LEA desktop SidePanel**: testid `lea-progress-percent` ("X%" v `<span>`,
-  "Splněno" v sourozenci nad — sjednoceno s codes panelem)
-- **LEA mobile summary**: testid `lea-mobile-progress-percent` ("Přehled otázek — X% splněno")
+- **Codes desktop SidePanel**: testid `progress-percent`
+- **Codes mobile summary**: testid `mobile-progress-percent`
+- **LEA desktop SidePanel**: testid `lea-progress-percent`
+- **LEA mobile summary**: testid `lea-mobile-progress-percent`
+- **Penal Scenarios desktop**: testid `penal-scenarios-progress-percent`
+- **Penal Scenarios mobile**: testid `penal-scenarios-mobile-progress-percent`
+- **Penal Recall desktop**: testid `penal-recall-progress-percent`
+- **Penal Recall mobile**: testid `penal-recall-mobile-progress-percent`
 
 `isComplete` ⟺ všechny filtrované items na +2.
 
-### SidePanel layout (codes i LEA sjednoceno)
+### SidePanel layout (codes / LEA / Penal sjednoceno)
 
-Oba boční panely sdílí vizuální jazyk: `card flex flex-col gap-3 p-4` wrapper +
+Všechny boční panely sdílí vizuální jazyk: `card flex flex-col gap-3 p-4` wrapper +
 `ProgressHeader` (uppercase tracking-wider "Splněno" vlevo, percent vpravo, bar
 pod) + score-based barva pozadí podle stejné `SCORE_CLASS` mapy (`-3..+3`).
 Mapa zůstává s rozsahem `-3..+3` pro zpětnou kompatibilitu s legacy daty;
-nové skóre používá jen `-2..+2`. Duplikovaná v obou souborech (codes
-`SidePanel.tsx` + LEA `SidePanel.tsx`), záměrně neabstraktováno — YAGNI dokud
-nebudou 3+ panely (Penal Code, Firearm Act).
+nové skóre používá jen `-2..+2`. Duplikovaná ve 3 souborech (codes
+`SidePanel.tsx` + LEA `SidePanel.tsx` + penal `PenalSidePanel.tsx`); když se
+přidá Firearm Act, půjde refaktorovat do `src/shared/quiz/SidePanel.tsx`.
 
 Codes panel: dense grid `grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4`
-chips s ID kódu. LEA panel: vertikální `<ul>` s jedním řádkem na otázku — mono
-`§ref` v pevné šířce `w-14` vlevo, `description` flex-grow uprostřed, ✓ badge
-vpravo když mastered (`score >= 2`). Každý řádek má `data-testid="chip-<id>"`,
-`data-score`, `data-done` pro budoucí E2E.
+chips s ID kódu. LEA panel: vertikální `<ul>` s `§ref` (`w-14`) + description.
+Penal panel: generický (item: `{ id, label, sublabel?, hoverTitle }`):
+scénky mají label=ref + sublabel=zkrácený prompt; recall má jen label=`§N` (sublabel
+záměrně vynechán per uživatelova požadavku — jen čísla, ne názvy). Když chybí
+sublabel, label dostává `flex-1` místo `w-14`. Každý řádek `data-testid="chip-<id>"`,
+`data-score`, `data-done`.
 
 ## Analytika (Mixpanel)
 
@@ -302,9 +392,11 @@ konstanta (Mixpanel FE tokeny jsou public-by-design).
 |---|---|---|---|
 | `trackCodeAnswered` | `code_answered` | `mode: 'write'\|'choose'`, `success`, `code_id` | ModeWrite/ModeChoose po vyhodnocení |
 | `trackLawAnswered` | `law_answered` | `success` (= perfect), `question_id` | LeaQuizPage `handleSubmit` |
-| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'` | ResetButton/LeaResetButton confirm |
+| `trackPenalAnswered` | `penal_answered` | `mode: 'scenario'\|'recall'`, `success`, `question_id` | PenalScenarioPage / PenalRecallPage `handleSubmit` |
+| `trackPenalCompleted` | `penal_completed` | `mode: 'scenario'\|'recall'` | Mount completion screen po posledním correct submitu |
+| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'` | ResetButton/LeaResetButton/PenalResetButton confirm |
 | `trackCodesCompleted` | `codes_completed` | `scope: 'all'\|'partial'` | CongratsBanner mount |
-| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'lea'`, `question_id` | ModeWrite/ModeChoose/LeaQuizPage `handleSkip` |
+| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'`, `question_id` | handleSkip ve všech kvízových stránkách |
 | `trackPageview` | _(Mixpanel pageview)_ | `url` (origin + `#` + path) | AppLayout useEffect na route change |
 
 **Init pipeline** (po `mixpanel.init`):
@@ -364,6 +456,61 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 9. `useMediaQuery('(min-width: 1024px)')` switch mezi desktop SidePanel inline
    vs `LeaMobilePanel` (`<details>` se summary).
 
+## Penal UI flow
+
+`PenalLayout` (`src/modules/laws/penal/components/PenalLayout.tsx`) je parent
+route s `<Outlet />`:
+
+1. Header: h1 "Penal Code (002-19)" + popis + `NavLink` tabs (`Scénky`/`Recall`)
+   se stejným stylem jako `CodesPage` (aktivní tab `bg-sasp-tan text-sasp-bg`,
+   neaktivní `border border-sasp-navy-light`).
+2. Index route (`/laws/penal`) renderuje `<PenalScenarioPage />` defaultně.
+3. Tabs navigují na `/laws/penal/scenarios` a `/laws/penal/recall`.
+
+`PenalScenarioPage` (mode A) — kopíruje LeaQuizPage strukturu:
+
+1. `usePenalScenarioProgress` poskytuje `{ progress, turn, recordSubmit, recordSkip, reset }`
+   nad `penal.scenarios` slice.
+2. `current: PenalScenario | null` v `useState`. Picker v `useEffect` jen když
+   `current === null && phase === 'answering'` (stejný pattern jako LEA, viz Gotcha 7).
+3. `chips: AnsweredChip[]` ({ key, raw, parsed: ExpectedAnswer | null, duplicate }).
+4. `handleCommit(raw)`: parse přes `matchScenarioAnswer`. Null parsed = wrong.
+   Duplicate = key je už v `foundKeys` set.
+5. Při submitu projde `chips` proti `current.expected[]`:
+   - parsed null → wrong
+   - parsed.key v expectedKeys + ne duplicate → correct
+   - parsed.key NENÍ v expectedKeys → wrong („neaplikovatelný")
+   - duplicate → duplicate
+   - perfect = wrong=0 ∧ duplicate=0 ∧ correct=expected.length
+6. Reveal přidá `missed` entries pro každý chybějící expected.
+7. `educationalNote` z scénky se renderuje v reveal pod „Pozor:" boxem
+   (testid `penal-scenario-note`), když ji scénka definuje.
+8. SubmitFooter v `submit-footer--end` (default LEA pattern) NEBO když `leftSlot`
+   je passed (Hard mode checkbox), přepne na `flex justify-between`.
+9. PenalAnswerInput používá `suggestParagraphs` místo `suggestItems`. Suggestions
+   pole `{ canonicalId, display, paragraphId, subId, title, description }`.
+   Při kliknutí/Enteru se commit hodnota = `canonicalId`. `disableSuggestions`
+   prop (= hard mode) blokuje generování suggestions.
+10. Skip volá `recordSkip` + `trackQuestionSkipped({ module: 'penal-scenario' })`.
+
+`PenalRecallPage` (mode B) — single-answer flow, jednodušší:
+
+1. `usePenalRecallProgress` nad `penal.recall` slice.
+2. Pool = `RECALL_PARAGRAPHS` (27 paragrafů). Picker přes `pickNextRecallParagraph`.
+3. Otázka „Co je §X?" + plain `<input>` (žádné chips, žádné autocomplete).
+   testid `penal-recall-input`. Enter triggers handleSubmit.
+4. `handleSubmit`: `matchParagraph(value, [current])` — jediný paragraf v poolu
+   pro match je current. Match = perfect.
+5. Reveal: `RecallReveal` komponenta v stejném souboru. Když matched=current →
+   zelený „Správně!" banner (testid `penal-recall-correct`). Jinak red box
+   s plnou odpovědí (testid `penal-recall-wrong`).
+6. Reveal box dál vypisuje `description` paragrafu + všechny sub-paragrafy
+   (testid `penal-recall-reveal`) — edukační moment, user vidí kategorizaci.
+7. Reset/Skip: `PenalResetButton` s prefixem `penal-recall`, skip přes
+   `recordSkip` + `trackQuestionSkipped({ module: 'penal-recall' })`.
+8. SidePanel show **jen čísla paragrafů** (label=`§N`, sublabel undefined).
+   Hover tooltip ukazuje název + popis. testid `penal-recall-side-panel`.
+
 ## Gotchas (na co si dát pozor)
 
 1. **`useSyncExternalStore` snapshot stability** — `storage.ts` má `cachedSnapshot`,
@@ -379,9 +526,9 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 3. **Playwright seed přes `localStorage`, ne přes window hook**: `page.addInitScript`
    běží před app skripty, takže window hooky ještě nejsou připojené. Místo toho
    `e2e/fixtures/seed.ts` zapisuje rovnou `localStorage["genk-pd:v1"]` (ve formátu
-   `schemaVersion: 2`) a `localStorage["genk-pd:rng-seed"]`. Init script používá
-   `sessionStorage` flag `genk-pd:seeded`, aby se **nepřeseedoval po reloadu**
-   (jinak by persistence testy byly k ničemu).
+   `schemaVersion: 3` s codes + lea + penal slices) a `localStorage["genk-pd:rng-seed"]`.
+   Init script používá `sessionStorage` flag `genk-pd:seeded`, aby se
+   **nepřeseedoval po reloadu** (jinak by persistence testy byly k ničemu).
 
 4. **SidePanel se renderuje jen jednou**, ne dvakrát. `CodesPage` i `LeaQuizPage`
    přepínají mezi inline desktop a collapsible mobile podle `useMediaQuery('(min-width: 1024px)')`.
@@ -425,10 +572,11 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
     `<details>`). RTL `getByTestId` najde i hidden elementy uvnitř collapsed details,
     takže existující testy fungují.
 
-11. **`schemaVersion` v test seedech musí být `2` + `lea` slice**. Hardcoded literály
-    v `src/modules/codes/components/*.test.tsx` byly bumped při Task 4. Pokud přidáš
-    nový test co píše `PersistedState` literál, přidej `lea: { progress: {}, turn: 0 }`
-    a `schemaVersion: 2`.
+11. **`schemaVersion` v test seedech musí být `3` + `lea` + `penal` slice**.
+    Hardcoded literály ve všech `*.test.tsx` které volají `saveState({...})` musí mít
+    `schemaVersion: 3`, `lea: { progress: {}, turn: 0 }`, a
+    `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`.
+    Pokud přidáš další slice, bumpni schema (v3 → v4) a doplň migrationi v `storage.ts`.
 
 12. **Vite dev server je default lockdown na `localhost`.** Pro ngrok/cloudflared
     tunel je v `vite.config.ts` `server.allowedHosts: ['.ngrok-free.app', '.ngrok.app',
@@ -488,9 +636,46 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 22. **UI clamp earnedScore na MAX_SCORE (2)** — progress-bar pct počítá
     `Σ min(2, max(0, score))` namísto `Σ max(0, score)`. Bez horního clampu
     by legacy `score=3` (z rozsahu `-3..+3`) dával pct > 100 % (test viděl
-    150 %). Tři místa: codes `SidePanel.tsx`, codes `CodesPage.tsx` MobilePanel,
-    LEA `SidePanel.tsx`, LEA `LeaQuizPage.tsx` LeaMobilePanel. Při bumpu range
-    nezapomenout všechny čtyři.
+    150 %). Šest míst: codes `SidePanel.tsx`, codes `CodesPage.tsx` MobilePanel,
+    LEA `SidePanel.tsx`, LEA `LeaQuizPage.tsx` LeaMobilePanel, penal
+    `PenalSidePanel.tsx`, penal `PenalScenarioPage.tsx`/`PenalRecallPage.tsx`
+    MobilePanel. Při bumpu range nezapomenout všech šest.
+
+23. **Penal mode A: strict ID matching, žádný partial credit** —
+    `matchScenarioAnswer` vrací null, pokud paragraf má subs ale uživatel
+    neuvedl sub (nebo naopak). Stejně tak špatný sub (`25a` při expected `25b`)
+    je v page logice plné `wrong`. To je úmyslný edukační design — modul učí
+    distinkci sub-paragrafů. Pokud bys to měnil, drsně to změní expected
+    behavior všech 28 scénář.
+
+24. **Penal recall pool je derivovaný subset z `PENAL_PARAGRAPHS`** přes
+    `data/recallPool.ts` (filter na `paragraphId` z `PENAL_SCENARIOS.expected`).
+    Když přidáš novou scénku referující dosud nepokrytý paragraf, RECALL_PARAGRAPHS
+    se automaticky rozšíří. Když odebereš poslední scénku referující paragraf,
+    spadne z recall poolu — uživatelé už ho nikdy v mode B neuvidí. Test
+    `recallPool.test.ts` validuje, že pool match union scénár expected.
+
+25. **Penal scénář IDs v E2E seed musí být sync s daty** — `e2e/fixtures/seed.ts`
+    má hardcoded `PENAL_SCENARIO_IDS` (28) a `PENAL_PARAGRAPH_IDS` (75, hard-coded
+    pro full catalog). Když přidáš novou scénku do `scenarios.ts` nebo paragraf do
+    `paragraphs.ts`, **musíš rozšířit i hardcoded list v seed.ts**, jinak
+    `pinNextPenalScenario` přestane saturovat 27/28 a picker pustí jiný target.
+
+26. **PenalAnswerInput používá canonical ID jako match key, ne quote** — chip
+    excludeKeys obsahuje `'25b'`, `'27'`, ne `paragraphId`. Pokud bys přesunul
+    AnswerList přes shared a fillnul `meta = paragraphId` místo `display`, exclude
+    by přestal fungovat. Drž canonical ID v `chip.parsed → canonicalId` mapování.
+
+27. **PenalLayout je parent route s `<Outlet />`**, analogicky `CodesPage`.
+    Index route (`/laws/penal`) defaultuje na `PenalScenarioPage`. Přepínání
+    režimu jde přes `NavLink` tabs (`penal-tab-scenarios`, `penal-tab-recall`).
+    Žádná redundantní rozcestníková stránka — proklik z `/laws` rovnou jede do
+    režimu, na který tabs ukazují (default scénky).
+
+28. **Hard mode toggle je per-session state** v `PenalScenarioPage`
+    (`useState(false)`). Stav nepřežije refresh ani přepnutí tabu. Záměrně
+    — nechtěl jsem komplikovat storage schema o UI preference. Pokud má persist,
+    přidat do `penal.scenarios.settings.hardMode` a bumpnout schema.
 
 ## Konvence
 
@@ -509,13 +694,21 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 
 ## Mimo MVP / nápady do budoucna
 
-- **Penal Code** + **Firearm Act** moduly: kopíruj `modules/laws/lea/` strukturu,
-  přidej do `LawsIndex` (změň `aria-disabled` na aktivní `<Link>`), přidej route.
-- **Sdílený "law quiz engine"**: až budou 2+ zákony, vytáhnout shared layer pro
-  matching/suggest/UI komponenty (zatím YAGNI — `pickNextFromPool` a `normalize`
-  už jsou shared).
+- **Firearm Act** modul (`/laws/firearm`): kopíruj strukturu `modules/laws/penal/`
+  (která už ukazuje 2-režim pattern s tabs + parent layout), přidej do `LawsIndex`
+  (změň `aria-disabled` na aktivní `<Link>`), přidej route. Zdroj: `docs/firearm-act.md`.
+- **Sdílený "law quiz engine"**: až bude 3. modul (Firearm Act), refaktorovat
+  AnswerList/AnswerRow/SidePanel ProgressHeader/SCORE_CLASS do `src/shared/quiz/`.
+  Aktuálně AnswerList/AnswerRow se importují z LEA (penal je závislý na LEA),
+  SidePanel je duplikovaný do 3 souborů (codes/lea/penal). YAGNI dokud se to
+  nezačne lišit nebo nezačne bolet při změnách.
 - **SASP příručka** (`/sasp`) — zatím `<ComingSoonPage>`, `docs/sasp-manual.md`
   je v `.gitignore` (důvěrný zdroj).
-- **False-negative aliasy** v LEA — pokud user narazí na často chybějící parafráze,
-  rozšířit alias seznam v `questions.ts` ručně. Pozor na strict legal correctness
-  (některé parafráze posunou právní význam, viz Gotcha o §15 5a).
+- **Penal scénky další** — některé reálné situace (korupce §53, vraždy §12,
+  obchod s lidmi §13) nejsou pokryté. Pool nejsou edukačně critical, ale dají
+  se přidat. Při každé nové scénce se automaticky rozšíří i `RECALL_PARAGRAPHS`.
+- **False-negative aliasy** v LEA / Penal — pokud user narazí na často chybějící
+  parafráze, rozšířit alias seznam v `questions.ts` / `paragraphs.ts` ručně.
+  Pozor na strict legal correctness (některé parafráze posunou právní význam,
+  viz Gotcha o LEA §15 5a; v Penal podobně §50 ≠ §51 přes „drogy").
+- **Persist Hard mode** v Penal scenarios (Gotcha 28) — pokud se uživatel ozve.

@@ -11,9 +11,9 @@ export function LawsIndex() {
           </Link>
         </li>
         <li>
-          <span className="btn-secondary disabled" aria-disabled="true">
-            Penal Code (připravujeme)
-          </span>
+          <Link to="/laws/penal" className="btn-primary">
+            Penal Code (002-19)
+          </Link>
         </li>
         <li>
           <span className="btn-secondary disabled" aria-disabled="true">

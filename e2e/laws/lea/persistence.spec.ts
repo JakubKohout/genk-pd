@@ -34,12 +34,15 @@ test('migrating a v1 storage payload still surfaces existing codes progress and 
   await page.goto('/#/laws/lea');
   await expect(page.getByTestId('lea-progress-percent')).toHaveText('0%');
 
-  // Trigger any state-mutating action so the app writes back v2 to localStorage.
+  // Trigger any state-mutating action so the app writes back the latest schema to localStorage.
   await page.getByRole('button', { name: /vyhodnotit otázku/i }).click();
 
   const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
   const parsed = JSON.parse(stored!);
-  expect(parsed.schemaVersion).toBe(2);
+  expect(parsed.schemaVersion).toBe(3);
   expect(parsed.codes.progress['10-4'].score).toBe(2);
   expect(parsed.lea).toBeDefined();
+  expect(parsed.penal).toBeDefined();
+  expect(parsed.penal.scenarios).toEqual({ progress: {}, turn: 0 });
+  expect(parsed.penal.recall).toEqual({ progress: {}, turn: 0 });
 });

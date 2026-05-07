@@ -14,13 +14,22 @@ describe('LawsIndex', () => {
     expect(lea).toHaveAttribute('href', '/laws/lea');
   });
 
-  it('renders Penal Code and Firearm Act as disabled', () => {
+  it('renders an active link to /laws/penal', () => {
     render(
       <MemoryRouter>
         <LawsIndex />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/penal code/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
+    const penal = screen.getByRole('link', { name: /penal code/i });
+    expect(penal).toHaveAttribute('href', '/laws/penal');
+  });
+
+  it('renders Firearm Act as disabled', () => {
+    render(
+      <MemoryRouter>
+        <LawsIndex />
+      </MemoryRouter>,
+    );
     expect(screen.getByText(/firearm act/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
   });
 });
