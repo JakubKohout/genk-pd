@@ -14,12 +14,6 @@ const modules = [
     enabled: true,
   },
   {
-    to: '/tools/mdt-citizens',
-    title: 'MDT občané (TMP)',
-    description: 'Pomocný nástroj — z view-source MDT vyrenderuje tabulku občanů s odkazy na detail.',
-    enabled: true,
-  },
-  {
     to: '/sasp',
     title: 'SASP příručka',
     description: 'Otázky nad provozní příručkou SASP — postupy, role, situace.',
