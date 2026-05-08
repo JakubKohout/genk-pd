@@ -9,6 +9,7 @@ import { LeaQuizPage } from '@/modules/laws/lea/components/LeaQuizPage';
 import { PenalLayout } from '@/modules/laws/penal/components/PenalLayout';
 import { PenalScenarioPage } from '@/modules/laws/penal/components/PenalScenarioPage';
 import { PenalRecallPage } from '@/modules/laws/penal/components/PenalRecallPage';
+import { MdtCitizensPage } from '@/modules/tools/mdt/MdtCitizensPage';
 import { ComingSoonPage } from './ComingSoonPage';
 
 export const router = createHashRouter([
@@ -37,6 +38,7 @@ export const router = createHashRouter([
           { path: 'recall', element: <PenalRecallPage /> },
         ],
       },
+      { path: 'tools/mdt-citizens', element: <MdtCitizensPage /> },
       { path: 'sasp', element: <ComingSoonPage title="SASP příručka" /> },
     ],
   },
