@@ -9,7 +9,7 @@ import {
   pointToSegmentDist,
   polygonHit,
 } from './hitTest';
-import type { POIPoint, POIStreet } from '../data/types';
+import type { POIPoint, POIPolygon, POIStreet } from '../data/types';
 
 describe('distance', () => {
   it('returns 0 for the same point', () => {
@@ -108,6 +108,38 @@ describe('evaluateClick', () => {
 
   it('miss when perpendicular distance exceeds threshold', () => {
     const result = evaluateClick(street, { x: 0.3, y: 0.6 });
+    expect(result.hit).toBe(false);
+  });
+
+  const polygon: POIPolygon = {
+    id: 'street.x',
+    category: 'street',
+    name: 'X street',
+    description: 'desc',
+    aliases: ['x'],
+    geometry: 'polygon',
+    path: [
+      { x: 0.3, y: 0.4 },
+      { x: 0.7, y: 0.4 },
+      { x: 0.7, y: 0.6 },
+      { x: 0.3, y: 0.6 },
+      { x: 0.3, y: 0.4 },
+    ],
+    centroid: { x: 0.5, y: 0.5 },
+  };
+
+  it('hit inside polygon', () => {
+    const result = evaluateClick(polygon, { x: 0.5, y: 0.5 });
+    expect(result.hit).toBe(true);
+  });
+
+  it('hit just outside polygon within tolerance', () => {
+    const result = evaluateClick(polygon, { x: 0.71, y: 0.5 });
+    expect(result.hit).toBe(true); // 0.01 outside, default tolerance 0.015
+  });
+
+  it('miss far outside polygon', () => {
+    const result = evaluateClick(polygon, { x: 0.85, y: 0.5 });
     expect(result.hit).toBe(false);
   });
 });

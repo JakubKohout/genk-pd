@@ -98,9 +98,17 @@ export function evaluateClick(
   click: Vec2,
   threshold = HIT_THRESHOLD,
 ): EvaluatedClick {
-  const d =
-    poi.geometry === 'point'
-      ? distance(click, poi.position)
-      : pointToPolylineDist(click, poi.path);
-  return { hit: d < threshold, distance: d };
+  if (poi.geometry === 'point') {
+    const d = distance(click, poi.position);
+    return { hit: d < threshold, distance: d };
+  }
+  if (poi.geometry === 'polyline') {
+    const d = pointToPolylineDist(click, poi.path);
+    return { hit: d < threshold, distance: d };
+  }
+  // polygon: hit determined by polygonHit with edge tolerance; distance is 0
+  // when inside, else distance to nearest edge.
+  const hit = polygonHit(poi.path, click, POLYGON_EDGE_TOLERANCE);
+  const d = hit ? 0 : pointToPolygonEdgeDist(click, poi.path);
+  return { hit, distance: d };
 }
