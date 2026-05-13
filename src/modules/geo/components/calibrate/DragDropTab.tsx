@@ -85,25 +85,31 @@ export function DragDropTab() {
       </div>
 
       <GeoMap>
-        {pois.map((poi) =>
-          poi.geometry === 'point' ? (
-            <DraggablePoint
-              key={poi.id}
-              poi={poi}
-              selected={selectedId === poi.id}
-              onSelect={() => setSelectedId(poi.id)}
-              onMove={updatePoint}
-            />
-          ) : (
-            <DraggablePolyline
-              key={poi.id}
-              poi={poi}
-              selected={selectedId === poi.id}
-              onSelect={() => setSelectedId(poi.id)}
-              onMovePathNode={updatePathNode}
-            />
-          ),
-        )}
+        {pois.map((poi) => {
+          if (poi.geometry === 'point') {
+            return (
+              <DraggablePoint
+                key={poi.id}
+                poi={poi}
+                selected={selectedId === poi.id}
+                onSelect={() => setSelectedId(poi.id)}
+                onMove={updatePoint}
+              />
+            );
+          }
+          if (poi.geometry === 'polyline') {
+            return (
+              <DraggablePolyline
+                key={poi.id}
+                poi={poi}
+                selected={selectedId === poi.id}
+                onSelect={() => setSelectedId(poi.id)}
+                onMovePathNode={updatePathNode}
+              />
+            );
+          }
+          return null; // polygon: auto-imported, not editable here
+        })}
       </GeoMap>
 
       <details className="card p-4" open>

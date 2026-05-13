@@ -254,13 +254,15 @@ export function AddPoiTab() {
                 }
               />
             ))}
-            {added.map((poi) =>
-              poi.geometry === 'point' ? (
-                <AddedPoint key={poi.id} poi={poi} onMove={movePoint} />
-              ) : (
-                <AddedPolyline key={poi.id} poi={poi} onMove={movePathNode} />
-              ),
-            )}
+            {added.map((poi) => {
+              if (poi.geometry === 'point') {
+                return <AddedPoint key={poi.id} poi={poi} onMove={movePoint} />;
+              }
+              if (poi.geometry === 'polyline') {
+                return <AddedPolyline key={poi.id} poi={poi} onMove={movePathNode} />;
+              }
+              return null; // polygon: auto-imported, not editable here
+            })}
           </GeoMap>
 
           {added.length > 0 && (
