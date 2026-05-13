@@ -278,7 +278,7 @@ export function calibratePoi(poi: POI, t: AffineTransform): POI {
   return { ...poi, path: newPath, centroid: polygonCentroid(newPath) };
 }
 
-function polygonCentroid(ring: Vec2[]): Vec2 {
+export function polygonCentroid(ring: Vec2[]): Vec2 {
   let cx = 0,
     cy = 0,
     a2 = 0;

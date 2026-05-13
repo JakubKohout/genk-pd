@@ -248,4 +248,18 @@
     color: rgba(245, 230, 200, 0.7);
   }
 
+  .geo-vertex-handle {
+    width: 10px;
+    height: 10px;
+    background: rgba(212, 162, 86, 0.9);
+    border: 1px solid #1a1d2a;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    cursor: grab;
+  }
+  .geo-vertex-handle:hover,
+  .geo-vertex-handle--selected {
+    background: #d4a256;
+    transform: scale(1.4);
+  }
+
 }

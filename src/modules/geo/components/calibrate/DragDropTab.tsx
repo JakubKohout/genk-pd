@@ -1,17 +1,21 @@
 import { useMemo, useState } from 'react';
 import { divIcon, type LeafletEvent } from 'leaflet';
-import { Marker, Tooltip } from 'react-leaflet';
+import { Marker, Polygon, Tooltip } from 'react-leaflet';
 import { POIS } from '../../data/pois';
 import { TILE_META } from '../../data/tileMeta';
 import { fromLatLng, toLatLng } from '../../logic/coords';
-import { formatPoisTs } from '../../logic/calibrate';
+import { formatPoisTs, polygonCentroid } from '../../logic/calibrate';
 import { GeoMap } from '../GeoMap';
 import type { POI, Vec2 } from '../../data/types';
 
 /**
- * Per-POI drag-and-drop editor. Each point POI = draggable marker. Each polyline
- * POI = polyline + per-node draggable handles. On every drag, local state updates
- * and the TS literal output is regenerated for paste-back into pois.ts.
+ * Per-POI drag-and-drop editor. Each point POI = draggable marker. Each polygon
+ * POI = polygon outline + per-vertex draggable handles. On every drag, local
+ * state updates and the TS literal output is regenerated for paste-back into
+ * pois.ts (or streetPolygons.generated.ts for streets).
+ *
+ * Closure note: polygon ring's first and last point are identical (closed). When
+ * the first vertex is dragged, the last is updated to match (and vice versa).
  */
 export function DragDropTab() {
   const [pois, setPois] = useState<POI[]>(() => POIS.map((p) => structuredClone(p)));
@@ -21,6 +25,20 @@ export function DragDropTab() {
   const updatePoint = (id: string, pos: Vec2) => {
     setPois((prev) =>
       prev.map((p) => (p.id === id && p.geometry === 'point' ? { ...p, position: pos } : p)),
+    );
+  };
+
+  const updatePolygonVertex = (id: string, index: number, pos: Vec2) => {
+    setPois((prev) =>
+      prev.map((p) => {
+        if (p.id !== id || p.geometry !== 'polygon') return p;
+        const path = [...p.path];
+        path[index] = pos;
+        // Maintain closed-ring invariant: first === last
+        if (index === 0) path[path.length - 1] = pos;
+        else if (index === path.length - 1) path[0] = pos;
+        return { ...p, path, centroid: polygonCentroid(path) };
+      }),
     );
   };
 
@@ -45,10 +63,12 @@ export function DragDropTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-sasp-ink-dim">
-        Každý POI je <strong>tažitelný marker</strong>. Chyť ho a přesuň přímo na
-        správné místo na mapě. Ulice mají na každém uzlu cesty malý oranžový
-        marker, který lze taky tahat. Až bude vše umístěné, zkopíruj výstup dole
-        a paste do <code>src/modules/geo/data/pois.ts</code>.
+        Každý POI je <strong>tažitelný marker</strong>. Body se táhnou přímo,
+        polygony (ulice) mají na každém vertexu malý oranžový čtvercový
+        handle. Vnitřek polygonu se přepočítá automaticky. Až bude vše umístěné,
+        zkopíruj výstup dole a paste do <code>src/modules/geo/data/pois.ts</code>
+        (pro body) nebo <code>streetPolygons.generated.ts</code> (pro ulice — to
+        se ale při příštím spuštění importu přepíše).
       </p>
 
       <div className="flex flex-wrap gap-2">
@@ -87,7 +107,15 @@ export function DragDropTab() {
               />
             );
           }
-          return null; // polygon: auto-imported, not editable here
+          return (
+            <DraggablePolygon
+              key={poi.id}
+              poi={poi}
+              selected={selectedId === poi.id}
+              onSelect={() => setSelectedId(poi.id)}
+              onMoveVertex={updatePolygonVertex}
+            />
+          );
         })}
       </GeoMap>
 
@@ -151,3 +179,86 @@ function DraggablePoint({ poi, selected, onSelect, onMove }: DraggablePointProps
   );
 }
 
+interface DraggablePolygonProps {
+  poi: Extract<POI, { geometry: 'polygon' }>;
+  selected: boolean;
+  onSelect: () => void;
+  onMoveVertex: (id: string, index: number, pos: Vec2) => void;
+}
+
+function DraggablePolygon({ poi, selected, onSelect, onMoveVertex }: DraggablePolygonProps) {
+  const positions = poi.path.map((p) => toLatLng(p, TILE_META));
+  // Ring is closed (first === last); render N-1 handles to avoid double-dragging
+  // the closure vertex. Index 0 also visually represents the last vertex.
+  const handleCount = poi.path.length - 1;
+  return (
+    <>
+      <Polygon
+        positions={positions}
+        pathOptions={{
+          color: selected ? '#d4a256' : '#7fc99a',
+          fillColor: selected ? '#d4a256' : '#7fc99a',
+          fillOpacity: selected ? 0.25 : 0.12,
+          weight: selected ? 2.5 : 1.5,
+          opacity: selected ? 1 : 0.7,
+        }}
+        eventHandlers={{ click: onSelect }}
+      >
+        <Tooltip
+          direction="center"
+          opacity={selected ? 1 : 0.75}
+          className="geo-marker-tooltip geo-marker-tooltip--target"
+          sticky
+        >
+          {poi.name}
+        </Tooltip>
+      </Polygon>
+      {Array.from({ length: handleCount }, (_, idx) => (
+        <VertexHandle
+          key={`${poi.id}-${idx}`}
+          poiId={poi.id}
+          index={idx}
+          position={poi.path[idx]!}
+          selected={selected}
+          onSelect={onSelect}
+          onMove={onMoveVertex}
+        />
+      ))}
+    </>
+  );
+}
+
+interface VertexHandleProps {
+  poiId: string;
+  index: number;
+  position: Vec2;
+  selected: boolean;
+  onSelect: () => void;
+  onMove: (id: string, index: number, pos: Vec2) => void;
+}
+
+function VertexHandle({ poiId, index, position, selected, onSelect, onMove }: VertexHandleProps) {
+  const cls = selected ? 'geo-vertex-handle geo-vertex-handle--selected' : 'geo-vertex-handle';
+  const icon = divIcon({
+    html: `<div class="${cls}" data-poi-id="${poiId}" data-vertex-idx="${index}"></div>`,
+    className: '',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5],
+  });
+  return (
+    <Marker
+      position={toLatLng(position, TILE_META)}
+      icon={icon}
+      draggable
+      eventHandlers={{
+        click: onSelect,
+        dragstart: onSelect,
+        dragend: (e: LeafletEvent) => {
+          const m = e.target as { getLatLng: () => { lat: number; lng: number } };
+          const pos = fromLatLng(m.getLatLng(), TILE_META);
+          onMove(poiId, index, pos);
+        },
+      }}
+    />
+  );
+}
