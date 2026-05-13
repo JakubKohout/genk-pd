@@ -27,9 +27,9 @@ afterEach(() => {
 });
 
 describe('storage migration', () => {
-  it('returns initialState (schemaVersion 5) when no data exists', () => {
+  it('returns initialState (schemaVersion 6) when no data exists', () => {
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({});
     expect(state.lea.progress).toEqual({});
     expect(state.lea.turn).toBe(0);
@@ -40,7 +40,7 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('migrates a stored v1 payload all the way to v5', () => {
+  it('migrates a stored v1 payload all the way to v6', () => {
     const v1 = {
       schemaVersion: 1,
       codes: {
@@ -52,7 +52,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v1));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.codes.turn).toBe(7);
     expect(state.lea).toEqual({ progress: {}, turn: 0 });
@@ -63,7 +63,7 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('migrates a stored v2 payload to v5, preserving codes and lea', () => {
+  it('migrates a stored v2 payload to v6, preserving codes and lea', () => {
     const v2 = {
       schemaVersion: 2,
       codes: {
@@ -79,7 +79,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v2));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 3 } });
     expect(state.lea.turn).toBe(4);
@@ -89,7 +89,7 @@ describe('storage migration', () => {
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
   });
 
-  it('migrates a stored v3 payload to v5, preserving all prior slices', () => {
+  it('migrates a stored v3 payload to v6, preserving all prior slices', () => {
     const v3 = {
       schemaVersion: 3,
       codes: {
@@ -115,7 +115,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v3));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 3 } });
     expect(state.penal.scenarios.progress).toEqual({
@@ -129,7 +129,7 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('migrates a stored v4 payload to v5, wiping geo progress but preserving everything else', () => {
+  it('migrates a stored v4 payload to v6, wiping geo progress but preserving everything else', () => {
     // v4 had geo POI IDs that the v5 dataset replaces wholesale — progress is reset
     // intentionally. Settings (categoryFilter) carry over with new categories backfilled.
     const v4 = {
@@ -159,7 +159,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v4));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 3 } });
     expect(state.penal.scenarios.progress).toEqual({
@@ -226,7 +226,7 @@ describe('storage migration', () => {
     expect(state).toEqual(initialState);
   });
 
-  it('reads a v5 payload with missing geo slice as v5 with empty geo (no data loss)', () => {
+  it('reads a v5 payload with missing geo slice as v6 with empty geo (no data loss)', () => {
     const partial = {
       schemaVersion: 5,
       codes: {
@@ -244,7 +244,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 1 } });
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
@@ -252,9 +252,9 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('reads a v5 payload with partial categoryFilter (backfills new categories)', () => {
+  it('reads a v6 payload with partial categoryFilter (backfills new categories)', () => {
     const partial = {
-      schemaVersion: 5,
+      schemaVersion: 6,
       codes: {
         progress: {},
         turn: 0,
@@ -305,11 +305,79 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(5);
+    expect(state.schemaVersion).toBe(6);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 1 } });
     expect(state.penal.scenarios).toEqual({ progress: {}, turn: 0 });
     expect(state.penal.recall).toEqual({ progress: {}, turn: 0 });
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
+  });
+});
+
+describe('storage migration v5 → v6', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    __resetCacheForTests();
+  });
+
+  it('resets geo.blind.progress and geo.name.progress', () => {
+    const v5: any = {
+      schemaVersion: 5,
+      codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
+      lea: { progress: {}, turn: 0 },
+      penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } },
+      geo: {
+        blind: { progress: { 'street.old-id': { score: 2, lastAskedAtTurn: 5 } }, turn: 7 },
+        name: { progress: { 'street.old-id': { score: 1, lastAskedAtTurn: 3 } }, turn: 4 },
+        settings: { categoryFilter: { street: true, landmark: false, pd: true, fire: true, ems: true, ammu: true } },
+      },
+    };
+    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
+    __resetCacheForTests();
+
+    const state = loadState();
+
+    expect(state.schemaVersion).toBe(6);
+    expect(state.geo.blind.progress).toEqual({});
+    expect(state.geo.name.progress).toEqual({});
+    expect(state.geo.blind.turn).toBe(0);
+    expect(state.geo.name.turn).toBe(0);
+  });
+
+  it('preserves geo.settings.categoryFilter through v5 → v6', () => {
+    const v5: any = {
+      schemaVersion: 5,
+      codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
+      lea: { progress: {}, turn: 0 },
+      penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } },
+      geo: {
+        blind: { progress: {}, turn: 0 },
+        name: { progress: {}, turn: 0 },
+        settings: { categoryFilter: { street: false, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      },
+    };
+    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
+    __resetCacheForTests();
+
+    const state = loadState();
+    expect(state.geo.settings.categoryFilter.street).toBe(false);
+    expect(state.geo.settings.categoryFilter.landmark).toBe(true);
+  });
+
+  it('preserves codes, lea, penal slices through v5 → v6', () => {
+    const v5: any = {
+      schemaVersion: 5,
+      codes: { progress: { 'code.10-4': { score: 2, lastAskedAtTurn: 5 } }, turn: 5, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
+      lea: { progress: { 'lea.7': { score: 1, lastAskedAtTurn: 2 } }, turn: 3 },
+      penal: { scenarios: { progress: { 'penal.A1': { score: 2, lastAskedAtTurn: 1 } }, turn: 2 }, recall: { progress: {}, turn: 0 } },
+      geo: { blind: { progress: {}, turn: 0 }, name: { progress: {}, turn: 0 }, settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } } },
+    };
+    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
+    __resetCacheForTests();
+
+    const state = loadState();
+    expect(state.codes.progress['code.10-4']).toEqual({ score: 2, lastAskedAtTurn: 5 });
+    expect(state.lea.progress['lea.7']).toEqual({ score: 1, lastAskedAtTurn: 2 });
+    expect(state.penal.scenarios.progress['penal.A1']).toEqual({ score: 2, lastAskedAtTurn: 1 });
   });
 });
