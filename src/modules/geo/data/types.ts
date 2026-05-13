@@ -20,7 +20,15 @@ export interface POIStreet extends POIBase {
   path: Vec2[];
 }
 
-export type POI = POIPoint | POIStreet;
+export interface POIPolygon extends POIBase {
+  geometry: 'polygon';
+  /** Closed outer ring: first point equals last. ≥4 points (3 unique + closure). */
+  path: Vec2[];
+  /** Pre-computed area-weighted centroid in [0,1]². Used as label position. */
+  centroid: Vec2;
+}
+
+export type POI = POIPoint | POIStreet | POIPolygon;
 
 export type TileMeta = {
   width: number;
