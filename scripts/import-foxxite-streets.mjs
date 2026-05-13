@@ -136,6 +136,56 @@ function polygonCentroid(ring) {
   return { x: cx / (3 * a2), y: cy / (3 * a2) };
 }
 
+/**
+ * Foxxite street polygons represent *street zones* (asphalt + sidewalks +
+ * surrounding context) — empirically 4–17× wider than the actual road. To get
+ * realistic-looking street polygons we PCA the vertices, identify the major
+ * (along-road) and minor (across-road) axes, and shrink ONLY along the minor.
+ *
+ * Length is preserved (factor 1.0 on major axis), width is reduced by
+ * `WIDTH_SHRINK` (0.25 = polygon becomes 25 % of its original width). User
+ * can fine-tune individual streets in /geo/calibrate after import.
+ */
+const WIDTH_SHRINK = 0.25;
+
+function shrinkPolygonWidth(ring, shrinkFactor) {
+  const n = ring.length;
+  let mx = 0, my = 0;
+  for (const p of ring) { mx += p.x; my += p.y; }
+  mx /= n; my /= n;
+  let cxx = 0, cxy = 0, cyy = 0;
+  for (const p of ring) {
+    const dx = p.x - mx, dy = p.y - my;
+    cxx += dx * dx; cxy += dx * dy; cyy += dy * dy;
+  }
+  cxx /= n; cxy /= n; cyy /= n;
+  // Eigenvector of larger eigenvalue = major axis (along road)
+  const tr = cxx + cyy;
+  const det = cxx * cyy - cxy * cxy;
+  const disc = Math.sqrt(Math.max(0, tr * tr / 4 - det));
+  const l1 = tr / 2 + disc;
+  let vx, vy;
+  if (Math.abs(cxy) > 1e-10) {
+    vx = l1 - cyy;
+    vy = cxy;
+  } else {
+    vx = cxx >= cyy ? 1 : 0;
+    vy = cxx >= cyy ? 0 : 1;
+  }
+  const vn = Math.hypot(vx, vy) || 1;
+  const major = { x: vx / vn, y: vy / vn };
+  const minor = { x: -major.y, y: major.x };
+  return ring.map((p) => {
+    const dx = p.x - mx, dy = p.y - my;
+    const projMajor = dx * major.x + dy * major.y;
+    const projMinor = (dx * minor.x + dy * minor.y) * shrinkFactor;
+    return {
+      x: mx + projMajor * major.x + projMinor * minor.x,
+      y: my + projMajor * major.y + projMinor * minor.y,
+    };
+  });
+}
+
 // ---------- main pipeline ----------
 
 async function fetchText(url) {
@@ -204,7 +254,10 @@ async function main() {
       continue;
     }
     const ring = f.geometry.coordinates[0];
-    const mapped = ring.map(([x, y]) => applyAffine6({ x, y }, t));
+    const mappedFull = ring.map(([x, y]) => applyAffine6({ x, y }, t));
+    // Foxxite polygons represent street zones (4-17x wider than real road).
+    // Shrink along the minor axis to approximate actual street width.
+    const mapped = shrinkPolygonWidth(mappedFull, WIDTH_SHRINK);
     for (const p of mapped) {
       if (p.x < 0 || p.x > 1 || p.y < 0 || p.y > 1) {
         console.log(`  OUT-OF-BOUNDS ${w.id}: point ${fmtVec(p)} not in [0,1]²`);
