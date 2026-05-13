@@ -1,25 +1,31 @@
 import type { AnchorPair } from '../logic/transform';
 import { MG_LOCATION_BY_ID } from './mapgenieLocations';
+import type { Vec2 } from './types';
 
 /**
- * Persistent calibration anchors for `clean-map.jpg` ↔ Map Genie projection.
+ * Persistent calibration anchors. Each anchor carries three coords:
+ * - `ourCoord`: position in our normalized 0..1 image space (clean-map.jpg)
+ * - `mgLocationId` → looked up to MG lat/lng (Mercator-projected for affine fit)
+ * - `gtaWorld`: Rockstar GTA V world coords (X, Y; in meters from origin,
+ *   Y grows northward). Linear — no projection needed.
  *
- * After fixing `mgLatLngToVec2` to apply Web Mercator forward projection on
- * latitude (Map Genie tiles are Mercator-rendered but lat is stored as raw
- * degrees), these 6 anchors fit with Δ ≤ 0.0005 and LOO ≤ 0.0005 — well within
- * a single pixel at the tile resolution. The 6-param affine model is sufficient
- * because the underlying projection mismatch is now linearized.
- *
- * To re-calibrate or extend: open `/geo/calibrate` → "Anchor & import",
- * adjust the markers, and replace this constant with the new positions.
+ * Values verified via Foxxite/GTAV-Geo-Json area centroids cross-referenced with
+ * GTA Wiki / FiveM published coords (±5 m accuracy).
  */
-export const DEFAULT_ANCHORS: readonly Omit<AnchorPair, 'mgLatLng'>[] = [
-  { mgLocationId: 12624, ourCoord: { x: 0.316, y: 0.744 } }, // Vespucci Police Department
-  { mgLocationId: 13825, ourCoord: { x: 0.359, y: 0.205 } }, // Paleto Forest Motel
-  { mgLocationId: 12807, ourCoord: { x: 0.822, y: 0.375 } }, // Humane Labs and Research
-  { mgLocationId: 13868, ourCoord: { x: 0.461, y: 0.944 } }, // Helicopter (Lookout Point, far south)
-  { mgLocationId: 13326, ourCoord: { x: 0.387, y: 0.590 } }, // Galileo Observatory
-  { mgLocationId: 13748, ourCoord: { x: 0.622, y: 0.466 } }, // Bolingbroke Penitentiary
+interface DefaultAnchor {
+  mgLocationId: number;
+  ourCoord: Vec2;
+  gtaWorld: Vec2;
+  label: string;
+}
+
+export const DEFAULT_ANCHORS: readonly DefaultAnchor[] = [
+  { mgLocationId: 12624, ourCoord: { x: 0.316, y: 0.744 }, gtaWorld: { x: -1109, y: -845 }, label: 'Vespucci Police Department' },
+  { mgLocationId: 13825, ourCoord: { x: 0.359, y: 0.205 }, gtaWorld: { x: 140, y: 6580 }, label: 'Paleto Forest Motel' },
+  { mgLocationId: 12807, ourCoord: { x: 0.822, y: 0.375 }, gtaWorld: { x: 3666, y: 3735 }, label: 'Humane Labs and Research' },
+  { mgLocationId: 13868, ourCoord: { x: 0.461, y: 0.944 }, gtaWorld: { x: 479, y: -3173 }, label: 'Helicopter (Lookout Point, far south)' },
+  { mgLocationId: 13326, ourCoord: { x: 0.387, y: 0.590 }, gtaWorld: { x: -438, y: 1227 }, label: 'Galileo Observatory' },
+  { mgLocationId: 13748, ourCoord: { x: 0.622, y: 0.466 }, gtaWorld: { x: 1846, y: 2616 }, label: 'Bolingbroke Penitentiary' },
 ];
 
 /** Expand to full `AnchorPair[]` by looking up lat/lng from filtered MG data. */
@@ -35,4 +41,19 @@ export function buildDefaultAnchors(): AnchorPair[] {
     });
   }
   return out;
+}
+
+/** GTA-world → ourCoord pair, used by the streets import pipeline. */
+export interface GtaAnchorPair {
+  label: string;
+  gtaWorld: Vec2;
+  ourCoord: Vec2;
+}
+
+export function buildGtaAnchors(): GtaAnchorPair[] {
+  return DEFAULT_ANCHORS.map((a) => ({
+    label: a.label,
+    gtaWorld: a.gtaWorld,
+    ourCoord: a.ourCoord,
+  }));
 }
