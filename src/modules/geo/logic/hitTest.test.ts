@@ -4,8 +4,10 @@ import {
   distance,
   evaluateClick,
   pointInPolygon,
+  pointToPolygonEdgeDist,
   pointToPolylineDist,
   pointToSegmentDist,
+  polygonHit,
 } from './hitTest';
 import type { POIPoint, POIStreet } from '../data/types';
 
@@ -150,5 +152,57 @@ describe('pointInPolygon', () => {
   it('returns false for empty or degenerate input', () => {
     expect(pointInPolygon({ x: 0.5, y: 0.5 }, [])).toBe(false);
     expect(pointInPolygon({ x: 0.5, y: 0.5 }, [{ x: 0, y: 0 }])).toBe(false);
+  });
+});
+
+describe('pointToPolygonEdgeDist', () => {
+  const square = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+    { x: 0, y: 0 },
+  ];
+
+  it('returns 0 for a point on an edge', () => {
+    expect(pointToPolygonEdgeDist({ x: 0.5, y: 0 }, square)).toBe(0);
+    expect(pointToPolygonEdgeDist({ x: 1, y: 0.7 }, square)).toBe(0);
+  });
+
+  it('returns shortest perpendicular distance for inside point', () => {
+    // Center of unit square — equidistant from all 4 edges, distance = 0.5
+    expect(pointToPolygonEdgeDist({ x: 0.5, y: 0.5 }, square)).toBeCloseTo(0.5);
+  });
+
+  it('returns shortest perpendicular distance for outside point', () => {
+    expect(pointToPolygonEdgeDist({ x: 1.2, y: 0.5 }, square)).toBeCloseTo(0.2);
+    expect(pointToPolygonEdgeDist({ x: -0.1, y: 0.5 }, square)).toBeCloseTo(0.1);
+  });
+});
+
+describe('polygonHit', () => {
+  const square = [
+    { x: 0.4, y: 0.4 },
+    { x: 0.6, y: 0.4 },
+    { x: 0.6, y: 0.6 },
+    { x: 0.4, y: 0.6 },
+    { x: 0.4, y: 0.4 },
+  ];
+
+  it('hit when click is inside polygon (no tolerance needed)', () => {
+    expect(polygonHit(square, { x: 0.5, y: 0.5 }, 0.015)).toBe(true);
+  });
+
+  it('hit when click is outside but within edge tolerance', () => {
+    expect(polygonHit(square, { x: 0.61, y: 0.5 }, 0.015)).toBe(true); // 0.01 outside, tol 0.015
+  });
+
+  it('miss when click is outside and beyond tolerance', () => {
+    expect(polygonHit(square, { x: 0.7, y: 0.5 }, 0.015)).toBe(false); // 0.1 outside, tol 0.015
+  });
+
+  it('hit on a corner within tolerance', () => {
+    // 0.01 diagonal outside top-right corner
+    expect(polygonHit(square, { x: 0.607, y: 0.607 }, 0.015)).toBe(true);
   });
 });

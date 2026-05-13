@@ -51,6 +51,41 @@ export function pointInPolygon(p: Vec2, ring: readonly Vec2[]): boolean {
   return inside;
 }
 
+/** Polygon edge-tolerance used by `polygonHit` and `evaluateClick`. */
+export const POLYGON_EDGE_TOLERANCE = 0.015;
+
+/**
+ * Smallest perpendicular distance from `p` to any edge of a closed polygon ring.
+ * Treats consecutive vertices as segments; if ring is not explicitly closed,
+ * also considers the implicit last→first segment.
+ */
+export function pointToPolygonEdgeDist(p: Vec2, ring: readonly Vec2[]): number {
+  if (ring.length === 0) return Infinity;
+  if (ring.length === 1) return distance(p, ring[0]!);
+  let best = Infinity;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i]!;
+    const b = ring[(i + 1) % ring.length]!;
+    const d = pointToSegmentDist(p, a, b);
+    if (d < best) best = d;
+  }
+  return best;
+}
+
+/**
+ * Touch-friendly polygon hit-test: true if click is inside polygon OR within
+ * `tolerance` of any edge. Allows users to "miss" by up to `tolerance` and still
+ * register a hit — important for narrow streets on small screens.
+ */
+export function polygonHit(
+  ring: readonly Vec2[],
+  click: Vec2,
+  tolerance = POLYGON_EDGE_TOLERANCE,
+): boolean {
+  if (pointInPolygon(click, ring)) return true;
+  return pointToPolygonEdgeDist(click, ring) <= tolerance;
+}
+
 export type EvaluatedClick = {
   hit: boolean;
   /** Normalized distance to the POI (0..√2). */
