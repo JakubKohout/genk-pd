@@ -15,11 +15,6 @@ export interface POIPoint extends POIBase {
   position: Vec2;
 }
 
-export interface POIStreet extends POIBase {
-  geometry: 'polyline';
-  path: Vec2[];
-}
-
 export interface POIPolygon extends POIBase {
   geometry: 'polygon';
   /** Closed outer ring: first point equals last. ≥4 points (3 unique + closure). */
@@ -28,7 +23,7 @@ export interface POIPolygon extends POIBase {
   centroid: Vec2;
 }
 
-export type POI = POIPoint | POIStreet | POIPolygon;
+export type POI = POIPoint | POIPolygon;
 
 export type TileMeta = {
   width: number;

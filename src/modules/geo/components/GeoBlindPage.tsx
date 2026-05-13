@@ -7,7 +7,6 @@ import { useGeoSettings } from '../state/useGeoSettings';
 import { useMediaQuery } from '@/shared/useMediaQuery';
 import { GeoMap } from './GeoMap';
 import { GeoMarker } from './GeoMarker';
-import { GeoStreet } from './GeoStreet';
 import { GeoSidePanel } from './GeoSidePanel';
 import { GeoMobilePanel } from './GeoMobilePanel';
 import { GeoResetButton } from './GeoResetButton';
@@ -157,9 +156,7 @@ export function GeoBlindPage() {
                   label={p.name}
                   poiId={p.id}
                 />
-              ) : (
-                <GeoStreet key={p.id} path={p.path} variant="mastered" />
-              ),
+              ) : null /* TODO Task 15: GeoPolygon mastered */,
             )}
           {phase === 'revealed' &&
             (current.geometry === 'point' ? (
@@ -169,9 +166,7 @@ export function GeoBlindPage() {
                 label={current.name}
                 poiId={current.id}
               />
-            ) : (
-              <GeoStreet path={current.path} variant="target" />
-            ))}
+            ) : null /* TODO Task 15: GeoPolygon target */)}
           {phase === 'revealed' && userClick && hit === false && (
             <GeoMarker position={userClick} variant="wrongClick" />
           )}

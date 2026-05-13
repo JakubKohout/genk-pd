@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { divIcon, type LeafletEvent } from 'leaflet';
-import { Marker, Polyline, Tooltip } from 'react-leaflet';
+import { Marker, Tooltip } from 'react-leaflet';
 import { POIS } from '../../data/pois';
 import { TILE_META } from '../../data/tileMeta';
 import { fromLatLng, toLatLng } from '../../logic/coords';
@@ -21,16 +21,6 @@ export function DragDropTab() {
   const updatePoint = (id: string, pos: Vec2) => {
     setPois((prev) =>
       prev.map((p) => (p.id === id && p.geometry === 'point' ? { ...p, position: pos } : p)),
-    );
-  };
-
-  const updatePathNode = (id: string, idx: number, pos: Vec2) => {
-    setPois((prev) =>
-      prev.map((p) => {
-        if (p.id !== id || p.geometry !== 'polyline') return p;
-        const newPath = p.path.map((pt, i) => (i === idx ? pos : pt));
-        return { ...p, path: newPath };
-      }),
     );
   };
 
@@ -94,17 +84,6 @@ export function DragDropTab() {
                 selected={selectedId === poi.id}
                 onSelect={() => setSelectedId(poi.id)}
                 onMove={updatePoint}
-              />
-            );
-          }
-          if (poi.geometry === 'polyline') {
-            return (
-              <DraggablePolyline
-                key={poi.id}
-                poi={poi}
-                selected={selectedId === poi.id}
-                onSelect={() => setSelectedId(poi.id)}
-                onMovePathNode={updatePathNode}
               />
             );
           }
@@ -172,102 +151,3 @@ function DraggablePoint({ poi, selected, onSelect, onMove }: DraggablePointProps
   );
 }
 
-interface DraggablePolylineProps {
-  poi: Extract<POI, { geometry: 'polyline' }>;
-  selected: boolean;
-  onSelect: () => void;
-  onMovePathNode: (id: string, idx: number, pos: Vec2) => void;
-}
-
-function DraggablePolyline({
-  poi,
-  selected,
-  onSelect,
-  onMovePathNode,
-}: DraggablePolylineProps) {
-  const positions = poi.path.map((pt) => toLatLng(pt, TILE_META));
-  const midIdx = Math.floor(poi.path.length / 2);
-  return (
-    <>
-      <Polyline
-        positions={positions}
-        pathOptions={{
-          color: selected ? '#d4a256' : '#7fc99a',
-          opacity: selected ? 1 : 0.6,
-          weight: selected ? 6 : 4,
-        }}
-        eventHandlers={{ click: onSelect }}
-      />
-      {poi.path.map((pt, idx) => (
-        <PathNodeMarker
-          key={`${poi.id}-${idx}`}
-          poiId={poi.id}
-          idx={idx}
-          position={pt}
-          label={idx === midIdx ? poi.name : undefined}
-          selected={selected}
-          onSelect={onSelect}
-          onMove={onMovePathNode}
-        />
-      ))}
-    </>
-  );
-}
-
-interface PathNodeMarkerProps {
-  poiId: string;
-  idx: number;
-  position: Vec2;
-  label?: string;
-  selected: boolean;
-  onSelect: () => void;
-  onMove: (id: string, idx: number, pos: Vec2) => void;
-}
-
-function PathNodeMarker({
-  poiId,
-  idx,
-  position,
-  label,
-  selected,
-  onSelect,
-  onMove,
-}: PathNodeMarkerProps) {
-  const cls = selected
-    ? 'geo-marker geo-marker--asked'
-    : 'geo-marker geo-marker--mastered';
-  const icon = divIcon({
-    html: `<div class="${cls}" data-poi-id="${poiId}" data-path-idx="${idx}" style="width: 10px; height: 10px;"><span class="geo-marker__dot" style="width: 8px; height: 8px;"></span></div>`,
-    className: '',
-    iconSize: [10, 10],
-    iconAnchor: [5, 5],
-  });
-  return (
-    <Marker
-      position={toLatLng(position, TILE_META)}
-      icon={icon}
-      draggable
-      eventHandlers={{
-        click: onSelect,
-        dragstart: onSelect,
-        dragend: (e: LeafletEvent) => {
-          const m = e.target as { getLatLng: () => { lat: number; lng: number } };
-          const pos = fromLatLng(m.getLatLng(), TILE_META);
-          onMove(poiId, idx, pos);
-        },
-      }}
-    >
-      {label && (
-        <Tooltip
-          permanent
-          direction="right"
-          offset={[8, 0]}
-          opacity={selected ? 1 : 0.75}
-          className="geo-marker-tooltip"
-        >
-          {label}
-        </Tooltip>
-      )}
-    </Marker>
-  );
-}

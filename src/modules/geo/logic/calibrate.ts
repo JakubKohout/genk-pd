@@ -273,7 +273,31 @@ export function calibratePoi(poi: POI, t: AffineTransform): POI {
   if (poi.geometry === 'point') {
     return { ...poi, position: applyAffine(poi.position, t) };
   }
-  return { ...poi, path: poi.path.map((pt) => applyAffine(pt, t)) };
+  // polygon — transform path AND recalculate centroid
+  const newPath = poi.path.map((pt) => applyAffine(pt, t));
+  return { ...poi, path: newPath, centroid: polygonCentroid(newPath) };
+}
+
+function polygonCentroid(ring: Vec2[]): Vec2 {
+  let cx = 0,
+    cy = 0,
+    a2 = 0;
+  for (let i = 0; i < ring.length - 1; i++) {
+    const p = ring[i]!;
+    const q = ring[i + 1]!;
+    const cross = p.x * q.y - q.x * p.y;
+    a2 += cross;
+    cx += (p.x + q.x) * cross;
+    cy += (p.y + q.y) * cross;
+  }
+  if (Math.abs(a2) < 1e-12) {
+    const sum = ring.reduce(
+      (acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }),
+      { x: 0, y: 0 },
+    );
+    return { x: sum.x / ring.length, y: sum.y / ring.length };
+  }
+  return { x: cx / (3 * a2), y: cy / (3 * a2) };
 }
 
 /**
@@ -298,12 +322,6 @@ export function formatPoisTs(pois: readonly POI[]): string {
       lines.push(
         `    position: { x: ${formatCoord(p.position.x)}, y: ${formatCoord(p.position.y)} },`,
       );
-    } else if (p.geometry === 'polyline') {
-      lines.push(`    path: [`);
-      for (const pt of p.path) {
-        lines.push(`      { x: ${formatCoord(pt.x)}, y: ${formatCoord(pt.y)} },`);
-      }
-      lines.push(`    ],`);
     } else {
       // polygon — emit path + centroid
       lines.push(`    path: [`);

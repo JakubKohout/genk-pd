@@ -83,26 +83,34 @@ describe('calibratePoi', () => {
     }
   });
 
-  it('shifts every node of a polyline POI', () => {
+  it('shifts every node of a polygon POI and recalculates centroid', () => {
     const p: POI = {
       id: 'street.x',
       category: 'street',
-      geometry: 'polyline',
+      geometry: 'polygon',
       path: [
         { x: 0.1, y: 0.2 },
+        { x: 0.3, y: 0.2 },
         { x: 0.3, y: 0.4 },
+        { x: 0.1, y: 0.4 },
+        { x: 0.1, y: 0.2 },
       ],
+      centroid: { x: 0.2, y: 0.3 },
       name: 'X',
       description: 'd',
       aliases: ['x'],
     };
     const r = calibratePoi(p, t);
-    expect(r.geometry).toBe('polyline');
-    if (r.geometry === 'polyline') {
+    expect(r.geometry).toBe('polygon');
+    if (r.geometry === 'polygon') {
+      // ax=1 bx=0.1, ay=1 by=0.2 → x+0.1, y+0.2
       expect(r.path[0]!.x).toBeCloseTo(0.2);
       expect(r.path[0]!.y).toBeCloseTo(0.4);
-      expect(r.path[1]!.x).toBeCloseTo(0.4);
-      expect(r.path[1]!.y).toBeCloseTo(0.6);
+      expect(r.path[2]!.x).toBeCloseTo(0.4);
+      expect(r.path[2]!.y).toBeCloseTo(0.6);
+      // centroid should shift by the same transform
+      expect(r.centroid.x).toBeCloseTo(0.3);
+      expect(r.centroid.y).toBeCloseTo(0.5);
     }
   });
 });
@@ -151,22 +159,4 @@ describe('formatPoisTs', () => {
     expect(out).not.toContain('centroid:');
   });
 
-  it('emits polyline geometry with path, no centroid', () => {
-    const polyline: POI = {
-      id: 'street.z',
-      category: 'street',
-      name: 'Street Z',
-      description: 'desc',
-      aliases: ['z'],
-      geometry: 'polyline',
-      path: [
-        { x: 0.1, y: 0.1 },
-        { x: 0.5, y: 0.5 },
-      ],
-    };
-    const out = formatPoisTs([polyline]);
-    expect(out).toContain('geometry: "polyline"');
-    expect(out).toContain('path: [');
-    expect(out).not.toContain('centroid:');
-  });
 });

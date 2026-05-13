@@ -68,10 +68,9 @@ export function AddPoiTab() {
       description: draft.description.trim(),
       aliases,
     };
-    const poi: POI =
-      draft.geometry === 'point'
-        ? { ...base, geometry: 'point', position: placingPoint! }
-        : { ...base, geometry: 'polyline', path: placingPath };
+    // Only point geometry can be added here; polyline form mode is UI-only
+    // (dataset no longer uses polyline — streets are polygons).
+    const poi: POI = { ...base, geometry: 'point', position: placingPoint! };
     setAdded((prev) => [...prev, poi]);
     setDraft(EMPTY_DRAFT);
     setPlacingPoint(null);
@@ -87,15 +86,6 @@ export function AddPoiTab() {
       prev.map((p) =>
         p.id === id && p.geometry === 'point' ? { ...p, position: pos } : p,
       ),
-    );
-  };
-
-  const movePathNode = (id: string, idx: number, pos: Vec2) => {
-    setAdded((prev) =>
-      prev.map((p) => {
-        if (p.id !== id || p.geometry !== 'polyline') return p;
-        return { ...p, path: p.path.map((pt, i) => (i === idx ? pos : pt)) };
-      }),
     );
   };
 
@@ -260,9 +250,6 @@ export function AddPoiTab() {
               if (poi.geometry === 'point') {
                 return <AddedPoint key={poi.id} poi={poi} onMove={movePoint} />;
               }
-              if (poi.geometry === 'polyline') {
-                return <AddedPolyline key={poi.id} poi={poi} onMove={movePathNode} />;
-              }
               return null; // polygon: auto-imported, not editable here
             })}
           </GeoMap>
@@ -415,46 +402,3 @@ function AddedPoint({
   );
 }
 
-function AddedPolyline({
-  poi,
-  onMove,
-}: {
-  poi: Extract<POI, { geometry: 'polyline' }>;
-  onMove: (id: string, idx: number, pos: Vec2) => void;
-}) {
-  const positions = poi.path.map((pt) => toLatLng(pt, TILE_META));
-  const midIdx = Math.floor(poi.path.length / 2);
-  return (
-    <>
-      <Polyline positions={positions} pathOptions={{ color: '#7fc99a', weight: 4, opacity: 0.6 }} />
-      {poi.path.map((pt, idx) => {
-        const icon = divIcon({
-          html: `<div class="geo-marker geo-marker--mastered" style="width: 10px; height: 10px;"><span class="geo-marker__dot" style="width: 8px; height: 8px;"></span></div>`,
-          className: '',
-          iconSize: [10, 10],
-          iconAnchor: [5, 5],
-        });
-        return (
-          <Marker
-            key={`${poi.id}-${idx}`}
-            position={toLatLng(pt, TILE_META)}
-            icon={icon}
-            draggable
-            eventHandlers={{
-              dragend: (e: LeafletEvent) => {
-                const m = e.target as { getLatLng: () => { lat: number; lng: number } };
-                onMove(poi.id, idx, fromLatLng(m.getLatLng(), TILE_META));
-              },
-            }}
-          >
-            {idx === midIdx && (
-              <Tooltip direction="right" offset={[8, 0]} opacity={0.75}>
-                {poi.name}
-              </Tooltip>
-            )}
-          </Marker>
-        );
-      })}
-    </>
-  );
-}

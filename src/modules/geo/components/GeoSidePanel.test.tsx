@@ -17,11 +17,15 @@ const pois: POI[] = [
   {
     id: 'street.b',
     category: 'street',
-    geometry: 'polyline',
+    geometry: 'polygon',
     path: [
       { x: 0, y: 0 },
-      { x: 1, y: 1 },
+      { x: 1, y: 0 },
+      { x: 1, y: 0.1 },
+      { x: 0, y: 0.1 },
+      { x: 0, y: 0 },
     ],
+    centroid: { x: 0.5, y: 0.05 },
     name: 'Street B',
     description: 'd',
     aliases: ['b'],

@@ -9,7 +9,7 @@ import {
   pointToSegmentDist,
   polygonHit,
 } from './hitTest';
-import type { POIPoint, POIPolygon, POIStreet } from '../data/types';
+import type { POIPoint, POIPolygon } from '../data/types';
 
 describe('distance', () => {
   it('returns 0 for the same point', () => {
@@ -86,29 +86,6 @@ describe('evaluateClick', () => {
     const result = evaluateClick(point, { x: 0.6, y: 0.6 });
     expect(result.hit).toBe(false);
     expect(result.distance).toBeGreaterThan(HIT_THRESHOLD);
-  });
-
-  const street: POIStreet = {
-    id: 'street.x',
-    category: 'street',
-    name: 'X street',
-    description: 'desc',
-    aliases: ['x'],
-    geometry: 'polyline',
-    path: [
-      { x: 0, y: 0.5 },
-      { x: 1, y: 0.5 },
-    ],
-  };
-
-  it('hit anywhere along a polyline within threshold', () => {
-    const result = evaluateClick(street, { x: 0.3, y: 0.51 });
-    expect(result.hit).toBe(true);
-  });
-
-  it('miss when perpendicular distance exceeds threshold', () => {
-    const result = evaluateClick(street, { x: 0.3, y: 0.6 });
-    expect(result.hit).toBe(false);
   });
 
   const polygon: POIPolygon = {
