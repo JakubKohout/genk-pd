@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { POIS, POI_BY_ID } from './pois';
 import { normalize } from '@/shared/text/normalize';
+import { pointInPolygon } from '@/modules/geo/logic/hitTest';
 
 describe('POI dataset', () => {
   it('has the expected POI counts across categories', () => {
@@ -74,16 +75,35 @@ describe('POI dataset', () => {
     }
   });
 
-  it('has polyline path with at least 2 points and all coords in [0,1] for streets', () => {
+  it('has polygon path with at least 4 closed points and all coords in [0,1] for streets', () => {
     for (const p of POIS) {
-      if (p.geometry === 'polyline') {
-        expect(p.path.length).toBeGreaterThanOrEqual(2);
+      if (p.category === 'street') {
+        expect(p.geometry).toBe('polygon');
+        if (p.geometry !== 'polygon') continue;
+        expect(p.path.length).toBeGreaterThanOrEqual(4);
+        // Closed ring: first === last
+        const first = p.path[0]!;
+        const last = p.path[p.path.length - 1]!;
+        expect(first.x).toBeCloseTo(last.x);
+        expect(first.y).toBeCloseTo(last.y);
         for (const pt of p.path) {
           expect(pt.x).toBeGreaterThanOrEqual(0);
           expect(pt.x).toBeLessThanOrEqual(1);
           expect(pt.y).toBeGreaterThanOrEqual(0);
           expect(pt.y).toBeLessThanOrEqual(1);
         }
+      }
+    }
+  });
+
+  it('has centroid inside polygon for each street', () => {
+    for (const p of POIS) {
+      if (p.geometry === 'polygon') {
+        expect(pointInPolygon(p.centroid, p.path)).toBe(true);
+        expect(p.centroid.x).toBeGreaterThanOrEqual(0);
+        expect(p.centroid.x).toBeLessThanOrEqual(1);
+        expect(p.centroid.y).toBeGreaterThanOrEqual(0);
+        expect(p.centroid.y).toBeLessThanOrEqual(1);
       }
     }
   });
@@ -95,10 +115,10 @@ describe('POI dataset', () => {
     }
   });
 
-  it('uses polyline geometry only for streets, point for everything else', () => {
+  it('uses polygon geometry only for streets, point for everything else', () => {
     for (const p of POIS) {
       if (p.category === 'street') {
-        expect(p.geometry).toBe('polyline');
+        expect(p.geometry).toBe('polygon');
       } else {
         expect(p.geometry).toBe('point');
       }
