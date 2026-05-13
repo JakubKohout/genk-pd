@@ -23,7 +23,7 @@ function seedSinglePool(codeId: string, score = 0): void {
   if (score !== 0) progress[codeId] = { score, lastAskedAtTurn: -10 };
 
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress,
       turn: 0,
@@ -104,7 +104,7 @@ describe('<ModeWrite />', () => {
       }
     }
     saveState({
-      schemaVersion: 5,
+      schemaVersion: 6,
       codes: {
         progress,
         turn: 0,

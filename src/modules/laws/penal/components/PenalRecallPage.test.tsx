@@ -12,7 +12,7 @@ function pinParagraph(paragraphId: string) {
     if (p.id !== paragraphId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress: {},
       turn: 0,
@@ -129,7 +129,7 @@ describe('<PenalRecallPage />', () => {
       }
     }
     saveState({
-      schemaVersion: 5,
+      schemaVersion: 6,
       codes: {
         progress: {},
         turn: 0,

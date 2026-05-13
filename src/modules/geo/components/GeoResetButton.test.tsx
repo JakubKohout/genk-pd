@@ -21,7 +21,7 @@ afterEach(() => {
 
 function seedGeo(): void {
   const state: PersistedState = {
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress: {},
       turn: 0,

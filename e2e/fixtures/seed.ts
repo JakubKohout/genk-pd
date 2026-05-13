@@ -39,7 +39,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 5 as const,
+    schemaVersion: 6 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,

@@ -6,7 +6,7 @@ import { saveState, loadState, type PersistedState } from '@/shared/storage';
 
 function seed(progress: PersistedState['codes']['progress']): void {
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress,
       turn: 5,

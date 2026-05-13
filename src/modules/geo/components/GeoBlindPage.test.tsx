@@ -50,7 +50,7 @@ function seedPinningTo(targetId: string): void {
     if (p.id !== targetId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress: {},
       turn: 0,
@@ -133,7 +133,7 @@ describe('<GeoBlindPage />', () => {
     const progress: Record<string, { score: number; lastAskedAtTurn: number }> = {};
     for (const p of POIS) progress[p.id] = { score: 2, lastAskedAtTurn: 0 };
     saveState({
-      schemaVersion: 5,
+      schemaVersion: 6,
       codes: {
         progress: {},
         turn: 0,

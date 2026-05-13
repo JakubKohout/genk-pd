@@ -37,7 +37,7 @@ function seedPinningTo(targetId: string): void {
     if (p.id !== targetId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress: {},
       turn: 0,

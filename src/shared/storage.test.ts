@@ -228,7 +228,7 @@ describe('storage migration', () => {
 
   it('reads a v5 payload with missing geo slice as v6 with empty geo (no data loss)', () => {
     const partial = {
-      schemaVersion: 5,
+      schemaVersion: 6,
       codes: {
         progress: { '10-4': { score: 2, lastAskedAtTurn: 5 } },
         turn: 7,

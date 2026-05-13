@@ -5,7 +5,7 @@ import { saveState, type PersistedState } from '@/shared/storage';
 
 function seed(state: Partial<PersistedState['codes']>): void {
   const full: PersistedState = {
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress: state.progress ?? {},
       turn: state.turn ?? 0,

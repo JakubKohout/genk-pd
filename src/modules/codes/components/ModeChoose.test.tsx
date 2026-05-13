@@ -17,7 +17,7 @@ function seedSinglePool(codeId: string): void {
     }
   }
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress,
       turn: 0,

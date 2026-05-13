@@ -13,7 +13,7 @@ function pinScenario(id: string) {
     if (s.id !== id) progress[s.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 5,
+    schemaVersion: 6,
     codes: {
       progress: {},
       turn: 0,
@@ -119,7 +119,7 @@ describe('<PenalScenarioPage />', () => {
       }
     }
     saveState({
-      schemaVersion: 5,
+      schemaVersion: 6,
       codes: {
         progress: {},
         turn: 0,
