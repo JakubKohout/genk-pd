@@ -48,17 +48,26 @@ const WHITELIST = [
   { id: 'street.west-eclipse-blvd',  foxxiteName: 'West Eclipse Blvd',  displayName: 'West Eclipse Blvd',  description: 'West Eclipse Boulevard',     aliases: ['west eclipse', 'eclipse', 'west eclipse boulevard'] },
 ];
 
-// Inline anchor definitions (mirror src/modules/geo/data/anchorsCalibration.ts).
-// Node ESM script can't import .ts directly without tooling; we duplicate the
-// 6 anchors here. Single source of truth = anchorsCalibration.ts; if it changes,
-// update both. Drift is caught by Δ residuals during script run.
+// Anchor set derived by cross-referencing Foxxite/GTAV-Geo-Json's area.geojson
+// (which carries authoritative GTA V world coords for named neighborhoods/landmarks)
+// against image coords from src/modules/geo/data/pois.ts (calibrated against
+// Map Genie to Δ ≤ 0.0005). 15 anchors distributed across the map.
 const ANCHORS = [
-  { label: 'Vespucci PD',          gtaWorld: { x: -1109, y: -845 },  ourCoord: { x: 0.316, y: 0.744 } },
-  { label: 'Paleto Motel',         gtaWorld: { x: 140,   y: 6580 },  ourCoord: { x: 0.359, y: 0.205 } },
-  { label: 'Humane Labs',          gtaWorld: { x: 3666,  y: 3735 },  ourCoord: { x: 0.822, y: 0.375 } },
-  { label: 'Heli lookout',         gtaWorld: { x: 479,   y: -3173 }, ourCoord: { x: 0.461, y: 0.944 } },
-  { label: 'Galileo Observatory',  gtaWorld: { x: -438,  y: 1227 },  ourCoord: { x: 0.387, y: 0.590 } },
-  { label: 'Bolingbroke',          gtaWorld: { x: 1846,  y: 2616 },  ourCoord: { x: 0.622, y: 0.466 } },
+  { label: 'Los Santos International Airport', gtaWorld: { x: -1215, y: -2720 }, ourCoord: { x: 0.298, y: 0.884 } },
+  { label: 'Port of South Los Santos',         gtaWorld: { x: -155,  y: -2145 }, ourCoord: { x: 0.430, y: 0.878 } },
+  { label: 'Maze Bank Arena',                  gtaWorld: { x: -310,  y: -1965 }, ourCoord: { x: 0.546, y: 0.870 } },
+  { label: 'Legion Square',                    gtaWorld: { x: 200,   y: -930 },  ourCoord: { x: 0.456, y: 0.755 } },
+  { label: 'Pillbox Hill',                     gtaWorld: { x: -80,   y: -865 },  ourCoord: { x: 0.474, y: 0.725 } },
+  { label: 'Mirror Park',                      gtaWorld: { x: 1130,  y: -550 },  ourCoord: { x: 0.558, y: 0.729 } },
+  { label: 'Fort Zancudo',                     gtaWorld: { x: -1800, y: 3045 },  ourCoord: { x: 0.200, y: 0.423 } },
+  { label: 'Bolingbroke Penitentiary',         gtaWorld: { x: 1735,  y: 2575 },  ourCoord: { x: 0.622, y: 0.466 } },
+  { label: 'Palmer-Taylor Power Station',      gtaWorld: { x: 2755,  y: 1510 },  ourCoord: { x: 0.741, y: 0.550 } },
+  { label: 'Ron Alternates Wind Farm',         gtaWorld: { x: 2515,  y: 1920 },  ourCoord: { x: 0.683, y: 0.497 } },
+  { label: 'Sandy Shores',                     gtaWorld: { x: 2070,  y: 3715 },  ourCoord: { x: 0.630, y: 0.391 } },
+  { label: 'Grapeseed',                        gtaWorld: { x: 2215,  y: 4785 },  ourCoord: { x: 0.738, y: 0.332 } },
+  { label: 'Paleto Bay',                       gtaWorld: { x: -30,   y: 6495 },  ourCoord: { x: 0.378, y: 0.194 } },
+  { label: 'North Chumash',                    gtaWorld: { x: -2365, y: 4220 },  ourCoord: { x: 0.179, y: 0.561 } },
+  { label: 'Chumash',                          gtaWorld: { x: -3110, y: 1050 },  ourCoord: { x: 0.202, y: 0.716 } },
 ];
 
 // ---------- minimal affine6 fit (mirrors src/modules/geo/logic/calibrate.ts) ----------
@@ -116,9 +125,92 @@ function applyAffine6(p, t) {
   return { x: t.a * p.x + t.b * p.y + t.c, y: t.d * p.x + t.e * p.y + t.f };
 }
 
+// ---------- TPS (thin-plate spline) ----------
+// Mirrors fitTps/applyTps in src/modules/geo/logic/calibrate.ts. TPS interpolates
+// exactly through every anchor and produces smooth, locally-adapted deformation
+// in between — handles non-linear distortion that affine6 cannot.
+
+function tpsKernel(r2) {
+  return r2 < 1e-12 ? 0 : r2 * Math.log(r2);
+}
+
+function fitTps(pairs) {
+  const n = pairs.length;
+  // System: [K P; P^T 0] [w; a] = [v; 0]
+  // K is n×n, P is n×3 (1, x, y), w is n weights, a is 3 affine coeffs.
+  const size = n + 3;
+  const Lx = Array.from({ length: size }, () => new Array(size).fill(0));
+  const Ly = Array.from({ length: size }, () => new Array(size).fill(0));
+  const bx = new Array(size).fill(0);
+  const by = new Array(size).fill(0);
+  for (let i = 0; i < n; i++) {
+    const p = pairs[i].before;
+    bx[i] = pairs[i].after.x;
+    by[i] = pairs[i].after.y;
+    for (let j = 0; j < n; j++) {
+      const q = pairs[j].before;
+      const dx = p.x - q.x;
+      const dy = p.y - q.y;
+      const k = tpsKernel(dx * dx + dy * dy);
+      Lx[i][j] = k;
+      Ly[i][j] = k;
+    }
+    Lx[i][n] = 1; Ly[i][n] = 1;
+    Lx[i][n + 1] = p.x; Ly[i][n + 1] = p.x;
+    Lx[i][n + 2] = p.y; Ly[i][n + 2] = p.y;
+    Lx[n][i] = 1; Ly[n][i] = 1;
+    Lx[n + 1][i] = p.x; Ly[n + 1][i] = p.x;
+    Lx[n + 2][i] = p.y; Ly[n + 2][i] = p.y;
+  }
+  const solX = solveLinearSystem(Lx.map((r) => [...r]), [...bx]);
+  const solY = solveLinearSystem(Ly.map((r) => [...r]), [...by]);
+  return {
+    anchors: pairs.map((p) => p.before),
+    wx: solX.slice(0, n),
+    ax: solX.slice(n),
+    wy: solY.slice(0, n),
+    ay: solY.slice(n),
+  };
+}
+
+function applyTps(p, t) {
+  let x = t.ax[0] + t.ax[1] * p.x + t.ax[2] * p.y;
+  let y = t.ay[0] + t.ay[1] * p.x + t.ay[2] * p.y;
+  for (let i = 0; i < t.anchors.length; i++) {
+    const a = t.anchors[i];
+    const dx = p.x - a.x;
+    const dy = p.y - a.y;
+    const k = tpsKernel(dx * dx + dy * dy);
+    x += t.wx[i] * k;
+    y += t.wy[i] * k;
+  }
+  return { x, y };
+}
+
 // ---------- geometry helpers ----------
 
-/** Area-weighted centroid of a closed polygon ring. */
+function vertexMean(ring) {
+  const sum = ring.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
+  return { x: sum.x / ring.length, y: sum.y / ring.length };
+}
+
+function pointInPolygon(p, ring) {
+  if (ring.length < 3) return false;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i], b = ring[j];
+    const intersects = (a.y > p.y) !== (b.y > p.y) && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+/**
+ * Area-weighted centroid of a closed polygon ring. Falls back to vertex mean
+ * if (a) polygon is degenerate (zero area) OR (b) area-weighted centroid lands
+ * outside the polygon — happens when TPS deformation produces self-intersecting
+ * or strongly concave polygons where the area-weighted formula isn't reliable.
+ */
 function polygonCentroid(ring) {
   let cx = 0, cy = 0, a2 = 0;
   for (let i = 0; i < ring.length - 1; i++) {
@@ -128,12 +220,26 @@ function polygonCentroid(ring) {
     cx += (p.x + q.x) * cross;
     cy += (p.y + q.y) * cross;
   }
-  if (Math.abs(a2) < 1e-12) {
-    // degenerate; fall back to mean of points
-    const sum = ring.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
-    return { x: sum.x / ring.length, y: sum.y / ring.length };
+  if (Math.abs(a2) < 1e-12) return nearestVertex(vertexMean(ring), ring);
+  const c = { x: cx / (3 * a2), y: cy / (3 * a2) };
+  if (pointInPolygon(c, ring)) return c;
+  // Area-weighted centroid landed outside (self-intersecting / strongly concave
+  // polygon). Pick the vertex nearest to the desired centroid — guaranteed to
+  // be on the polygon, "best-effort" marker position.
+  const mean = vertexMean(ring);
+  if (pointInPolygon(mean, ring)) return mean;
+  return nearestVertex(c, ring);
+}
+
+function nearestVertex(p, ring) {
+  let best = ring[0];
+  let bestD2 = Infinity;
+  for (const v of ring) {
+    const dx = v.x - p.x, dy = v.y - p.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 < bestD2) { bestD2 = d2; best = v; }
   }
-  return { x: cx / (3 * a2), y: cy / (3 * a2) };
+  return { x: best.x, y: best.y };
 }
 
 /**
@@ -205,16 +311,16 @@ async function main() {
   if (geo.type !== 'FeatureCollection') throw new Error('Expected FeatureCollection');
   console.log(`Got ${geo.features.length} features`);
 
-  console.log('\nFitting GTA-world → image transform from 6 anchors...');
+  console.log(`\nFitting GTA-world → image transform (TPS, ${ANCHORS.length} anchors)...`);
   const pairs = ANCHORS.map((a) => ({ before: a.gtaWorld, after: a.ourCoord }));
-  const t = fitAffine6(pairs);
+  const t = fitTps(pairs);
   let maxDelta = 0;
   for (const a of ANCHORS) {
-    const pred = applyAffine6(a.gtaWorld, t);
+    const pred = applyTps(a.gtaWorld, t);
     const dx = a.ourCoord.x - pred.x;
     const dy = a.ourCoord.y - pred.y;
     const d = Math.hypot(dx, dy);
-    console.log(`  ${a.label.padEnd(24)} Δ = ${d.toFixed(5)}`);
+    console.log(`  ${a.label.padEnd(36)} Δ = ${d.toFixed(5)}`);
     if (d > maxDelta) maxDelta = d;
   }
   // Threshold 0.05 = 5% of image width ≈ 300px on 5944px source, ≈ 1 city block
@@ -254,7 +360,7 @@ async function main() {
       continue;
     }
     const ring = f.geometry.coordinates[0];
-    const mappedFull = ring.map(([x, y]) => applyAffine6({ x, y }, t));
+    const mappedFull = ring.map(([x, y]) => applyTps({ x, y }, t));
     // Foxxite polygons represent street zones (4-17x wider than real road).
     // Shrink along the minor axis to approximate actual street width.
     const mapped = shrinkPolygonWidth(mappedFull, WIDTH_SHRINK);

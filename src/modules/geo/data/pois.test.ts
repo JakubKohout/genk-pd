@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { POIS, POI_BY_ID } from './pois';
 import { normalize } from '@/shared/text/normalize';
-import { pointInPolygon } from '@/modules/geo/logic/hitTest';
+import { pointInPolygon, pointToPolygonEdgeDist } from '@/modules/geo/logic/hitTest';
 
 describe('POI dataset', () => {
   it('has the expected POI counts across categories', () => {
@@ -96,10 +96,18 @@ describe('POI dataset', () => {
     }
   });
 
-  it('has centroid inside polygon for each street', () => {
+  it('has centroid inside or near polygon edge for each street', () => {
+    // Centroid is used as marker position in "Co je tady" mode. We want it on
+    // or near the polygon. For self-intersecting / strongly concave polygons
+    // (post-TPS deformation), the area-weighted centroid may land outside —
+    // import script falls back to vertex-mean / nearest-vertex, which puts
+    // the marker within edge tolerance of the polygon.
     for (const p of POIS) {
       if (p.geometry === 'polygon') {
-        expect(pointInPolygon(p.centroid, p.path)).toBe(true);
+        const inside = pointInPolygon(p.centroid, p.path);
+        const edgeDist = pointToPolygonEdgeDist(p.centroid, p.path);
+        // Either inside, or close to polygon (within 2 % of image width).
+        expect(inside || edgeDist <= 0.02).toBe(true);
         expect(p.centroid.x).toBeGreaterThanOrEqual(0);
         expect(p.centroid.x).toBeLessThanOrEqual(1);
         expect(p.centroid.y).toBeGreaterThanOrEqual(0);
