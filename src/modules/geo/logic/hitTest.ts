@@ -32,6 +32,25 @@ export function pointToPolylineDist(p: Vec2, path: readonly Vec2[]): number {
   return best;
 }
 
+/**
+ * Point-in-polygon ray casting. Polygon is given as a closed ring (first === last);
+ * the algorithm works regardless. Boundary behavior is undefined-ish but acceptable
+ * for hit-test (off-by-pixel on edge is irrelevant — we add edge tolerance separately).
+ */
+export function pointInPolygon(p: Vec2, ring: readonly Vec2[]): boolean {
+  if (ring.length < 3) return false;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i]!;
+    const b = ring[j]!;
+    const intersects =
+      a.y > p.y !== b.y > p.y &&
+      p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
 export type EvaluatedClick = {
   hit: boolean;
   /** Normalized distance to the POI (0..√2). */

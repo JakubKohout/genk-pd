@@ -3,6 +3,7 @@ import {
   HIT_THRESHOLD,
   distance,
   evaluateClick,
+  pointInPolygon,
   pointToPolylineDist,
   pointToSegmentDist,
 } from './hitTest';
@@ -106,5 +107,48 @@ describe('evaluateClick', () => {
   it('miss when perpendicular distance exceeds threshold', () => {
     const result = evaluateClick(street, { x: 0.3, y: 0.6 });
     expect(result.hit).toBe(false);
+  });
+});
+
+describe('pointInPolygon', () => {
+  // Unit square: [0,0] - [1,0] - [1,1] - [0,1] - [0,0]
+  const square = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+    { x: 0, y: 0 },
+  ];
+
+  it('returns true for a point in the center of a convex polygon', () => {
+    expect(pointInPolygon({ x: 0.5, y: 0.5 }, square)).toBe(true);
+  });
+
+  it('returns false for a point clearly outside', () => {
+    expect(pointInPolygon({ x: 1.5, y: 0.5 }, square)).toBe(false);
+    expect(pointInPolygon({ x: -0.1, y: 0.5 }, square)).toBe(false);
+    expect(pointInPolygon({ x: 0.5, y: 1.5 }, square)).toBe(false);
+  });
+
+  it('handles concave polygon correctly', () => {
+    // C-shape: rect with notch on the right
+    const cshape = [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 0.3 },
+      { x: 0.4, y: 0.3 },
+      { x: 0.4, y: 0.7 },
+      { x: 1, y: 0.7 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 0, y: 0 },
+    ];
+    expect(pointInPolygon({ x: 0.2, y: 0.5 }, cshape)).toBe(true); // inside left arm
+    expect(pointInPolygon({ x: 0.7, y: 0.5 }, cshape)).toBe(false); // in the notch
+  });
+
+  it('returns false for empty or degenerate input', () => {
+    expect(pointInPolygon({ x: 0.5, y: 0.5 }, [])).toBe(false);
+    expect(pointInPolygon({ x: 0.5, y: 0.5 }, [{ x: 0, y: 0 }])).toBe(false);
   });
 });
