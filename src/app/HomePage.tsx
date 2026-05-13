@@ -14,6 +14,12 @@ const modules = [
     enabled: true,
   },
   {
+    to: '/geo',
+    title: 'Geografie',
+    description: 'Slepá mapa Los Santos a Blaine County — zájmové body, ulice, PD stanice.',
+    enabled: true,
+  },
+  {
     to: '/sasp',
     title: 'SASP příručka',
     description: 'Otázky nad provozní příručkou SASP — postupy, role, situace.',

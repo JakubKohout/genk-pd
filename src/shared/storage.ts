@@ -39,15 +39,38 @@ export type PenalSlice = {
   recall: PenalQuizSlice;
 };
 
+export type GeoCategoryFilter = {
+  street: boolean;
+  landmark: boolean;
+  pd: boolean;
+  fire: boolean;
+  ems: boolean;
+  ammu: boolean;
+};
+
+export type GeoQuizSlice = {
+  progress: Record<string, ProgressEntry>;
+  turn: number;
+};
+
+export type GeoSlice = {
+  blind: GeoQuizSlice;
+  name: GeoQuizSlice;
+  settings: {
+    categoryFilter: GeoCategoryFilter;
+  };
+};
+
 export type PersistedState = {
-  schemaVersion: 3;
+  schemaVersion: 5;
   codes: CodesSlice;
   lea: LeaSlice;
   penal: PenalSlice;
+  geo: GeoSlice;
 };
 
 export const initialState: PersistedState = {
-  schemaVersion: 3,
+  schemaVersion: 5,
   codes: {
     progress: {},
     turn: 0,
@@ -67,6 +90,20 @@ export const initialState: PersistedState = {
     scenarios: { progress: {}, turn: 0 },
     recall: { progress: {}, turn: 0 },
   },
+  geo: {
+    blind: { progress: {}, turn: 0 },
+    name: { progress: {}, turn: 0 },
+    settings: {
+      categoryFilter: {
+        street: true,
+        landmark: true,
+        pd: true,
+        fire: true,
+        ems: true,
+        ammu: true,
+      },
+    },
+  },
 };
 
 let cachedSnapshot: PersistedState | null = null;
@@ -81,6 +118,27 @@ type StoredV2 = {
   schemaVersion: 2;
   codes: CodesSlice;
   lea?: LeaSlice;
+};
+
+type StoredV3 = {
+  schemaVersion: 3;
+  codes: CodesSlice;
+  lea: LeaSlice;
+  penal: PenalSlice;
+};
+
+type StoredV4 = {
+  schemaVersion: 4;
+  codes: CodesSlice;
+  lea: LeaSlice;
+  penal: PenalSlice;
+  geo: {
+    blind: GeoQuizSlice;
+    name: GeoQuizSlice;
+    settings: {
+      categoryFilter: Partial<GeoCategoryFilter>;
+    };
+  };
 };
 
 function migrateV1ToV2(v1: StoredV1): StoredV2 {
@@ -100,7 +158,7 @@ function migrateV1ToV2(v1: StoredV1): StoredV2 {
   };
 }
 
-function migrateV2ToV3(v2: StoredV2): PersistedState {
+function migrateV2ToV3(v2: StoredV2): StoredV3 {
   return {
     schemaVersion: 3,
     codes: {
@@ -124,47 +182,129 @@ function migrateV2ToV3(v2: StoredV2): PersistedState {
   };
 }
 
+function migrateV3ToV4(v3: StoredV3): StoredV4 {
+  return {
+    schemaVersion: 4,
+    codes: {
+      progress: v3.codes?.progress ?? {},
+      turn: v3.codes?.turn ?? 0,
+      settings: {
+        importanceFilter: {
+          ...initialState.codes.settings.importanceFilter,
+          ...(v3.codes?.settings?.importanceFilter ?? {}),
+        },
+      },
+    },
+    lea: {
+      progress: v3.lea?.progress ?? {},
+      turn: v3.lea?.turn ?? 0,
+    },
+    penal: {
+      scenarios: {
+        progress: v3.penal?.scenarios?.progress ?? {},
+        turn: v3.penal?.scenarios?.turn ?? 0,
+      },
+      recall: {
+        progress: v3.penal?.recall?.progress ?? {},
+        turn: v3.penal?.recall?.turn ?? 0,
+      },
+    },
+    geo: {
+      blind: { progress: {}, turn: 0 },
+      name: { progress: {}, turn: 0 },
+      settings: {
+        categoryFilter: {},
+      },
+    },
+  };
+}
+
+function migrateV4ToV5(v4: StoredV4): PersistedState {
+  return {
+    schemaVersion: 5,
+    codes: v4.codes,
+    lea: v4.lea,
+    penal: v4.penal,
+    geo: {
+      blind: { progress: {}, turn: 0 },
+      name: { progress: {}, turn: 0 },
+      settings: {
+        categoryFilter: {
+          ...initialState.geo.settings.categoryFilter,
+          ...(v4.geo?.settings?.categoryFilter ?? {}),
+        },
+      },
+    },
+  };
+}
+
 function readFromStorage(): PersistedState {
   if (typeof localStorage === 'undefined') return cloneInitial();
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return cloneInitial();
   try {
-    const parsed = JSON.parse(raw) as Partial<PersistedState | StoredV2 | StoredV1>;
-    if (parsed?.schemaVersion === 3 && parsed.codes) {
-      const v3 = parsed as Partial<PersistedState>;
+    const parsed = JSON.parse(raw) as Partial<
+      PersistedState | StoredV4 | StoredV3 | StoredV2 | StoredV1
+    >;
+    if (parsed?.schemaVersion === 5 && parsed.codes) {
+      const v5 = parsed as Partial<PersistedState>;
       return {
-        schemaVersion: 3,
+        schemaVersion: 5,
         codes: {
-          progress: v3.codes?.progress ?? {},
-          turn: v3.codes?.turn ?? 0,
+          progress: v5.codes?.progress ?? {},
+          turn: v5.codes?.turn ?? 0,
           settings: {
             importanceFilter: {
               ...initialState.codes.settings.importanceFilter,
-              ...(v3.codes?.settings?.importanceFilter ?? {}),
+              ...(v5.codes?.settings?.importanceFilter ?? {}),
             },
           },
         },
         lea: {
-          progress: v3.lea?.progress ?? {},
-          turn: v3.lea?.turn ?? 0,
+          progress: v5.lea?.progress ?? {},
+          turn: v5.lea?.turn ?? 0,
         },
         penal: {
           scenarios: {
-            progress: v3.penal?.scenarios?.progress ?? {},
-            turn: v3.penal?.scenarios?.turn ?? 0,
+            progress: v5.penal?.scenarios?.progress ?? {},
+            turn: v5.penal?.scenarios?.turn ?? 0,
           },
           recall: {
-            progress: v3.penal?.recall?.progress ?? {},
-            turn: v3.penal?.recall?.turn ?? 0,
+            progress: v5.penal?.recall?.progress ?? {},
+            turn: v5.penal?.recall?.turn ?? 0,
+          },
+        },
+        geo: {
+          blind: {
+            progress: v5.geo?.blind?.progress ?? {},
+            turn: v5.geo?.blind?.turn ?? 0,
+          },
+          name: {
+            progress: v5.geo?.name?.progress ?? {},
+            turn: v5.geo?.name?.turn ?? 0,
+          },
+          settings: {
+            categoryFilter: {
+              ...initialState.geo.settings.categoryFilter,
+              ...(v5.geo?.settings?.categoryFilter ?? {}),
+            },
           },
         },
       };
     }
+    if (parsed?.schemaVersion === 4 && parsed.codes) {
+      return migrateV4ToV5(parsed as StoredV4);
+    }
+    if (parsed?.schemaVersion === 3 && parsed.codes) {
+      return migrateV4ToV5(migrateV3ToV4(parsed as StoredV3));
+    }
     if (parsed?.schemaVersion === 2 && parsed.codes) {
-      return migrateV2ToV3(parsed as StoredV2);
+      return migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(parsed as StoredV2)));
     }
     if (parsed?.schemaVersion === 1 && parsed.codes) {
-      return migrateV2ToV3(migrateV1ToV2(parsed as StoredV1));
+      return migrateV4ToV5(
+        migrateV3ToV4(migrateV2ToV3(migrateV1ToV2(parsed as StoredV1))),
+      );
     }
   } catch {
     // fall through

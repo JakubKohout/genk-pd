@@ -15,6 +15,18 @@ export type SeedInput = {
     scenarios?: { progress?: SeedProgress; turn?: number };
     recall?: { progress?: SeedProgress; turn?: number };
   };
+  geo?: {
+    blind?: { progress?: SeedProgress; turn?: number };
+    name?: { progress?: SeedProgress; turn?: number };
+    categoryFilter?: {
+      street?: boolean;
+      landmark?: boolean;
+      pd?: boolean;
+      fire?: boolean;
+      ems?: boolean;
+      ammu?: boolean;
+    };
+  };
   randomSeed?: number;
 };
 
@@ -27,7 +39,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 3 as const,
+    schemaVersion: 5 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -51,6 +63,26 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
       recall: {
         progress: input.penal?.recall?.progress ?? {},
         turn: input.penal?.recall?.turn ?? 0,
+      },
+    },
+    geo: {
+      blind: {
+        progress: input.geo?.blind?.progress ?? {},
+        turn: input.geo?.blind?.turn ?? 0,
+      },
+      name: {
+        progress: input.geo?.name?.progress ?? {},
+        turn: input.geo?.name?.turn ?? 0,
+      },
+      settings: {
+        categoryFilter: {
+          street: input.geo?.categoryFilter?.street ?? true,
+          landmark: input.geo?.categoryFilter?.landmark ?? true,
+          pd: input.geo?.categoryFilter?.pd ?? true,
+          fire: input.geo?.categoryFilter?.fire ?? true,
+          ems: input.geo?.categoryFilter?.ems ?? true,
+          ammu: input.geo?.categoryFilter?.ammu ?? true,
+        },
       },
     },
   };
@@ -212,6 +244,94 @@ export function pinNextPenalScenario(targetId: string, targetScore = 0): SeedPro
 export function pinNextPenalParagraph(targetId: string, targetScore = 0): SeedProgress {
   const progress: SeedProgress = {};
   for (const id of PENAL_PARAGRAPH_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+/**
+ * Geo POI IDs hard-coded for E2E (must match src/modules/geo/data/pois.ts).
+ * 68 POIs total.
+ */
+export const GEO_POI_IDS = [
+  'landmark.lsia',
+  'landmark.doky',
+  'landmark.industrialni-zona',
+  'landmark.ropne-vrty',
+  'landmark.mirror-park',
+  'landmark.casino',
+  'landmark.mega-mall',
+  'landmark.pdm',
+  'landmark.legion-square',
+  'landmark.pillbox',
+  'landmark.maze-bank-tower',
+  'landmark.posta',
+  'landmark.arcadius',
+  'landmark.weazel',
+  'landmark.gym-u-plaze',
+  'landmark.molo',
+  'landmark.life-invader',
+  'landmark.klenotnictvi',
+  'landmark.radnice',
+  'landmark.lsc',
+  'landmark.rockford-plaza',
+  'landmark.hlavni-banka',
+  'landmark.hriste-golf',
+  'landmark.hrbitov',
+  'landmark.observator',
+  'landmark.divadlo',
+  'landmark.vinewood-sign',
+  'landmark.power-station',
+  'landmark.vetrne-elektrarny',
+  'landmark.prehrada',
+  'landmark.veznice',
+  'landmark.letiste-sandy',
+  'landmark.fort-zancudo',
+  'landmark.vinice',
+  'landmark.maze-bank-arena',
+  'landmark.g6',
+  'landmark.pink-cage-motel',
+  'landmark.vodni-mesto',
+  'landmark.sandy-shores',
+  'landmark.grapeseed',
+  'landmark.paleto-bay',
+  'landmark.north-chumash',
+  'landmark.chumash',
+  'pd.vespucci',
+  'pd.vinewood',
+  'fire.hq',
+  'ems.central',
+  'ammu.downtown',
+  'street.del-perro-fwy',
+  'street.la-puerta-fwy',
+  'street.olympic-fwy',
+  'street.elysian-fields-fwy',
+  'street.los-santos-fwy',
+  'street.palomino-fwy',
+  'street.senora-fwy',
+  'street.goh',
+  'street.route-68',
+  'street.vespucci-blvd',
+  'street.san-andreas-ave',
+  'street.palomino-ave',
+  'street.calais-ave',
+  'street.alta-street',
+  'street.innocence-blvd',
+  'street.el-rancho-blvd',
+  'street.popular-st',
+  'street.las-lagunas-blvd',
+  'street.vinewood-blvd',
+  'street.west-eclipse-blvd',
+] as const;
+
+export function pinNextGeoPoi(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of GEO_POI_IDS) {
     if (id !== targetId) {
       progress[id] = { score: 2, lastAskedAtTurn: -10 };
     }

@@ -12,7 +12,7 @@ function pinParagraph(paragraphId: string) {
     if (p.id !== paragraphId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 3,
+    schemaVersion: 5,
     codes: {
       progress: {},
       turn: 0,
@@ -22,6 +22,11 @@ function pinParagraph(paragraphId: string) {
     penal: {
       scenarios: { progress: {}, turn: 0 },
       recall: { progress, turn: 0 },
+    },
+    geo: {
+      blind: { progress: {}, turn: 0 },
+      name: { progress: {}, turn: 0 },
+      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
     },
   });
 }
@@ -124,7 +129,7 @@ describe('<PenalRecallPage />', () => {
       }
     }
     saveState({
-      schemaVersion: 3,
+      schemaVersion: 5,
       codes: {
         progress: {},
         turn: 0,
@@ -134,6 +139,11 @@ describe('<PenalRecallPage />', () => {
       penal: {
         scenarios: { progress: {}, turn: 0 },
         recall: { progress, turn: 0 },
+      },
+      geo: {
+        blind: { progress: {}, turn: 0 },
+        name: { progress: {}, turn: 0 },
+        settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
       },
     });
     renderPage();

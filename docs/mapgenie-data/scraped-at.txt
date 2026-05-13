@@ -1,0 +1,5 @@
+scraped_at: 2026-05-11T22:53:41.616Z
+source_url: https://gta-5-map.com/
+total_locations: 2269
+filtered_locations: 355
+relevant_category_ids: 462,463,467,475,476,477,478,480,481,487,495,504,517,518,520

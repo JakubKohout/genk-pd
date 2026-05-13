@@ -6,7 +6,7 @@ import { saveState, loadState, type PersistedState } from '@/shared/storage';
 
 function seed(progress: PersistedState['codes']['progress']): void {
   saveState({
-    schemaVersion: 3,
+    schemaVersion: 5,
     codes: {
       progress,
       turn: 5,
@@ -18,6 +18,11 @@ function seed(progress: PersistedState['codes']['progress']): void {
     penal: {
       scenarios: { progress: {}, turn: 0 },
       recall: { progress: {}, turn: 0 },
+    },
+    geo: {
+      blind: { progress: {}, turn: 0 },
+      name: { progress: {}, turn: 0 },
+      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
     },
   });
 }

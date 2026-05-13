@@ -24,3 +24,6 @@ coverage
 
 # Confidential source material (parsed app data is fine, raw manual is not)
 /docs/sasp-manual.md
+
+# Superpowers skill internal state (brainstorm transcripts, etc.)
+.superpowers/
