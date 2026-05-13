@@ -15,6 +15,7 @@ vi.mock('react-leaflet', () => {
     Marker: Stub,
     Tooltip: Stub,
     Polyline: () => null,
+    Polygon: () => null,
     useMapEvents: () => null,
   };
 });

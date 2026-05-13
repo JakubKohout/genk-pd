@@ -22,6 +22,7 @@ vi.mock('react-leaflet', () => {
     Marker: Stub,
     Tooltip: Stub,
     Polyline: () => <span data-testid="mock-polyline" />,
+    Polygon: () => <span data-testid="mock-polygon" />,
     useMapEvents: (handlers: { click?: (e: never) => void }) => {
       if (handlers.click) {
         capturedHandlers.click = handlers.click as never;

@@ -6,6 +6,7 @@ import { useGeoSettings } from '../state/useGeoSettings';
 import { useMediaQuery } from '@/shared/useMediaQuery';
 import { GeoMap } from './GeoMap';
 import { GeoMarker } from './GeoMarker';
+import { GeoPolygon } from './GeoPolygon';
 import { GeoSidePanel } from './GeoSidePanel';
 import { GeoMobilePanel } from './GeoMobilePanel';
 import { GeoResetButton } from './GeoResetButton';
@@ -145,7 +146,9 @@ export function GeoNamePage() {
                   label={p.name}
                   poiId={p.id}
                 />
-              ) : null /* TODO Task 15: GeoPolygon mastered */,
+              ) : (
+                <GeoPolygon key={p.id} path={p.path} variant="mastered" />
+              ),
             )}
           {/* Asked POI: shown without label until reveal */}
           {current.geometry === 'point' ? (
@@ -155,7 +158,20 @@ export function GeoNamePage() {
               label={phase === 'revealed' ? current.name : undefined}
               poiId={current.id}
             />
-          ) : null /* TODO Task 15: GeoPolygon asked/revealed */}
+          ) : (
+            <>
+              <GeoPolygon
+                path={current.path}
+                variant={phase === 'revealed' ? (success ? 'target' : 'wrongClick') : 'asked'}
+              />
+              <GeoMarker
+                position={current.centroid}
+                variant={phase === 'revealed' ? (success ? 'target' : 'wrongClick') : 'asked'}
+                label={phase === 'revealed' ? current.name : undefined}
+                poiId={current.id}
+              />
+            </>
+          )}
         </GeoMap>
 
         {phase === 'answering' ? (
