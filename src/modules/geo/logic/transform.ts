@@ -167,3 +167,54 @@ export function computeResiduals(
     };
   });
 }
+
+/** GTA V world anchor pair (no projection needed — coords are linear). */
+export interface GtaWorldAnchor {
+  label: string;
+  gtaWorld: Vec2;
+  ourCoord: Vec2;
+}
+
+/**
+ * Fit a 6-param affine from GTA V world coords to our image space. Linear input
+ * (no Mercator projection — unlike `fitAnchorTransform` for MG which preprocesses
+ * with `mgLatLngToVec2`). Returns null if fewer than 3 non-collinear anchors.
+ */
+export function fitGtaWorldTransform(
+  anchors: readonly GtaWorldAnchor[],
+): Affine6Transform | null {
+  if (anchors.length < 3) return null;
+  const pairs: CalibrationPair[] = anchors.map((a, i) => ({
+    poiId: `gta.${a.label || i}`,
+    before: a.gtaWorld,
+    after: a.ourCoord,
+  }));
+  try {
+    return fitAffine6(pairs);
+  } catch {
+    return null;
+  }
+}
+
+/** Apply a GTA-world transform to a GTA V world coord. */
+export function applyGtaWorldTransform(p: Vec2, t: Affine6Transform): Vec2 {
+  return applyAffine6(p, t);
+}
+
+/** Per-anchor residual after the GTA fit. */
+export function computeGtaResiduals(
+  anchors: readonly GtaWorldAnchor[],
+  t: Affine6Transform,
+): { label: string; predicted: Vec2; actual: Vec2; distance: number }[] {
+  return anchors.map((a) => {
+    const predicted = applyGtaWorldTransform(a.gtaWorld, t);
+    const dx = a.ourCoord.x - predicted.x;
+    const dy = a.ourCoord.y - predicted.y;
+    return {
+      label: a.label,
+      predicted,
+      actual: a.ourCoord,
+      distance: Math.hypot(dx, dy),
+    };
+  });
+}

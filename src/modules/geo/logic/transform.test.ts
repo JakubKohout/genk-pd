@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyGtaWorldTransform,
   applyMgTransform,
   computeResiduals,
   fitAnchorTransform,
   fitBestAnchorTransform,
+  fitGtaWorldTransform,
   mgLatLngToVec2,
   type AnchorPair,
+  type GtaWorldAnchor,
 } from './transform';
 
 describe('mgLatLngToVec2', () => {
@@ -147,5 +150,37 @@ describe('fitBestAnchorTransform — picks affine6 when ≥3 anchors', () => {
     for (const r of residuals) {
       expect(r.distance).toBeLessThan(1e-9);
     }
+  });
+});
+
+describe('fitGtaWorldTransform', () => {
+  // Synthetic linear case: ourCoord = (gta.x/1000 + 0.5, -gta.y/1000 + 0.5)
+  // (Y flip: GTA Y grows north, image Y grows south.)
+  const synthetic: GtaWorldAnchor[] = [
+    { label: 'a', gtaWorld: { x: -1000, y: -1000 }, ourCoord: { x: -0.5, y: 1.5 } },
+    { label: 'b', gtaWorld: { x: 1000, y: -1000 }, ourCoord: { x: 1.5, y: 1.5 } },
+    { label: 'c', gtaWorld: { x: 0, y: 1000 }, ourCoord: { x: 0.5, y: -0.5 } },
+  ];
+
+  it('fits an exact linear transform from 3 non-collinear anchors', () => {
+    const t = fitGtaWorldTransform(synthetic);
+    expect(t).not.toBeNull();
+    for (const a of synthetic) {
+      const predicted = applyGtaWorldTransform(a.gtaWorld, t!);
+      expect(predicted.x).toBeCloseTo(a.ourCoord.x, 6);
+      expect(predicted.y).toBeCloseTo(a.ourCoord.y, 6);
+    }
+  });
+
+  it('handles Y-axis flip correctly (GTA north → image top)', () => {
+    const t = fitGtaWorldTransform(synthetic);
+    // GTA point at (0, 0) maps to (0.5, 0.5) under synthetic transform
+    const predicted = applyGtaWorldTransform({ x: 0, y: 0 }, t!);
+    expect(predicted.x).toBeCloseTo(0.5, 6);
+    expect(predicted.y).toBeCloseTo(0.5, 6);
+  });
+
+  it('returns null for < 3 anchors', () => {
+    expect(fitGtaWorldTransform(synthetic.slice(0, 2))).toBeNull();
   });
 });
