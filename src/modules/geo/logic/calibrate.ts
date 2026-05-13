@@ -298,12 +298,22 @@ export function formatPoisTs(pois: readonly POI[]): string {
       lines.push(
         `    position: { x: ${formatCoord(p.position.x)}, y: ${formatCoord(p.position.y)} },`,
       );
-    } else {
+    } else if (p.geometry === 'polyline') {
       lines.push(`    path: [`);
       for (const pt of p.path) {
         lines.push(`      { x: ${formatCoord(pt.x)}, y: ${formatCoord(pt.y)} },`);
       }
       lines.push(`    ],`);
+    } else {
+      // polygon — emit path + centroid
+      lines.push(`    path: [`);
+      for (const pt of p.path) {
+        lines.push(`      { x: ${formatCoord(pt.x)}, y: ${formatCoord(pt.y)} },`);
+      }
+      lines.push(`    ],`);
+      lines.push(
+        `    centroid: { x: ${formatCoord(p.centroid.x)}, y: ${formatCoord(p.centroid.y)} },`,
+      );
     }
     lines.push(`    name: ${JSON.stringify(p.name)},`);
     lines.push(`    description: ${JSON.stringify(p.description)},`);

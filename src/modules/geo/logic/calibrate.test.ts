@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applyAffine, calibratePoi, fitAffine } from './calibrate';
-import type { POI } from '../data/types';
+import { applyAffine, calibratePoi, fitAffine, formatPoisTs } from './calibrate';
+import type { POI, POIPolygon } from '../data/types';
 
 describe('fitAffine', () => {
   it('recovers identity when before == after', () => {
@@ -104,5 +104,69 @@ describe('calibratePoi', () => {
       expect(r.path[1]!.x).toBeCloseTo(0.4);
       expect(r.path[1]!.y).toBeCloseTo(0.6);
     }
+  });
+});
+
+describe('formatPoisTs', () => {
+  it('emits polygon path + centroid in TS literal', () => {
+    const polygon: POIPolygon = {
+      id: 'street.example',
+      category: 'street',
+      name: 'Example St',
+      description: 'desc',
+      aliases: ['ex'],
+      geometry: 'polygon',
+      path: [
+        { x: 0.1, y: 0.2 },
+        { x: 0.3, y: 0.2 },
+        { x: 0.3, y: 0.4 },
+        { x: 0.1, y: 0.4 },
+        { x: 0.1, y: 0.2 },
+      ],
+      centroid: { x: 0.2, y: 0.3 },
+    };
+    const out = formatPoisTs([polygon]);
+    expect(out).toContain('geometry: "polygon"');
+    expect(out).toContain('path: [');
+    expect(out).toContain('centroid: { x: 0.2, y: 0.3 }');
+    // Verify all path points are present
+    expect(out).toContain('{ x: 0.1, y: 0.2 }');
+    expect(out).toContain('{ x: 0.3, y: 0.4 }');
+  });
+
+  it('emits point geometry without path or centroid', () => {
+    const point: POI = {
+      id: 'landmark.y',
+      category: 'landmark',
+      name: 'Point Y',
+      description: 'desc',
+      aliases: ['y'],
+      geometry: 'point',
+      position: { x: 0.5, y: 0.5 },
+    };
+    const out = formatPoisTs([point]);
+    expect(out).toContain('geometry: "point"');
+    expect(out).toContain('position: { x: 0.5, y: 0.5 }');
+    expect(out).not.toContain('path:');
+    expect(out).not.toContain('centroid:');
+  });
+
+  it('emits polyline geometry with path, no centroid', () => {
+    const polyline: POI = {
+      id: 'street.z',
+      category: 'street',
+      name: 'Street Z',
+      description: 'desc',
+      aliases: ['z'],
+      geometry: 'polyline',
+      path: [
+        { x: 0.1, y: 0.1 },
+        { x: 0.5, y: 0.5 },
+      ],
+    };
+    const out = formatPoisTs([polyline]);
+    expect(out).toContain('geometry: "polyline"');
+    expect(out).toContain('path: [');
+    expect(out).not.toContain('centroid:');
   });
 });

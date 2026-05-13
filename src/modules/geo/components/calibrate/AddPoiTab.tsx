@@ -7,6 +7,8 @@ import { formatPoisTs } from '../../logic/calibrate';
 import { GeoMap } from '../GeoMap';
 import type { POI, POICategory, Vec2 } from '../../data/types';
 
+// Polygon POI are auto-imported by scripts/import-foxxite-streets.mjs,
+// not user-addable through this form.
 type Geometry = 'point' | 'polyline';
 
 interface Draft {
