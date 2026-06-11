@@ -163,11 +163,7 @@ export function GeoBlindPage() {
                   />
                 );
               }
-              if (p.geometry === 'polyline') {
-                return <GeoPolyline key={p.id} path={p.path} variant="mastered" />;
-              }
-              // p.geometry === 'polygon' — žádný street POI už polygon není; reserved pro budoucí districts.
-              return null;
+              return <GeoPolyline key={p.id} path={p.path} variant="mastered" />;
             })}
           {phase === 'revealed' &&
             (current.geometry === 'point' ? (
@@ -177,9 +173,9 @@ export function GeoBlindPage() {
                 label={current.name}
                 poiId={current.id}
               />
-            ) : current.geometry === 'polyline' ? (
+            ) : (
               <GeoPolyline path={current.path} variant="target" />
-            ) : null)}
+            ))}
           {phase === 'revealed' && userClick && hit === false && (
             <GeoMarker position={userClick} variant="wrongClick" />
           )}

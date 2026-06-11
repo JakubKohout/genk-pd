@@ -152,11 +152,7 @@ export function GeoNamePage() {
                   />
                 );
               }
-              if (p.geometry === 'polyline') {
-                return <GeoPolyline key={p.id} path={p.path} variant="mastered" />;
-              }
-              // p.geometry === 'polygon' — žádný street POI už polygon není; reserved pro budoucí districts.
-              return null;
+              return <GeoPolyline key={p.id} path={p.path} variant="mastered" />;
             })}
           {/* Asked POI: shown without label until reveal */}
           {current.geometry === 'point' ? (
@@ -166,7 +162,7 @@ export function GeoNamePage() {
               label={phase === 'revealed' ? current.name : undefined}
               poiId={current.id}
             />
-          ) : current.geometry === 'polyline' ? (
+          ) : (
             <>
               <GeoPolyline
                 path={current.path}
@@ -179,15 +175,6 @@ export function GeoNamePage() {
                 poiId={current.id}
               />
             </>
-          ) : (
-            // current.geometry === 'polygon' — centroid marker for the asked
-            // location (reserved pro budoucí districts; streets jsou polyline).
-            <GeoMarker
-              position={current.centroid}
-              variant={phase === 'revealed' ? (success ? 'target' : 'wrongClick') : 'asked'}
-              label={phase === 'revealed' ? current.name : undefined}
-              poiId={current.id}
-            />
           )}
           <GeoDebugOverlay enabled={debug} currentPoiId={current.id} />
         </GeoMap>

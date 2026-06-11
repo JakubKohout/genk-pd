@@ -133,22 +133,17 @@ export function DragDropTab() {
               />
             );
           }
-          if (poi.geometry === 'polyline') {
-            return (
-              <DraggablePolyline
-                key={poi.id}
-                poi={poi}
-                selected={selectedId === poi.id}
-                onSelect={() => setSelectedId(poi.id)}
-                onMoveNode={updatePolylineNode}
-                onInsertNode={insertPolylineNode}
-                onDeleteNode={deletePolylineNode}
-              />
-            );
-          }
-          // poi.geometry === 'polygon' — no in-place editor yet; rings are
-          // sourced from Foxxite GeoJSON via the import script, not hand-drawn.
-          return null;
+          return (
+            <DraggablePolyline
+              key={poi.id}
+              poi={poi}
+              selected={selectedId === poi.id}
+              onSelect={() => setSelectedId(poi.id)}
+              onMoveNode={updatePolylineNode}
+              onInsertNode={insertPolylineNode}
+              onDeleteNode={deletePolylineNode}
+            />
+          );
         })}
       </GeoMap>
 

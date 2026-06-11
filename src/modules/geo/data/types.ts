@@ -23,22 +23,7 @@ export interface POIPolyline extends POIBase {
   centroid: Vec2;
 }
 
-export interface POIPolygon extends POIBase {
-  geometry: 'polygon';
-  /**
-   * Polygon ring(s) in normalized 0..1 coords. First ring is outer boundary,
-   * subsequent rings are holes. Each ring is closed: first === last vertex.
-   * A street may be represented by multiple disjoint polygons — see callers
-   * that handle MultiPolygon input by flattening into multiple POIPolygon
-   * entries OR by using multiple top-level rings (we choose the former; one
-   * POI = one polygon).
-   */
-  rings: Vec2[][];
-  /** Mean of outer-ring vertices in [0,1]². Used as label / camera target. */
-  centroid: Vec2;
-}
-
-export type POI = POIPoint | POIPolyline | POIPolygon;
+export type POI = POIPoint | POIPolyline;
 
 export type TileMeta = {
   width: number;
