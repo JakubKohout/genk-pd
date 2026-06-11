@@ -47,7 +47,7 @@ export function GeoMap({ onMapClick, children, className }: GeoMapProps) {
         style={{ width: '100%', height: '100%', background: '#0e3245' }}
       >
         <TileLayer
-          url="/tiles/{z}/{x}/{y}.jpg"
+          url={`${import.meta.env.BASE_URL}tiles/{z}/{x}/{y}.jpg`}
           tileSize={TILE_META.tileSize}
           noWrap
           bounds={bounds}
