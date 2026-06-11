@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './app/routes';
 import { initAnalytics } from './shared/analytics';
+import 'leaflet/dist/leaflet.css';
 import './styles/index.css';
 
 initAnalytics();

@@ -157,4 +157,112 @@
     @apply opacity-50 cursor-not-allowed;
   }
 
+  /* Geografie modul */
+  .geo-page {
+    @apply grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px];
+  }
+  .geo-map-shell {
+    /* `isolate` contains Leaflet's internal pane/control z-indexes (200–1000)
+       within this stacking context so they can't paint over the sticky header
+       (z-20). Without it the high Leaflet z-indexes escape into the root context. */
+    @apply relative z-0 isolate rounded-lg overflow-hidden border border-sasp-navy-light;
+    height: clamp(360px, 60vh, 720px);
+  }
+  .geo-map-shell .leaflet-container {
+    @apply font-sans;
+  }
+  .geo-map-shell .leaflet-control-zoom a {
+    @apply bg-sasp-navy text-sasp-tan border border-sasp-navy-light;
+  }
+  .geo-prompt {
+    @apply rounded-md border-l-4 border-sasp-tan bg-sasp-navy/60 px-4 py-3 text-sm sm:text-base;
+  }
+  .geo-prompt__name {
+    @apply font-semibold text-sasp-tan;
+  }
+  .geo-prompt__description {
+    @apply ml-2 text-sasp-ink-dim;
+  }
+  .geo-prompt__category {
+    @apply ml-2 inline-block rounded bg-sasp-navy-light px-2 py-0.5 text-xs uppercase tracking-wider text-sasp-ink-dim;
+  }
+  .geo-feedback {
+    @apply rounded-md border-l-4 px-4 py-3 text-sm;
+  }
+  .geo-feedback--hit {
+    @apply border-emerald-400 bg-emerald-500/10 text-emerald-100;
+  }
+  .geo-feedback--miss {
+    @apply border-rose-400 bg-rose-500/10 text-rose-100;
+  }
+
+  /* Markers (rendered as DivIcon HTML) */
+  .geo-marker {
+    @apply flex items-center justify-center;
+    width: 16px;
+    height: 16px;
+  }
+  .geo-marker__dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    border: 2px solid #0e3245;
+  }
+  .geo-marker--asked .geo-marker__dot {
+    background: #d4a256;
+    box-shadow: 0 0 0 0 rgba(212, 162, 86, 0.7);
+    animation: geoMarkerPulse 1.5s ease-out infinite;
+  }
+  .geo-marker--mastered .geo-marker__dot {
+    background: #7fc99a;
+    opacity: 0.6;
+  }
+  .geo-marker--target .geo-marker__dot {
+    background: #52a163;
+  }
+  .geo-marker--wrong .geo-marker__dot {
+    background: #e25963;
+  }
+  @keyframes geoMarkerPulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(212, 162, 86, 0.6);
+    }
+    70% {
+      box-shadow: 0 0 0 14px rgba(212, 162, 86, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(212, 162, 86, 0);
+    }
+  }
+
+  .geo-marker-tooltip {
+    background: rgba(20, 30, 50, 0.92);
+    color: #f5e6c8;
+    border: 1px solid rgba(212, 162, 86, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+  .geo-marker-tooltip::before {
+    border-right-color: rgba(212, 162, 86, 0.6) !important;
+  }
+  .geo-marker-tooltip--mastered {
+    color: rgba(245, 230, 200, 0.7);
+  }
+
+  .geo-vertex-handle {
+    width: 10px;
+    height: 10px;
+    background: rgba(212, 162, 86, 0.9);
+    border: 1px solid #1a1d2a;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    cursor: grab;
+  }
+  .geo-vertex-handle:hover,
+  .geo-vertex-handle--selected {
+    background: #d4a256;
+    transform: scale(1.4);
+  }
+
 }

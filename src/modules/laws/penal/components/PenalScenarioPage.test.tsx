@@ -13,7 +13,7 @@ function pinScenario(id: string) {
     if (s.id !== id) progress[s.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 3,
+    schemaVersion: 4,
     codes: {
       progress: {},
       turn: 0,
@@ -23,6 +23,11 @@ function pinScenario(id: string) {
     penal: {
       scenarios: { progress, turn: 0 },
       recall: { progress: {}, turn: 0 },
+    },
+    geo: {
+      blind: { progress: {}, turn: 0 },
+      name: { progress: {}, turn: 0 },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   });
 }
@@ -114,7 +119,7 @@ describe('<PenalScenarioPage />', () => {
       }
     }
     saveState({
-      schemaVersion: 3,
+      schemaVersion: 4,
       codes: {
         progress: {},
         turn: 0,
@@ -124,6 +129,11 @@ describe('<PenalScenarioPage />', () => {
       penal: {
         scenarios: { progress, turn: 0 },
         recall: { progress: {}, turn: 0 },
+      },
+      geo: {
+        blind: { progress: {}, turn: 0 },
+        name: { progress: {}, turn: 0 },
+        settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
       },
     });
     renderPage();

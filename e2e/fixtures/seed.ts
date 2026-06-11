@@ -1,5 +1,6 @@
 import { type Page } from '@playwright/test';
 import { CODES } from '../../src/modules/codes/data/codes';
+import { GEO_POI_IDS } from './geo-poi-ids';
 
 export const STORAGE_KEY = 'genk-pd:v1';
 export const RNG_SEED_KEY = 'genk-pd:rng-seed';
@@ -15,6 +16,16 @@ export type SeedInput = {
     scenarios?: { progress?: SeedProgress; turn?: number };
     recall?: { progress?: SeedProgress; turn?: number };
   };
+  geo?: {
+    blind?: { progress?: SeedProgress; turn?: number };
+    name?: { progress?: SeedProgress; turn?: number };
+    categoryFilter?: {
+      street?: boolean;
+      highway?: boolean;
+      city?: boolean;
+      state?: boolean;
+    };
+  };
   randomSeed?: number;
 };
 
@@ -27,7 +38,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 3 as const,
+    schemaVersion: 4 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -51,6 +62,24 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
       recall: {
         progress: input.penal?.recall?.progress ?? {},
         turn: input.penal?.recall?.turn ?? 0,
+      },
+    },
+    geo: {
+      blind: {
+        progress: input.geo?.blind?.progress ?? {},
+        turn: input.geo?.blind?.turn ?? 0,
+      },
+      name: {
+        progress: input.geo?.name?.progress ?? {},
+        turn: input.geo?.name?.turn ?? 0,
+      },
+      settings: {
+        categoryFilter: {
+          street: input.geo?.categoryFilter?.street ?? true,
+          highway: input.geo?.categoryFilter?.highway ?? true,
+          city: input.geo?.categoryFilter?.city ?? true,
+          state: input.geo?.categoryFilter?.state ?? true,
+        },
       },
     },
   };
@@ -212,6 +241,22 @@ export function pinNextPenalScenario(targetId: string, targetScore = 0): SeedPro
 export function pinNextPenalParagraph(targetId: string, targetScore = 0): SeedProgress {
   const progress: SeedProgress = {};
   for (const id of PENAL_PARAGRAPH_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+/** Re-exported from generated file (kept in sync with pois.ts via import script). */
+export { GEO_POI_IDS };
+
+export function pinNextGeoPoi(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of GEO_POI_IDS) {
     if (id !== targetId) {
       progress[id] = { score: 2, lastAskedAtTurn: -10 };
     }

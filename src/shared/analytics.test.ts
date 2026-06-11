@@ -5,9 +5,12 @@ import {
   initAnalytics,
   trackCodeAnswered,
   trackCodesCompleted,
+  trackGeoAnswered,
+  trackGeoCompleted,
   trackLawAnswered,
   trackPageview,
   trackProgressReset,
+  trackQuestionSkipped,
 } from './analytics';
 
 const mp = vi.mocked(mixpanel);
@@ -108,12 +111,45 @@ describe('analytics', () => {
     expect(mp.track).toHaveBeenCalledWith('codes_completed', { scope: 'partial' });
   });
 
+  it('trackGeoAnswered forwards props to mixpanel.track', () => {
+    initAnalytics();
+    trackGeoAnswered({ mode: 'blind', success: true, poi_id: 'landmark.vinewood-sign' });
+    expect(mp.track).toHaveBeenCalledWith('geo_answered', {
+      mode: 'blind',
+      success: true,
+      poi_id: 'landmark.vinewood-sign',
+    });
+  });
+
+  it('trackGeoCompleted forwards mode to mixpanel.track', () => {
+    initAnalytics();
+    trackGeoCompleted({ mode: 'name' });
+    expect(mp.track).toHaveBeenCalledWith('geo_completed', { mode: 'name' });
+  });
+
+  it('trackQuestionSkipped accepts geo modules', () => {
+    initAnalytics();
+    trackQuestionSkipped({ module: 'geo-blind', question_id: 'landmark.x' });
+    expect(mp.track).toHaveBeenCalledWith('question_skipped', {
+      module: 'geo-blind',
+      question_id: 'landmark.x',
+    });
+  });
+
+  it('trackProgressReset accepts geo modules', () => {
+    initAnalytics();
+    trackProgressReset({ module: 'geo-name' });
+    expect(mp.track).toHaveBeenCalledWith('progress_reset', { module: 'geo-name' });
+  });
+
   it('all track* are silent no-ops before initAnalytics', () => {
     expect(() => {
       trackCodeAnswered({ mode: 'choose', success: false, code_id: '10-99' });
       trackLawAnswered({ success: true, question_id: 'lea.7' });
       trackProgressReset({ module: 'codes' });
       trackCodesCompleted({ scope: 'all' });
+      trackGeoAnswered({ mode: 'blind', success: true, poi_id: 'x' });
+      trackGeoCompleted({ mode: 'name' });
     }).not.toThrow();
     expect(mp.track).not.toHaveBeenCalled();
   });
