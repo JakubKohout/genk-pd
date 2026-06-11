@@ -22,6 +22,7 @@ import { STREETS } from './streets.generated';
 const NON_STREET_POIS: readonly POI[] = [
   {
     id: "landmark.lsia",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.319, y: 0.809 },
@@ -31,6 +32,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.doky",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.453, y: 0.804 },
@@ -40,6 +42,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.industrialni-zona",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.54, y: 0.693 },
@@ -49,6 +52,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.ropne-vrty",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.63, y: 0.778 },
@@ -58,6 +62,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.mirror-park",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.583, y: 0.668 },
@@ -67,6 +72,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.casino",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.563, y: 0.62 },
@@ -76,6 +82,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.mega-mall",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.429, y: 0.638 },
@@ -85,6 +92,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.pdm",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.455, y: 0.703 },
@@ -94,6 +102,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.legion-square",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.479, y: 0.692 },
@@ -103,6 +112,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.pillbox",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.498, y: 0.664 },
@@ -112,6 +122,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.maze-bank-tower",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.45, y: 0.682 },
@@ -121,6 +132,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.posta",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.466, y: 0.612 },
@@ -130,6 +142,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.arcadius",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.442, y: 0.664 },
@@ -139,6 +152,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.weazel",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.39, y: 0.69 },
@@ -148,6 +162,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.gym-u-plaze",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.323, y: 0.737 },
@@ -157,6 +172,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.molo",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.268, y: 0.704 },
@@ -166,6 +182,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.life-invader",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.341, y: 0.641 },
@@ -175,6 +192,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.klenotnictvi",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.39, y: 0.637 },
@@ -184,6 +202,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.radnice",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.398, y: 0.638 },
@@ -193,6 +212,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.lsc",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.42, y: 0.631 },
@@ -202,6 +222,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.rockford-plaza",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.438, y: 0.638 },
@@ -211,6 +232,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.hlavni-banka",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.488, y: 0.604 },
@@ -220,6 +242,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.hriste-golf",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.328, y: 0.618 },
@@ -229,6 +252,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.hrbitov",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.273, y: 0.64 },
@@ -238,6 +262,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.observator",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.409, y: 0.541 },
@@ -247,6 +272,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.divadlo",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.495, y: 0.603 },
@@ -256,6 +282,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.vinewood-sign",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.536, y: 0.53 },
@@ -265,6 +292,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.power-station",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.765, y: 0.51 },
@@ -274,6 +302,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.vetrne-elektrarny",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.71, y: 0.457 },
@@ -283,6 +312,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.prehrada",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.677, y: 0.609 },
@@ -292,6 +322,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.veznice",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.648, y: 0.428 },
@@ -301,6 +332,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.letiste-sandy",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.605, y: 0.393 },
@@ -310,6 +342,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.fort-zancudo",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.22, y: 0.389 },
@@ -319,6 +352,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.vinice",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.259, y: 0.462 },
@@ -328,6 +362,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.maze-bank-arena",
+    size: "large",
     category: "landmark",
     geometry: "point",
     position: { x: 0.424, y: 0.766 },
@@ -337,6 +372,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.g6",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.431, y: 0.613 },
@@ -346,6 +382,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.pink-cage-motel",
+    size: "small",
     category: "landmark",
     geometry: "point",
     position: { x: 0.5, y: 0.591 },
@@ -355,6 +392,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.vodni-mesto",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.347, y: 0.701 },
@@ -364,6 +402,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.sandy-shores",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.652, y: 0.345 },
@@ -373,6 +412,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.grapeseed",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.711, y: 0.265 },
@@ -382,6 +422,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.paleto-bay",
+    size: "huge",
     category: "landmark",
     geometry: "point",
     position: { x: 0.442, y: 0.157 },
@@ -391,6 +432,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.north-chumash",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.201, y: 0.308 },
@@ -400,6 +442,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "landmark.chumash",
+    size: "medium",
     category: "landmark",
     geometry: "point",
     position: { x: 0.096, y: 0.551 },
@@ -409,6 +452,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "pd.vespucci",
+    size: "small",
     category: "pd",
     geometry: "point",
     position: { x: 0.338, y: 0.682 },
@@ -418,6 +462,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "pd.vinewood",
+    size: "small",
     category: "pd",
     geometry: "point",
     position: { x: 0.529, y: 0.622 },
@@ -427,6 +472,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "fire.hq",
+    size: "small",
     category: "fire",
     geometry: "point",
     position: { x: 0.386, y: 0.629 },
@@ -436,6 +482,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "ems.central",
+    size: "small",
     category: "ems",
     geometry: "point",
     position: { x: 0.499, y: 0.725 },
@@ -445,6 +492,7 @@ const NON_STREET_POIS: readonly POI[] = [
   },
   {
     id: "ammu.downtown",
+    size: "small",
     category: "ammu",
     geometry: "point",
     position: { x: 0.462, y: 0.703 },

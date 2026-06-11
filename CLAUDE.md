@@ -29,9 +29,12 @@ funkční moduly:
    (Leaflet + CRS.Simple + tile pyramid 0..3 nad `clean-map.jpg` 8192×12288),
    2 herní režimy + interní editor pozic:
    - **Slepá mapa** (`/geo/blind`, default index) — uživatel dostane prompt
-     „Klikni na X — popis" a kliká na mapu. Hit-test binární s prahem 0.03
-     normalizovaných jednotek (~3 % šířky). Bodové POI: euklidovská distance.
-     Polyline POI (ulice): minimum perpendikulární distance segmentu.
+     „Klikni na X — popis" a kliká na mapu. Hit-test binární s **prahem dle
+     velikosti POI** (pole `size`, 5 tierů tiny/small/medium/large/huge →
+     0.015/0.025/0.035/0.055/0.09 normalizovaných jednotek; default medium
+     když `size` chybí). Velké oblasti (letiště, doky, města) = huge, pinpoint
+     budovy = small. Bodové POI: euklidovská distance. Polyline POI (ulice):
+     minimum perpendikulární distance segmentu (fixní 0.015).
    - **Co je tady** (`/geo/name`) — pulzující marker na mapě bez popisku,
      uživatel napíše název. Free-text + autocomplete (LEA pattern) +
      Hard mode toggle (Penal pattern).
@@ -77,7 +80,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **395 unit/component + 67 E2E = 462 testů**.
+`npm run test:all` musí být zelené: **407 unit/component + 67 E2E = 474 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -151,11 +154,13 @@ src/
     geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + editor pozic)
       data/
         types.ts                    # POIBase, POIPoint, POIPolyline, POI union,
-                                    # POICategory: 6 hodnot (street/landmark/pd/fire/ems/ammu)
+                                    # POICategory: 6 hodnot (street/landmark/pd/fire/ems/ammu),
+                                    # POISize: 5 tierů (tiny..huge) — volitelné pole `size`
         pois.ts                     # POIS — 68 POI z uživatelova zadávacího seznamu:
                                     # 43 landmark + 2 pd + 1 fire + 1 ems + 1 ammu + 20 street.
                                     # Non-street: point geometry, pozice přenesené z HEAD
-                                    # přes image-affine + vizuálně ověřené (Gotcha 45).
+                                    # přes image-affine + vizuálně ověřené (Gotcha 45),
+                                    # každý má `size` tier pro klikací toleranci (Gotcha 47).
                                     # Streets: koncat z streets.generated.ts.
         streets.generated.ts        # HAND-TRACED z artu (navzdory názvu negenerovaný) —
                                     # 20 street polyline centerlines dle popisků v artu
@@ -165,7 +170,9 @@ src/
                                     # canonical id prefix per category, geometry consistency)
       logic/
         coords.ts                   # toLatLng / fromLatLng helpery (CRS.Simple [y,x])
-        hitTest.ts                  # evaluateClick: point (euklid threshold 0.03), polyline
+        hitTest.ts                  # evaluateClick: point (euklid threshold dle
+                                    # POI size, SIZE_THRESHOLDS 5 tierů, default
+                                    # medium 0.035), polyline
                                     # (perpendikulární distance ≤ 0.015).
                                     # hitTest.streets.test.ts: 12 real-coordinate fixtures
                                     # ověřených proti satelitnímu artu
@@ -873,8 +880,8 @@ route s `<Outlet />`:
 32. **Geo hit-test je ve square coord space (akceptujeme aspect distortion)** —
     `pointHit` a `polylineHit` z `logic/hitTest.ts` počítají Euklidovu distanci
     v normalizovaném 0..1 prostoru. Source PNG je portrait 5039×7463, takže
-    1 jednotka v Y odpovídá menšímu počtu pixelů než v X. Pro práh 0.03 to
-    znamená cca 151 zdrojových px v X vs 224 v Y. Pro MVP fine. Pokud bude
+    1 jednotka v Y odpovídá menšímu počtu pixelů než v X. Pro práh medium 0.035
+    to znamená cca 176 zdrojových px v X vs 261 v Y. Pro MVP fine. Pokud bude
     bolet, vynásobit Y rozdílem (5039/7463 = 0.675) v hit-testu pro skutečně
     izotropní distanci.
 
@@ -951,6 +958,20 @@ route s `<Outlet />`:
     retuningu použít `/geo/blind` debug overlay (klávesa `D`: vykreslí
     všechny centerlines + loguje normalized click coords do console) a
     Drag&Drop editor `/geo/calibrate`, pak paste do `streets.generated.ts`.
+
+47. **Klikací tolerance bodových POI je per-`size`, ne fixní** — `evaluateClick`
+    bere práh z `SIZE_THRESHOLDS[poi.size ?? 'medium']` (`logic/hitTest.ts`):
+    tiny 0.015 / small 0.025 / medium 0.035 / large 0.055 / huge 0.09. Velké
+    rozlehlé oblasti (letiště, doky, města, ropné pole — `size: "huge"`) mají
+    velkou klikací zónu, pinpoint budovy (`size: "small"`) malou. `size` je
+    volitelné na `POIBase`, ale prakticky platí jen pro point geometry (ulice
+    drží fixní `POLYLINE_HIT_TOLERANCE`). `HIT_THRESHOLD` je teď alias medium
+    (0.035, byl flat 0.03). Explicitní `threshold` param `evaluateClick` pořád
+    override-uje size (testy). `pois.test.ts` validuje, že každý point POI má
+    `size` z 5 hodnot. **`formatPoisTs` (calibrate export) emituje `size`** — bez
+    toho by re-export z `/geo/calibrate` pole smazal. Retuning hodnot: edituj
+    `SIZE_THRESHOLDS` (globálně) nebo per-POI `size` v `pois.ts`. Tier `tiny`
+    je zatím nepoužitý (k dispozici pro budoucí pinpoint POI).
 
 ## Konvence
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { POIS, POI_BY_ID } from './pois';
+import { SIZE_THRESHOLDS } from '../logic/hitTest';
 import { normalize } from '@/shared/text/normalize';
 
 describe('POI dataset', () => {
@@ -107,6 +108,15 @@ describe('POI dataset', () => {
     expect(Object.keys(POI_BY_ID).length).toBe(POIS.length);
     for (const p of POIS) {
       expect(POI_BY_ID[p.id]).toBe(p);
+    }
+  });
+
+  it('assigns a valid size tier to every point POI', () => {
+    for (const p of POIS) {
+      if (p.geometry === 'point') {
+        expect(p.size).toBeDefined();
+        expect(Object.keys(SIZE_THRESHOLDS)).toContain(p.size);
+      }
     }
   });
 

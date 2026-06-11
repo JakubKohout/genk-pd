@@ -1,5 +1,8 @@
 export type POICategory = 'street' | 'landmark' | 'pd' | 'fire' | 'ems' | 'ammu';
 
+/** Click-tolerance tier for point POIs. Omitted = 'medium'. See SIZE_THRESHOLDS. */
+export type POISize = 'tiny' | 'small' | 'medium' | 'large' | 'huge';
+
 export type Vec2 = { x: number; y: number };
 
 interface POIBase {
@@ -8,6 +11,9 @@ interface POIBase {
   name: string;
   description: string;
   aliases: string[];
+  /** Larger sprawling places (airport, docks, towns) get a bigger hit radius;
+   * pinpoint buildings a smaller one. Only meaningful for point POIs. */
+  size?: POISize;
 }
 
 export interface POIPoint extends POIBase {

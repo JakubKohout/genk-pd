@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   HIT_THRESHOLD,
   POLYLINE_HIT_TOLERANCE,
+  SIZE_THRESHOLDS,
   distance,
   evaluateClick,
   pointToPolylineDist,
   pointToSegmentDist,
 } from './hitTest';
-import type { POIPoint, POIPolyline } from '../data/types';
+import type { POIPoint, POIPolyline, POISize } from '../data/types';
 
 describe('distance', () => {
   it('returns 0 for the same point', () => {
@@ -127,6 +128,64 @@ describe('evaluateClick', () => {
 
   it('miss when click is past the endpoint', () => {
     const result = evaluateClick(polyline, { x: 0.9, y: 0.5 });
+    expect(result.hit).toBe(false);
+  });
+});
+
+describe('evaluateClick size tiers', () => {
+  const pointWithSize = (size?: POISize): POIPoint => ({
+    id: 'landmark.x',
+    category: 'landmark',
+    name: 'X',
+    description: 'desc',
+    aliases: ['x'],
+    geometry: 'point',
+    position: { x: 0.5, y: 0.5 },
+    ...(size ? { size } : {}),
+  });
+
+  it('defaults to the medium threshold when size is omitted', () => {
+    expect(SIZE_THRESHOLDS.medium).toBe(HIT_THRESHOLD);
+    const poi = pointWithSize();
+    // click at distance 0.03 along x — inside medium (0.035)
+    expect(evaluateClick(poi, { x: 0.53, y: 0.5 }).hit).toBe(true);
+    // click at distance 0.05 — outside medium
+    expect(evaluateClick(poi, { x: 0.55, y: 0.5 }).hit).toBe(false);
+  });
+
+  it('exposes the five expected tier thresholds in increasing order', () => {
+    expect(SIZE_THRESHOLDS).toEqual({
+      tiny: 0.015,
+      small: 0.025,
+      medium: 0.035,
+      large: 0.055,
+      huge: 0.09,
+    });
+  });
+
+  it.each([
+    ['tiny', 0.015],
+    ['small', 0.025],
+    ['medium', 0.035],
+    ['large', 0.055],
+    ['huge', 0.09],
+  ] as const)('hits just inside and misses just outside the %s radius', (size, threshold) => {
+    const poi = pointWithSize(size);
+    const inside = evaluateClick(poi, { x: 0.5 + threshold - 0.002, y: 0.5 });
+    const outside = evaluateClick(poi, { x: 0.5 + threshold + 0.002, y: 0.5 });
+    expect(inside.hit).toBe(true);
+    expect(outside.hit).toBe(false);
+  });
+
+  it('treats a huge POI click as a hit where a medium POI would miss', () => {
+    const click = { x: 0.5 + 0.07, y: 0.5 }; // 0.07: outside medium, inside huge
+    expect(evaluateClick(pointWithSize('huge'), click).hit).toBe(true);
+    expect(evaluateClick(pointWithSize('medium'), click).hit).toBe(false);
+  });
+
+  it('still honours an explicit threshold override regardless of size', () => {
+    const poi = pointWithSize('huge');
+    const result = evaluateClick(poi, { x: 0.55, y: 0.5 }, 0.01);
     expect(result.hit).toBe(false);
   });
 });

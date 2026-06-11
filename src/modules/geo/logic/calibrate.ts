@@ -53,6 +53,7 @@ export function formatPoisTs(pois: readonly POI[]): string {
   for (const p of pois) {
     lines.push(`  {`);
     lines.push(`    id: ${JSON.stringify(p.id)},`);
+    if (p.size) lines.push(`    size: ${JSON.stringify(p.size)},`);
     lines.push(`    category: ${JSON.stringify(p.category)},`);
     lines.push(`    geometry: ${JSON.stringify(p.geometry)},`);
     if (p.geometry === 'point') {

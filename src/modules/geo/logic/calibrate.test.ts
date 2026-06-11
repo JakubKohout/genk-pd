@@ -72,4 +72,33 @@ describe('formatPoisTs', () => {
     expect(out).not.toContain('path:');
     expect(out).not.toContain('centroid:');
   });
+
+  it('preserves the size tier for point POIs that define one', () => {
+    const point: POI = {
+      id: 'landmark.big',
+      category: 'landmark',
+      name: 'Big',
+      description: 'desc',
+      aliases: ['b'],
+      geometry: 'point',
+      position: { x: 0.5, y: 0.5 },
+      size: 'huge',
+    };
+    const out = formatPoisTs([point]);
+    expect(out).toContain('size: "huge"');
+  });
+
+  it('omits the size line for POIs without a size', () => {
+    const point: POI = {
+      id: 'landmark.plain',
+      category: 'landmark',
+      name: 'Plain',
+      description: 'desc',
+      aliases: ['p'],
+      geometry: 'point',
+      position: { x: 0.5, y: 0.5 },
+    };
+    const out = formatPoisTs([point]);
+    expect(out).not.toContain('size:');
+  });
 });

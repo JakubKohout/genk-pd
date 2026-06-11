@@ -1,6 +1,16 @@
-import type { POI, Vec2 } from '../data/types';
+import type { POI, POISize, Vec2 } from '../data/types';
 
-export const HIT_THRESHOLD = 0.03;
+/** Per-size click tolerances in normalized units (0..1 over map width). */
+export const SIZE_THRESHOLDS: Record<POISize, number> = {
+  tiny: 0.015,
+  small: 0.025,
+  medium: 0.035,
+  large: 0.055,
+  huge: 0.09,
+};
+
+/** Default point tolerance (alias for the medium tier). */
+export const HIT_THRESHOLD = SIZE_THRESHOLDS.medium;
 
 export function distance(a: Vec2, b: Vec2): number {
   const dx = a.x - b.x;
@@ -41,15 +51,18 @@ export type EvaluatedClick = {
   distance: number;
 };
 
-/** Evaluate a click against a POI: returns hit status and distance to target. */
+/** Evaluate a click against a POI: returns hit status and distance to target.
+ * For point POIs the tolerance derives from the POI's `size` tier (default
+ * medium) unless an explicit `threshold` override is supplied. */
 export function evaluateClick(
   poi: POI,
   click: Vec2,
-  threshold = HIT_THRESHOLD,
+  threshold?: number,
 ): EvaluatedClick {
   if (poi.geometry === 'point') {
+    const limit = threshold ?? SIZE_THRESHOLDS[poi.size ?? 'medium'];
     const d = distance(click, poi.position);
-    return { hit: d < threshold, distance: d };
+    return { hit: d < limit, distance: d };
   }
   const d = pointToPolylineDist(click, poi.path);
   return { hit: d <= POLYLINE_HIT_TOLERANCE, distance: d };
