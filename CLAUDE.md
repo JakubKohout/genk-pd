@@ -27,7 +27,7 @@ funkční moduly:
    + zkrácený prompt.
 4. **Geografie** (`/geo`) — interaktivní mapa Los Santos a Blaine County
    (Leaflet + CRS.Simple + tile pyramid 0..3 nad `clean-map.jpg` 8192×12288),
-   2 herní režimy + interní kalibrátor:
+   2 herní režimy + interní editor pozic:
    - **Slepá mapa** (`/geo/blind`, default index) — uživatel dostane prompt
      „Klikni na X — popis" a kliká na mapu. Hit-test binární s prahem 0.03
      normalizovaných jednotek (~3 % šířky). Bodové POI: euklidovská distance.
@@ -35,16 +35,15 @@ funkční moduly:
    - **Co je tady** (`/geo/name`) — pulzující marker na mapě bez popisku,
      uživatel napíše název. Free-text + autocomplete (LEA pattern) +
      Hard mode toggle (Penal pattern).
-   - **Kalibrátor** (`/geo/calibrate`) — interní 3-tab editor: `Drag&drop`
-     (ladění existujících POI), `Anchor & import (MG)` (Map Genie data + bulk
-     import přes affine fit), `Přidat POI` (formulář + klik na mapu pro nové
-     point/polyline).
+   - **Editor pozic** (`/geo/calibrate`) — interní Drag&drop editor:
+     markery a polyline nody tažitelné, export TS literálu pro paste zpět
+     do `pois.ts` / `streets.generated.ts`.
    Mastered POI zůstávají faded markery / polyline s názvem na mapě → mapa
    se postupně „odemyká". Společný `categoryFilter` (6 kategorií:
    street/landmark/pd/fire/ems/ammu) v `geo.settings`. Per-režim progress
    (jako Penal). **68 POI dataset** (`pois.ts`): 43 landmark + 2 pd + 1 fire
-   + 1 ems + 1 ammu + 20 street. 34 landmarků auto-derived z MG affine fit
-   (anchors v `anchorsCalibration.ts`), zbytek manuálně eyeball.
+   + 1 ems + 1 ammu + 20 street. Pozice přenesené z předchozí mapy přes
+   image-affine + vizuálně ověřené proti artu (Gotcha 45), ulice hand-traced.
 
 Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
 **Firearm Act** je disabled (`aria-disabled`, čeká na implementaci).
@@ -52,7 +51,7 @@ Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
 samostatný top-level modul, ne pod `/laws`.
 
 Pure-frontend, žádný backend. Veškerý stav v `localStorage` (klíč `genk-pd:v1`,
-schemaVersion 5).
+schemaVersion 6).
 
 ## Stack
 
@@ -78,7 +77,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **414 unit/component + 67 E2E = 481 testů**.
+`npm run test:all` musí být zelené: **395 unit/component + 67 E2E = 462 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -90,14 +89,11 @@ Pokud bys znovu regeneroval `docs/clean-map.jpg` z Rockstar minimapů:
 pak `node scripts/generate-tiles.mjs`. `docs/map-original/` (zdrojové `.ytd`)
 je v `.gitignore` — uživatel je extrahuje z `scaleform_generic.rpf` přes OpenIV.
 
-Map Genie scrape (geo modul) se NEspouští v `npm run build` — je to one-time
-idempotentní skript `node scripts/scrape-mapgenie.mjs`. Zapisuje archiv do
-`docs/mapgenie-data/` (commitnuté).
-
 Street centerlines (geo modul) jsou hand-traced z artu přímo v
-`src/modules/geo/data/streets.generated.ts` — NEgenerovat skriptem
-(YND pipeline je superseded, viz Gotcha 47). Retuning přes `/geo/calibrate`
-Drag&Drop nebo debug overlay (`D` v `/geo/blind`).
+`src/modules/geo/data/streets.generated.ts` — žádný generátor neexistuje
+(historické YND/Foxxite pipelines byly smazány; viz git historie, pokud by
+byly potřeba jako reference). Retuning přes `/geo/calibrate` Drag&Drop nebo
+debug overlay (`D` v `/geo/blind`).
 
 ## Adresářová struktura
 
@@ -152,9 +148,9 @@ src/
                                     # PenalScenarioPage, PenalRecallPage, PenalAnswerInput,
                                     # PenalSidePanel (generický pro obě módy s {label, sublabel?,
                                     # hoverTitle}), PenalSubmitFooter, PenalResetButton
-    geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + kalibrátor)
+    geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + editor pozic)
       data/
-        types.ts                    # POIBase, POIPoint, POIPolyline, POIPolygon, POI union,
+        types.ts                    # POIBase, POIPoint, POIPolyline, POI union,
                                     # POICategory: 6 hodnot (street/landmark/pd/fire/ems/ammu)
         pois.ts                     # POIS — 68 POI z uživatelova zadávacího seznamu:
                                     # 43 landmark + 2 pd + 1 fire + 1 ems + 1 ammu + 20 street.
@@ -164,36 +160,19 @@ src/
         streets.generated.ts        # HAND-TRACED z artu (navzdory názvu negenerovaný) —
                                     # 20 street polyline centerlines dle popisků v artu
                                     # (Gotcha 46)
-        foxxiteSource.generated.ts  # AUTO-GENERATED (import-foxxite-streets.mjs) — raw Foxxite
-                                    # polygony, jen pro legacy StreetAnchorsTab overlay
-        anchorsCalibration.ts       # DEFAULT_ANCHORS — persistentní kotvy pro MG import.
-                                    # UI nahrává automaticky při mountu Anchor & import tabu.
-        mapgenieLocations.ts        # Typed wrapper nad docs/mapgenie-data/filtered.json
-                                    # (355 lokací). MG_LOCATIONS + MG_LOCATION_BY_ID.
         tileMeta.ts                 # TILE_META — auto-generovaný skriptem generate-tiles.mjs
         pois.test.ts                # Validace (count, unique IDs, alias non-collision,
                                     # canonical id prefix per category, geometry consistency)
       logic/
         coords.ts                   # toLatLng / fromLatLng helpery (CRS.Simple [y,x])
-        gtaProjection.ts            # gtaToNorm — kanonický GTA-world → normalized transform
         hitTest.ts                  # evaluateClick: point (euklid threshold 0.03), polyline
-                                    # (perpendikulární distance ≤ 0.015), polygon
-                                    # (point-in-polygon přes turf — reserved pro districts).
+                                    # (perpendikulární distance ≤ 0.015).
                                     # hitTest.streets.test.ts: 12 real-coordinate fixtures
                                     # ověřených proti satelitnímu artu
         match.ts                    # matchPoi — strict equality po normalize, name + aliases
         suggest.ts                  # suggestPois — substring autocomplete, min 2, max 5
-        calibrate.ts                # fitAffine (4-param), fitAffine6 (6-param: +rotace,shear),
-                                    # fitTps (Thin-Plate Spline, exact interpolation).
-                                    # apply* counterparts, CalibrationPair, formatPoisTs.
-                                    # Internal: solve3x3, solveLinearSystem (Gauss elimination).
-        transform.ts                # MG-specific:
-                                    # · mgLatLngToVec2 — KRITICKÉ: aplikuje Web Mercator
-                                    #   forward na latitude (log(tan(π/4 + lat·π/360))).
-                                    # · fitAnchorTransformMode (auto/affine6/tps)
-                                    # · fitBestAnchorTransform (= auto)
-                                    # · computeResiduals / computeLooResiduals
-                                    # · MgTransform union (affine4/affine6/tps)
+        calibrate.ts                # polylineCentroid (arc-length midpoint) + formatPoisTs
+                                    # (TS literál pro paste do pois.ts) — jen pro DragDropTab
       state/
         selection.ts                # pickNextPoi(state, pois, filter) přes pickNextFromPool,
                                     # eligiblePois, isGeoComplete
@@ -202,24 +181,15 @@ src/
         useGeoSettings.ts           # Category filter (6 kategorií), persistuje
       components/                   # GeoLayout (tabs + Outlet), GeoBlindPage (mode 1),
                                     # GeoNamePage (mode 2), GeoMap (Leaflet wrapper +
-                                    # MapClickCapture), GeoMarker, GeoStreet, GeoSidePanel,
+                                    # MapClickCapture), GeoMarker, GeoPolyline, GeoSidePanel,
                                     # GeoMobilePanel (<details>), GeoAnswerInput, GeoResetButton,
-                                    # GeoCalibratePage (3-tab kontejner)
-        calibrate/                  # Tab implementations:
-                                    # · DragDropTab — POI markery tažitelné, polyline nody
+                                    # GeoCalibratePage (renderuje DragDropTab), GeoDebugOverlay
+        calibrate/                  # · DragDropTab — POI markery tažitelné, polyline nody
                                     #   draggable, export TS přes formatPoisTs
-                                    # · AnchorImportTab — MG seznam vlevo (search + checkboxy
-                                    #   pro import), mapa centr, anchor click flow, Model
-                                    #   dropdown (auto/affine6/tps), Preview všech 355 MG
-                                    #   checkbox, per-anchor Δ + LOO residual (zelená<0.02,
-                                    #   žlutá 0.02-0.04, červená >0.04), "Reset na defaultní"
-                                    #   tlačítko
-                                    # · AddPoiTab — formulář (id/name/desc/aliases/cat/geometry)
-                                    #   + klik na mapu pro point/polyline, draggable, export TS
   shared/
-    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 5,
-                                    # chained migrate v1→v2→v3→v4→v5 při readu, lenient v5 read.
-                                    # migrateV4ToV5: clear geo.blind.progress + geo.name.progress
+    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 6,
+                                    # chained migrate v1→…→v6 při readu, lenient v6 read.
+                                    # migrateV5ToV6: clear geo.blind.progress + geo.name.progress
                                     # (POI IDs přepsány při novém datasetu), settings zachovat
     rng.ts                          # Pluggable RNG (mulberry32, seed přes localStorage)
     useMediaQuery.ts                # SSR-safe matchMedia hook
@@ -244,38 +214,18 @@ scripts/
                                     # + tileMeta.ts. Spouští se ručně (`node scripts/...`)
   extract-minimap.py                # Stitch Rockstar minimap .ytd textur (docs/map-original/,
                                     # gitignored) → docs/clean-map.jpg (8192×12288)
-  scrape-mapgenie.mjs               # MG scraper: fetch gta-5-map.com HTML, parse inline
-                                    # window.mapData, write docs/mapgenie-data/*. Idempotentní,
-                                    # filtr 15 relevantních kategorií (Police, Hospital,
-                                    # Building, Misc, Executive Office, Facility, atd.).
-  fetch-ynd-data.mjs                # SUPERSEDED (Gotcha 47): stáhne GTA V path-node dump
-                                    # (DurtyFree) do data/raw/ (~144 MB, gitignored)
-  build-streets-from-ynd.mjs        # SUPERSEDED (Gotcha 47): centerlines z vanilla node
-                                    # grafu — na custom artu nesedí, NEPOUŠTĚT (přepsal by
-                                    # hand-traced streets.generated.ts)
-  import-foxxite-streets.mjs        # Archiv Foxxite street/area polygonů →
-                                    # foxxiteSource.generated.ts (jen legacy kalibrátor;
-                                    # street geometrii už NEgeneruje)
-  migrate-poi-coords.mjs            # SUPERSEDED (Gotcha 47): chybná one-shot migrace,
-                                    # NEPOUŠTĚT
 
 public/
   tiles/                            # Vygenerované Leaflet CRS.Simple tiles, z=0..3,
                                     # 802 JPEG souborů, ~5.7 MB
 
-docs/mapgenie-data/                 # Trvalý archiv MG datasetu (commitnutý):
-  raw.html                          # Celá HTML response (943 KB)
-  raw.json                          # window.mapData (1.2 MB, 2269 lokací × 67 kategorií)
-  filtered.json                     # 355 lokací z 15 relevantních kategorií (103 KB) —
-                                    # source pro mapgenieLocations.ts
-  scraped-at.txt                    # Timestamp + URL + counts
-docs/poi-mapping.md                 # Mapování uživatelova POI seznamu → MG IDs + CZ jména
+docs/poi-mapping.md                 # Mapování uživatelova POI seznamu → CZ jména
                                     # + aliasy. Cheat sheet, aplikace ho NEČTE. Slouží jako
                                     # human reference pro generování pois.ts.
 
 e2e/
   fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?, penal?, geo?, randomSeed? })`
-                                    # Píše schemaVersion 4, exportuje LEA_QUESTION_IDS,
+                                    # Píše schemaVersion 6, exportuje LEA_QUESTION_IDS,
                                     # PENAL_SCENARIO_IDS, PENAL_PARAGRAPH_IDS, GEO_POI_IDS,
                                     # pinNext{Question, LeaQuestion, PenalScenario,
                                     # PenalParagraph, GeoPoi}
@@ -298,7 +248,7 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
 ```ts
 // localStorage["genk-pd:v1"]
 {
-  schemaVersion: 5,
+  schemaVersion: 6,
   codes: {
     progress: { [codeId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number,
@@ -327,15 +277,15 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
 }
 ```
 
-**Migrace v1 → v2 → v3 → v4 → v5** (`src/shared/storage.ts`): při readu se starší
-payload chained-migruje v paměti. v1: codes zachováno, lea přidáno default.
+**Migrace v1 → v2 → v3 → v4 → v5 → v6** (`src/shared/storage.ts`): při readu se
+starší payload chained-migruje v paměti. v1: codes zachováno, lea přidáno default.
 v2: codes+lea zachováno, penal přidáno default. v3: codes+lea+penal zachováno,
-geo přidáno default. **v4 → v5**: `migrateV4ToV5` vynuluje `geo.blind.progress`
-+ `geo.name.progress` (POI IDs kompletně přepsané v novém 68-POI datasetu),
-settings se přenese a doplní nové default kategorie (fire/ems/ammu = true).
-`saveState` vždy zapisuje v5.
+geo přidáno default. v4 → v5: vynulování geo progress (první rewrite POI datasetu)
++ doplnění kategorií fire/ems/ammu. **v5 → v6**: `migrateV5ToV6` znovu vynuluje
+`geo.blind.progress` + `geo.name.progress` (POI IDs přepsané při druhém rewrite
+datasetu), settings se přenese. `saveState` vždy zapisuje v6.
 
-**Lenient v5 read**: pokud v5 payload chybí `geo` nebo některá sub-slice
+**Lenient v6 read**: pokud v6 payload chybí `geo` nebo některá sub-slice
 (`blind` / `name` / `settings`), dopočítáme prázdné defaults. categoryFilter
 doplní missing kategorie z initialState (každá true). Stejně lenient pro
 `penal`. (Test `storage.test.ts`.)
@@ -743,7 +693,7 @@ route s `<Outlet />`:
 3. **Playwright seed přes `localStorage`, ne přes window hook**: `page.addInitScript`
    běží před app skripty, takže window hooky ještě nejsou připojené. Místo toho
    `e2e/fixtures/seed.ts` zapisuje rovnou `localStorage["genk-pd:v1"]` (ve formátu
-   `schemaVersion: 3` s codes + lea + penal slices) a `localStorage["genk-pd:rng-seed"]`.
+   `schemaVersion: 6` se všemi slices) a `localStorage["genk-pd:rng-seed"]`.
    Init script používá `sessionStorage` flag `genk-pd:seeded`, aby se
    **nepřeseedoval po reloadu** (jinak by persistence testy byly k ničemu).
 
@@ -789,11 +739,12 @@ route s `<Outlet />`:
     `<details>`). RTL `getByTestId` najde i hidden elementy uvnitř collapsed details,
     takže existující testy fungují.
 
-11. **`schemaVersion` v test seedech musí být `3` + `lea` + `penal` slice**.
+11. **`schemaVersion` v test seedech musí být `6` se všemi slices**.
     Hardcoded literály ve všech `*.test.tsx` které volají `saveState({...})` musí mít
-    `schemaVersion: 3`, `lea: { progress: {}, turn: 0 }`, a
-    `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`.
-    Pokud přidáš další slice, bumpni schema (v3 → v4) a doplň migrationi v `storage.ts`.
+    `schemaVersion: 6`, `lea: { progress: {}, turn: 0 }`,
+    `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`
+    a `geo` slice s `settings.categoryFilter` (všech 6 kategorií).
+    Pokud přidáš další slice, bumpni schema (v6 → v7) a doplň migraci v `storage.ts`.
 
 12. **Vite dev server je default lockdown na `localhost`.** Pro ngrok/cloudflared
     tunel je v `vite.config.ts` `server.allowedHosts: ['.ngrok-free.app', '.ngrok.app',
@@ -894,12 +845,12 @@ route s `<Outlet />`:
     — nechtěl jsem komplikovat storage schema o UI preference. Pokud má persist,
     přidat do `penal.scenarios.settings.hardMode` a bumpnout schema.
 
-29. **Schema je v5** — bumpnuto z v4 při rewrite geo POI datasetu (POI IDs
-    úplně přepsané, stará progress garbage). **Všechny test seedy s hardcoded
-    `saveState({...})` literálem musí mít `schemaVersion: 5` + `geo.settings.
+29. **Schema je v6** — bumpnuto z v5 při druhém rewrite geo POI datasetu (POI
+    IDs přepsané, stará progress garbage). **Všechny test seedy s hardcoded
+    `saveState({...})` literálem musí mít `schemaVersion: 6` + `geo.settings.
     categoryFilter` se **všemi 6 kategoriemi**** (`street, landmark, pd, fire,
     ems, ammu` — všechny true defaultně). Stejně tak `e2e/fixtures/seed.ts`.
-    Pokud přidáš další modul nebo zase přepíšeš POI dataset, bumpni v5 → v6
+    Pokud přidáš další modul nebo zase přepíšeš POI dataset, bumpni v6 → v7
     a doplň migraci.
 
 30. **Tile pipeline NEní v `npm run build`** — `scripts/generate-tiles.mjs` je
@@ -950,14 +901,8 @@ route s `<Outlet />`:
     (jednoduchý text), ne na home kartu (link + h2 + p + span = složitý
     accessible name).
 
-37. **KRITICKÉ: MG ukládá raw lat ale renderuje Web Mercator.** `mgLatLngToVec2`
-    v `src/modules/geo/logic/transform.ts` MUSÍ aplikovat forward Mercator
-    na latitude: `y_merc = log(tan(π/4 + lat·π/360))`. Bez toho je vztah
-    `lat → image-y` logaritmický (ne lineární) a žádný affine fit nesedí
-    (Δ 0.02-0.09 i s 9 anchory). S Mercator fitem sedí 6-param affine na
-    6 kotvách s Δ ≤ 0.0005. Empiricky ověřeno: ratio Δour_y/Δlat se mění
-    1.92× napříč mapou, ale Δour_y/Δy_merc je konstantní v 2 %. Longitude
-    zůstává lineární (Mercator x = lng linearly), žádná projekce.
+37. _(smazáno — MG import tooling odstraněn; Web Mercator insight viz git
+    historie `transform.ts`, kdyby se import někdy vracel)_
 
 38. **6 POI kategorií, ne 3** — `POICategory = street | landmark | pd | fire |
     ems | ammu`. Test fixtures s `categoryFilter` literálem musí mít všech 6
@@ -966,33 +911,13 @@ route s `<Outlet />`:
     backfill + GeoSidePanel CATEGORY_LABEL/ABBR/ORDER + GeoBlindPage
     CATEGORY_LABEL + všechny test fixtures + e2e seed.
 
-39. **Anchor kalibrace má 3 modely** v `transform.ts`:
-    - `affine4` (4-param: translate + per-axis scale, žádná rotace) — min 2
-    - `affine6` (6-param: + rotace + shear) — min 3 non-collinear
-    - `tps` (Thin-Plate Spline, exaktní interpolace přes všechny kotvy +
-      hladká interpolace mezi nimi) — min 3 non-collinear, Gauss elim v
-      `solveLinearSystem` v `calibrate.ts`
-    `fitBestAnchorTransform` auto-vybere: 2 anchors → affine4, 3+ → affine6.
-    UI dropdown umožňuje vynutit konkrétní mode.
-
-40. **Leave-one-out (LOO) residuals** v Anchor & import tab — pro každou
-    kotvu: "kdybys vyhodil tuhle, fittnul z ostatních, kam by predikovala?"
-    Vysoký LOO = outlier kotva (zlý klik nebo nekonzistentní s ostatními).
-    Vyžaduje ≥4 anchorů (need 3 pro leave-one-out fit).
-
-41. **`/geo/calibrate` Anchor & import defaultně nahraje 6 anchorů** z
-    `anchorsCalibration.ts` při mountu — uživatel nemusí re-clickat po
-    reloadu. "Reset na defaultní kotvy" vrátí těch 6. "Smazat všechny"
-    vyprázdní seznam.
+39.–41. _(smazáno — anchor kalibrace a MG import odstraněny z kódbáze)_
 
 42. **POI s názvem rovným nějakému aliasu po normalize** = test fail
     (`alias collision with name`). Příklad: name "PDM" + alias "pdm" — oba
     normalizují na "pdm". Řešení: odebrat redundantní alias.
 
-43. **Map Genie tiles jsou za hotlink-protection** — vrací 403 bez Referer
-    z `gta-5-map.com`. Obejít přes spoofing = TOS violation, **nedělat**.
-    Používáme jen jejich JSON data (inlined v HTML, public). Pro satelitku
-    používáme přímo Rockstar minimap textury (viz Gotcha 44).
+43. _(smazáno — Map Genie data se už nepoužívají)_
 
 44. **KRITICKÉ: clean-map.jpg NENÍ lineární projekce vanilla GTA světa** —
     `docs/clean-map.jpg` (8192×12288, stitch 6 minimap textur přes
@@ -1001,11 +926,12 @@ route s `<Outlet />`:
     je až ~1 km „severněji", deformace je nelineární a neopravitelná žádnou
     globální transformací — empiricky ověřeno fitem road grafu i měřením
     křižovatek). Dřívější teorie „uniform projection x∈[-4000..4000],
-    y∈[-4000..8000] @1.024 px/m" je CHYBNÁ — `gtaProjection.ts` a
-    `scripts/migrate-poi-coords.mjs` na ní stavěly a rozbily pozice (proto
-    vznikla session „všechny POI jsou špatně umístěny"). **Jediný zdroj
-    pravdy pro souřadnice je samotný art** (jeho popisky ulic, route shields,
-    parcelní čísla).
+    y∈[-4000..8000] @1.024 px/m" je CHYBNÁ — historický `gtaProjection.ts`
+    a migrace na ní stavěly a rozbily pozice (proto vznikla session „všechny
+    POI jsou špatně umístěny"). **Jediný zdroj pravdy pro souřadnice je
+    samotný art** (jeho popisky ulic, route shields, parcelní čísla).
+    Z toho plyne: NEgenerovat geo souřadnice z vanilla GTA dat (path-node
+    dumpy, Foxxite GeoJSON apod.) — všechny takové pipelines byly smazány.
 
 45. **POI pozice = HEAD pozice přenesené image-affine + vizuální verifikace**
     — pozice v `pois.ts` vznikly přenosem pozic z předchozí mapy (HEAD
@@ -1024,16 +950,7 @@ route s `<Outlet />`:
     perpendikulární distance ≤ `POLYLINE_HIT_TOLERANCE` (0.015). Při
     retuningu použít `/geo/blind` debug overlay (klávesa `D`: vykreslí
     všechny centerlines + loguje normalized click coords do console) a
-    Drag&Drop tab kalibrátoru, pak paste do `streets.generated.ts`.
-
-47. **YND pipeline (fetch-ynd-data.mjs + build-streets-from-ynd.mjs) je
-    superseded** — stavěla centerlines z vanilla path-node dumpu, což na
-    custom artu nesedí (viz Gotcha 44). Skripty zůstávají jako reference
-    (graf, diameter path, sea-clip algoritmy), ale `streets.generated.ts`
-    NEPŘEPISOVAT jejich spuštěním. Stejně tak `migrate-poi-coords.mjs`
-    je one-shot omyl — NEspouštět. Foxxite polygony (hrubé konvexní hully
-    zón) jsou taky nepoužitelné pro hit-test; `import-foxxite-streets.mjs`
-    živí už jen legacy StreetAnchorsTab overlay.
+    Drag&Drop editor `/geo/calibrate`, pak paste do `streets.generated.ts`.
 
 ## Konvence
 
@@ -1061,19 +978,20 @@ route s `<Outlet />`:
   SidePanel je duplikovaný do 4 souborů (codes/lea/penal/geo). YAGNI dokud se to
   nezačne lišit nebo nezačne bolet při změnách.
 - **Geo polygon regiony / čtvrti** (`/geo`): MVP nemá kategorii `district` —
-  Vinewood, Del Perro atd. Pokud bude poptávka, přidat 7. kategorii
-  `district` s `geometry: 'polygon'` (path: Vec2[] uzavřený kruh, hit-test
-  point-in-polygon).
+  Vinewood, Del Perro atd. Polygon podpora byla z kódbáze odstraněna (typ
+  POIPolygon, polygon hit-test přes @turf/* — viz git historie). Pokud bude
+  poptávka, přidat 7. kategorii `district` s `geometry: 'polygon'` znovu:
+  typ + hit-test point-in-polygon + render + formatPoisTs větev.
 - **Geo tile zoom z=4** (native pixel sharpness): aktuálně cap z=3, max zoom
   ~5x downscaled. Bumpe `MAX_ZOOM` v `scripts/generate-tiles.mjs` na 4 přidá
   ~600 tiles (~25 MB). Smysl pokud user reportuje rozmazaný max zoom.
 - **Geo Hard mode persistence** (`geo.settings.hardMode`) — analog Penal Hard
   mode persistence. Stejný argument: bumpni schema až bude poptávka.
-- **Geo POI dolaďení v Drag&drop** — současný dataset má 34 MG-přesných POI
-  (Δ ≤ 0.0005) ale **20 ulic a 9 MANUAL landmarků** je eyeballnuto. Když user
-  zaregistruje konkrétní špatnou pozici, otevřít `/geo/calibrate` → Drag&drop,
-  drag-tune, export TS → paste do `pois.ts`. Ulice (polyline) mají per-node
-  draggable handles.
+- **Geo POI dolaďení v Drag&drop** — pozice jsou přenesené z předchozí mapy
+  + vizuálně ověřené, ale ne pixelově přesné. Když user zaregistruje konkrétní
+  špatnou pozici, otevřít `/geo/calibrate` (Drag&drop editor), drag-tune,
+  export TS → paste do `pois.ts`. Ulice (polyline) mají per-node draggable
+  handles.
 - **SASP příručka** (`/sasp`) — zatím `<ComingSoonPage>`, `docs/sasp-manual.md`
   je v `.gitignore` (důvěrný zdroj).
 - **Penal scénky další** — některé reálné situace (korupce §53, vraždy §12,

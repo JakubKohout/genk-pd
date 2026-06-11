@@ -1,6 +1,6 @@
 import { type Page } from '@playwright/test';
 import { CODES } from '../../src/modules/codes/data/codes';
-import { GEO_POI_IDS } from './geo-poi-ids.generated';
+import { GEO_POI_IDS } from './geo-poi-ids';
 
 export const STORAGE_KEY = 'genk-pd:v1';
 export const RNG_SEED_KEY = 'genk-pd:rng-seed';
