@@ -25,13 +25,38 @@ funkční moduly:
      omezený jen na paragrafy, které se objeví v některé scénce (27 položek).
    Side panel na recall obsahuje jen čísla paragrafů, na scénkách jejich `ref`
    + zkrácený prompt.
+4. **Geografie** (`/geo`) — interaktivní mapa Los Santos a Blaine County
+   (Leaflet + CRS.Simple + tile pyramid 0..3 nad `clean-map.jpg` 8192×12288),
+   2 herní režimy + interní editor pozic:
+   - **Slepá mapa** (`/geo/blind`, default index) — uživatel dostane prompt
+     „Klikni na X — popis" a kliká na mapu. Hit-test binární s **prahem dle
+     velikosti POI** (pole `size`, 5 tierů tiny/small/medium/large/huge →
+     0.01/0.0167/0.0233/0.0367/0.06 normalizovaných jednotek; default medium
+     když `size` chybí). Velké oblasti (letiště, doky, města) = huge, pinpoint
+     budovy = small. Bodové POI: euklidovská distance. Polyline POI (ulice):
+     minimum perpendikulární distance segmentu (fixní 0.015).
+   - **Co je tady** (`/geo/name`) — pulzující marker na mapě bez popisku,
+     uživatel napíše název. Free-text + autocomplete (LEA pattern) +
+     Hard mode toggle (Penal pattern).
+   - **Editor pozic** (`/geo/calibrate`) — interní Drag&drop editor:
+     markery a polyline nody tažitelné, export TS literálu pro paste zpět
+     do `pois.ts` / `streets.generated.ts`.
+   Mastered POI zůstávají faded markery / polyline s názvem na mapě → mapa
+   se postupně „odemyká". Společný `categoryFilter` (4 kategorie:
+   street=Ulice / highway=Dálnice / city=Body ve městě / state=Body ve státě)
+   v `geo.settings`. Per-režim progress (jako Penal). **68 POI dataset**
+   (`pois.ts` + `streets.generated.ts`): 37 city + 11 state + 11 street +
+   9 highway. ID prefix == kategorie (`city.lsia`, `state.paleto-bay`,
+   `street.vespucci-blvd`, `highway.del-perro-fwy`). Pozice vizuálně ověřené
+   proti artu (Gotcha 40), ulice hand-traced.
 
 Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
 **Firearm Act** je disabled (`aria-disabled`, čeká na implementaci).
-**SASP příručka** (`/sasp`) je ještě jako `<ComingSoonPage>`.
+**SASP příručka** (`/sasp`) je ještě jako `<ComingSoonPage>`. Geografie je
+samostatný top-level modul, ne pod `/laws`.
 
 Pure-frontend, žádný backend. Veškerý stav v `localStorage` (klíč `genk-pd:v1`,
-schemaVersion 3).
+schemaVersion 4).
 
 ## Stack
 
@@ -43,6 +68,8 @@ schemaVersion 3).
 - Vitest 2 (unit + component, jsdom)
 - Playwright 1 (E2E, chromium-desktop + chromium-mobile)
 - Mixpanel browser 2.78 (analytics, frontend-only, EU-resident)
+- Leaflet 1.9 + react-leaflet 4.2 (geo modul, CRS.Simple custom-tiled mapa)
+- Sharp 0.34 (devDep, tile generation pipeline pro geo modul)
 
 ## Příkazy
 
@@ -55,8 +82,23 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **283 unit/component + 55 E2E = 338 testů**.
+`npm run test:all` musí být zelené: **406 unit/component + 67 E2E = 473 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
+
+Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
+`node scripts/generate-tiles.mjs` po výměně source mapy. Výstup `public/tiles/`
+je commitnutý.
+
+Pokud bys znovu regeneroval `docs/clean-map.jpg` z Rockstar minimapů:
+`pip install pillow texture2ddecoder && python3 scripts/extract-minimap.py`,
+pak `node scripts/generate-tiles.mjs`. `docs/map-original/` (zdrojové `.ytd`)
+je v `.gitignore` — uživatel je extrahuje z `scaleform_generic.rpf` přes OpenIV.
+
+Street centerlines (geo modul) jsou hand-traced z artu přímo v
+`src/modules/geo/data/streets.generated.ts` — žádný generátor neexistuje
+(historické YND/Foxxite pipelines byly smazány; viz git historie, pokud by
+byly potřeba jako reference). Retuning přes `/geo/calibrate` Drag&Drop nebo
+debug overlay (`D` v `/geo/blind`).
 
 ## Adresářová struktura
 
@@ -111,9 +153,54 @@ src/
                                     # PenalScenarioPage, PenalRecallPage, PenalAnswerInput,
                                     # PenalSidePanel (generický pro obě módy s {label, sublabel?,
                                     # hoverTitle}), PenalSubmitFooter, PenalResetButton
+    geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + editor pozic)
+      data/
+        types.ts                    # POIBase, POIPoint, POIPolyline, POI union,
+                                    # POICategory: 4 hodnoty (street/highway/city/state),
+                                    # POISize: 5 tierů (tiny..huge) — volitelné pole `size`
+        pois.ts                     # POIS — 68 POI: 37 city + 11 state (point) + 20 street/highway
+                                    # (z streets.generated.ts). Point: pozice vizuálně ověřené
+                                    # proti artu (Gotcha 40), každý má `size` tier pro
+                                    # klikací toleranci (Gotcha 42).
+                                    # Streets: koncat z streets.generated.ts.
+        streets.generated.ts        # HAND-TRACED z artu (navzdory názvu negenerovaný) —
+                                    # 20 street polyline centerlines dle popisků v artu
+                                    # (Gotcha 41)
+        tileMeta.ts                 # TILE_META — auto-generovaný skriptem generate-tiles.mjs
+        pois.test.ts                # Validace (count, unique IDs, alias non-collision,
+                                    # canonical id prefix per category, geometry consistency)
+      logic/
+        coords.ts                   # toLatLng / fromLatLng helpery (CRS.Simple [y,x])
+        hitTest.ts                  # evaluateClick: point (euklid threshold dle
+                                    # POI size, SIZE_THRESHOLDS 5 tierů, default
+                                    # medium 0.0233), polyline
+                                    # (perpendikulární distance ≤ 0.015).
+                                    # hitTest.streets.test.ts: 12 real-coordinate fixtures
+                                    # ověřených proti satelitnímu artu
+        match.ts                    # matchPoi — strict equality po normalize, name + aliases
+        suggest.ts                  # suggestPois — substring autocomplete, min 2, max 5
+        calibrate.ts                # polylineCentroid (arc-length midpoint) + formatPoisTs
+                                    # (TS literál pro paste do pois.ts) + toleranceRing
+                                    # (prsten tolerance vybraného POI, elipsa v px) — jen DragDropTab
+      state/
+        selection.ts                # pickNextPoi(state, pois, filter) přes pickNextFromPool,
+                                    # eligiblePois, isGeoComplete
+        useGeoProgress.ts           # Generický hook useGeoSliceProgress('blind'|'name') →
+                                    # 2 veřejné: useGeoBlindProgress, useGeoNameProgress
+        useGeoSettings.ts           # Category filter (4 kategorie), persistuje
+      components/                   # GeoLayout (tabs + Outlet), GeoBlindPage (mode 1),
+                                    # GeoNamePage (mode 2), GeoMap (Leaflet wrapper +
+                                    # MapClickCapture), GeoMarker, GeoPolyline, GeoSidePanel,
+                                    # GeoMobilePanel (<details>), GeoAnswerInput, GeoResetButton,
+                                    # GeoCalibratePage (renderuje DragDropTab), GeoDebugOverlay
+        calibrate/                  # · DragDropTab — POI markery tažitelné, polyline nody
+                                    #   draggable, export TS přes formatPoisTs. Vybraný point
+                                    #   POI dostane prsten tolerance (toleranceRing → Polygon,
+                                    #   non-interactive, elipsa kvůli portrait mapě)
   shared/
-    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 3,
-                                    # chained migrate v1→v2→v3 při readu, lenient v3 read
+    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 4,
+                                    # chained migrate v1→…→v4 při readu, lenient v4 read
+                                    # (dopočítá chybějící geo/penal sub-slices)
     rng.ts                          # Pluggable RNG (mulberry32, seed přes localStorage)
     useMediaQuery.ts                # SSR-safe matchMedia hook
     text/normalize.ts               # NFD strip diakritiky + lowercase + whitespace collapse
@@ -127,18 +214,37 @@ src/
                                     # /.answer-row* (4 stavy: correct/duplicate/wrong/
                                     # missed) / .reveal-perfect / .submit-footer*
                                     # /.autocomplete-* / .lea-page
+                                    # /.geo-page / .geo-map-shell / .geo-prompt*
+                                    # /.geo-feedback* / .geo-marker* (DivIcon styly)
   test/setup.ts                     # Vitest setup: jsdom, jest-dom, storage cache reset,
                                     # window.matchMedia stub (jsdom nemá)
 
+scripts/
+  generate-tiles.mjs                # Tile generator: docs/clean-map.jpg → public/tiles/{z}/{x}/{y}.jpg
+                                    # + tileMeta.ts. Spouští se ručně (`node scripts/...`)
+  extract-minimap.py                # Stitch Rockstar minimap .ytd textur (docs/map-original/,
+                                    # gitignored) → docs/clean-map.jpg (8192×12288)
+
+public/
+  tiles/                            # Vygenerované Leaflet CRS.Simple tiles, z=0..3,
+                                    # 802 JPEG souborů, ~5.7 MB
+
+docs/poi-mapping.md                 # Mapování uživatelova POI seznamu → CZ jména
+                                    # + aliasy. Cheat sheet, aplikace ho NEČTE. Slouží jako
+                                    # human reference pro generování pois.ts.
+
 e2e/
-  fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?, penal?, randomSeed? })`
-                                    # Píše schemaVersion 3, exportuje LEA_QUESTION_IDS,
-                                    # PENAL_SCENARIO_IDS, PENAL_PARAGRAPH_IDS, pinNext{Question,
-                                    # LeaQuestion, PenalScenario, PenalParagraph}
+  fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?, penal?, geo?, randomSeed? })`
+                                    # Píše schemaVersion 4, exportuje LEA_QUESTION_IDS,
+                                    # PENAL_SCENARIO_IDS, PENAL_PARAGRAPH_IDS, GEO_POI_IDS,
+                                    # pinNext{Question, LeaQuestion, PenalScenario,
+                                    # PenalParagraph, GeoPoi}
   codes/*.spec.ts                   # 7 spec souborů, 20 testů
   laws/lea/*.spec.ts                # 6 spec souborů (quiz-flow, matching, autocomplete,
                                     # submit-reveal, persistence, responsive), 16 testů
   laws/penal/*.spec.ts              # 3 spec soubory (scenario-flow, recall-flow, persistence),
+                                    # 12 testů
+  geo/*.spec.ts                     # 3 spec soubory (blind-flow, name-flow, persistence),
                                     # 12 testů
 ```
 
@@ -152,7 +258,7 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
 ```ts
 // localStorage["genk-pd:v1"]
 {
-  schemaVersion: 3,
+  schemaVersion: 4,
   codes: {
     progress: { [codeId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number,
@@ -167,18 +273,28 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
   penal: {
     scenarios: { progress: { [scenarioId]: ProgressEntry }, turn: number },
     recall:    { progress: { [paragraphId]: ProgressEntry }, turn: number }
+  },
+  geo: {
+    blind: { progress: { [poiId]: ProgressEntry }, turn: number },
+    name:  { progress: { [poiId]: ProgressEntry }, turn: number },
+    settings: {
+      categoryFilter: {
+        street: bool, highway: bool, city: bool, state: bool
+      }
+    }
   }
 }
 ```
 
-**Migrace v1 → v2 → v3** (`src/shared/storage.ts:migrateV1ToV2`, `migrateV2ToV3`):
-při readu se starší payload chained-migruje v paměti. v1: codes zachováno, lea
-přidáno default. v2: codes+lea zachováno, penal přidáno default (obě sub-slices
-prázdné). `saveState` vždy zapisuje v3.
+**Migrace v1 → … → v4** (`src/shared/storage.ts`): při readu se starší payload
+chained-migruje v paměti. v1: jen codes. v2: +lea (prázdný progress, turn 0).
+v3: +penal (prázdné scenarios + recall slices). v4: +geo (prázdný blind/name
+progress, categoryFilter 4 kategorie vše true). `saveState` vždy zapisuje v4.
 
-**Lenient v3 read**: pokud v3 payload chybí `penal` nebo některá sub-slice
-(`scenarios` / `recall`), dopočítáme prázdné defaults — žádná data ztrát.
-(Test `storage.test.ts`.)
+**Lenient v4 read**: pokud v4 payload chybí `geo` nebo některá sub-slice
+(`blind` / `name` / `settings`), dopočítáme prázdné defaults. categoryFilter
+doplní missing kategorie z initialState (každá true). Stejně lenient pro
+`penal`. (Test `storage.test.ts`.)
 
 `STORAGE_KEY = 'genk-pd:v1'` se NEMĚNÍ při schema bumpu — jen JSON value uvnitř.
 "v1" v key je legacy; verzování je v `schemaVersion` field.
@@ -216,6 +332,18 @@ fallback `mandatory:true, rest:false` — záměrně, ať jsou spec soubory dete
 Kódy s A/B variantami z `docs/codes.md` (`10-14 A/B`, `10-99 A/B`) jsou v `CODES`
 **sjednocené** do jednoho záznamu. Vyšší důležitost vyhrává (`mandatory > rare > unnecessary`).
 Zdroj pravdy = `docs/codes.md`, parsováno **ručně** do TS literálu, ne za běhu.
+
+### Geo scoring
+
+Skóre `-2..+2` per POI, **per režim** (blind / name jsou nezávislé sliceí, jako
+Penal scenarios / recall). Delta ±2. Mastered na `+2`. Reset maže jen daný režim,
+druhý zůstává. `categoryFilter` v `geo.settings` (sdílený mezi režimy) ovlivňuje
+co je v poolu — disabled kategorie se nikdy nezeptá. POI mastered v daném režimu
+zůstává jako faded marker (point) / polyline (street) na mapě s názvem v Tooltipu
+→ „mapa se postupně odemyká".
+
+**Skip** stejná sémantika jako Codes / LEA — score=MAX (+2) absolutně, override.
+Tlačítka `data-testid="geo-blind-skip"` / `data-testid="geo-name-skip"`.
 
 ### LEA data
 
@@ -359,6 +487,10 @@ Storage uchovává nově `-2..+2`, selection filtruje `score < 2`.
 - **Penal Scenarios mobile**: testid `penal-scenarios-mobile-progress-percent`
 - **Penal Recall desktop**: testid `penal-recall-progress-percent`
 - **Penal Recall mobile**: testid `penal-recall-mobile-progress-percent`
+- **Geo Blind desktop**: testid `geo-blind-progress-percent`
+- **Geo Blind mobile**: testid `geo-blind-mobile-progress-percent`
+- **Geo Name desktop**: testid `geo-name-progress-percent`
+- **Geo Name mobile**: testid `geo-name-mobile-progress-percent`
 
 `isComplete` ⟺ všechny filtrované items na +2.
 
@@ -394,9 +526,11 @@ konstanta (Mixpanel FE tokeny jsou public-by-design).
 | `trackLawAnswered` | `law_answered` | `success` (= perfect), `question_id` | LeaQuizPage `handleSubmit` |
 | `trackPenalAnswered` | `penal_answered` | `mode: 'scenario'\|'recall'`, `success`, `question_id` | PenalScenarioPage / PenalRecallPage `handleSubmit` |
 | `trackPenalCompleted` | `penal_completed` | `mode: 'scenario'\|'recall'` | Mount completion screen po posledním correct submitu |
-| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'` | ResetButton/LeaResetButton/PenalResetButton confirm |
+| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'\|'geo-blind'\|'geo-name'` | ResetButton/LeaResetButton/PenalResetButton/GeoResetButton confirm |
 | `trackCodesCompleted` | `codes_completed` | `scope: 'all'\|'partial'` | CongratsBanner mount |
-| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'`, `question_id` | handleSkip ve všech kvízových stránkách |
+| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'\|'geo-blind'\|'geo-name'`, `question_id` | handleSkip ve všech kvízových stránkách |
+| `trackGeoAnswered` | `geo_answered` | `mode: 'blind'\|'name'`, `success`, `poi_id` | GeoBlindPage / GeoNamePage po vyhodnocení |
+| `trackGeoCompleted` | `geo_completed` | `mode: 'blind'\|'name'` | Mount completion screen po posledním masteru |
 | `trackPageview` | _(Mixpanel pageview)_ | `url` (origin + `#` + path) | AppLayout useEffect na route change |
 
 **Init pipeline** (po `mixpanel.init`):
@@ -511,6 +645,45 @@ route s `<Outlet />`:
 8. SidePanel show **jen čísla paragrafů** (label=`§N`, sublabel undefined).
    Hover tooltip ukazuje název + popis. testid `penal-recall-side-panel`.
 
+## Geo UI flow
+
+`GeoLayout` (`src/modules/geo/components/GeoLayout.tsx`) je parent route s
+`<Outlet />`, NavLink tabs `Slepá mapa` / `Co je tady`, default index =
+`<GeoBlindPage />`.
+
+`GeoBlindPage` (mode 1):
+1. `useGeoBlindProgress` nad `geo.blind` slice.
+2. `current: POI | null` v `useState`. Picker v `useEffect` jen když
+   `current === null && phase === 'answering'` (LEA Gotcha 7 pattern).
+3. `phase`: `'answering'` → `'revealed'`. `userClick: Vec2 | null`, `hit: boolean | null`.
+4. Map layers: TileLayer + mastered POI (faded markery / polyline) + click-capture
+   (jen `answering`) + reveal (jen `revealed`: target marker, wrongClick marker).
+5. Click handler: `evaluateClick(poi, click)` z `logic/hitTest.ts`. `recordSubmit`
+   s `perfect: hit`. Phase → revealed.
+6. Skip: `recordSkip` + `trackQuestionSkipped({ module: 'geo-blind' })`.
+7. SubmitFooter v `submit-footer--end`. Skip pořád dostupný, "Další otázka" jen
+   v revealed.
+
+`GeoNamePage` (mode 2):
+1. `useGeoNameProgress` nad `geo.name` slice.
+2. Stejný picker pattern. `feedback: { matched: POI|null, raw: string } | null`.
+3. Map layers: TileLayer + mastered + asked POI (pulsing marker BEZ labelu).
+   V revealed se asked přepne na `target` (correct) / `wrongClick` (incorrect)
+   variant a dostane label.
+4. `GeoAnswerInput` je adapt LEA `AnswerInput`: input + Vyhodnotit + autocomplete
+   `suggestPois(input, ALL_POIS)`. Match přes `matchPoi(input, [target])` — proti
+   jen current target POI, jako Penal Recall.
+5. Hard mode toggle (`useState(false)`) v `submit-footer--split` vlevo. Per-session,
+   nepersistuje.
+6. Skip + reset analogicky `geo-name` testidy.
+
+`GeoSidePanel` (sdílený obě módy přes prop `mode: 'blind'|'name'`):
+- ProgressHeader s testid `geo-{mode}-progress-percent` / `-bar`.
+- 4 checkboxy `geo-filter-{street|highway|city|state}`. Mění `geo.settings.categoryFilter`
+  přes `useGeoSettings` (sdílený hook). Filter platí pro oba módy.
+- POI seznam — chips s 3-znakovou kategorií (ULI/LMK/PD), name, ✓ pro mastered.
+- Mobile přes `<details>` v `GeoMobilePanel`.
+
 ## Gotchas (na co si dát pozor)
 
 1. **`useSyncExternalStore` snapshot stability** — `storage.ts` má `cachedSnapshot`,
@@ -526,7 +699,7 @@ route s `<Outlet />`:
 3. **Playwright seed přes `localStorage`, ne přes window hook**: `page.addInitScript`
    běží před app skripty, takže window hooky ještě nejsou připojené. Místo toho
    `e2e/fixtures/seed.ts` zapisuje rovnou `localStorage["genk-pd:v1"]` (ve formátu
-   `schemaVersion: 3` s codes + lea + penal slices) a `localStorage["genk-pd:rng-seed"]`.
+   `schemaVersion: 4` se všemi slices) a `localStorage["genk-pd:rng-seed"]`.
    Init script používá `sessionStorage` flag `genk-pd:seeded`, aby se
    **nepřeseedoval po reloadu** (jinak by persistence testy byly k ničemu).
 
@@ -572,11 +745,12 @@ route s `<Outlet />`:
     `<details>`). RTL `getByTestId` najde i hidden elementy uvnitř collapsed details,
     takže existující testy fungují.
 
-11. **`schemaVersion` v test seedech musí být `3` + `lea` + `penal` slice**.
+11. **`schemaVersion` v test seedech musí být `4` se všemi slices**.
     Hardcoded literály ve všech `*.test.tsx` které volají `saveState({...})` musí mít
-    `schemaVersion: 3`, `lea: { progress: {}, turn: 0 }`, a
-    `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`.
-    Pokud přidáš další slice, bumpni schema (v3 → v4) a doplň migrationi v `storage.ts`.
+    `schemaVersion: 4`, `lea: { progress: {}, turn: 0 }`,
+    `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`
+    a `geo` slice s `settings.categoryFilter` (4 kategorie street/highway/city/state).
+    Pokud přidáš další slice, bumpni schema (v4 → v5) a doplň migraci v `storage.ts`.
 
 12. **Vite dev server je default lockdown na `localhost`.** Pro ngrok/cloudflared
     tunel je v `vite.config.ts` `server.allowedHosts: ['.ngrok-free.app', '.ngrok.app',
@@ -677,6 +851,116 @@ route s `<Outlet />`:
     — nechtěl jsem komplikovat storage schema o UI preference. Pokud má persist,
     přidat do `penal.scenarios.settings.hardMode` a bumpnout schema.
 
+29. **Schema je v4** — bumpnuto z v3 přidáním geo slice. **Všechny test seedy
+    s hardcoded `saveState({...})` literálem musí mít `schemaVersion: 4` +
+    `geo.settings.categoryFilter` se všemi 4 kategoriemi** (`street, highway,
+    city, state` — všechny true defaultně). Stejně tak `e2e/fixtures/seed.ts`.
+    Pokud přidáš další modul nebo přepíšeš POI dataset/kategorie, bumpni
+    v4 → v5 a doplň migraci.
+
+30. **Tile pipeline NEní v `npm run build`** — `scripts/generate-tiles.mjs` je
+    jednorázový skript spouštěný ručně (`node scripts/generate-tiles.mjs`).
+    Generuje 802 tiles do `public/tiles/{z}/{x}/{y}.jpg` (z=0..3, ~5.7 MB) +
+    přepisuje `src/modules/geo/data/tileMeta.ts`. Output je commitnutý — pokud
+    bys měnil source `docs/clean-map.jpg` (8192×12288), spusť skript a commitni
+    nové tiles. Pokud chceš ostřejší max zoom, bumpni `MAX_ZOOM` v skriptu na 4
+    (přidá ~600 tiles, ~25 MB navíc).
+
+31. **react-leaflet v jsdom se rozbije** — komponenty `MapContainer`, `TileLayer`,
+    `Marker`, `Polyline`, `Tooltip` a `useMapEvents` se rendrovat nedají bez
+    skutečného Layoutu. Vzor pro page testy (`GeoBlindPage.test.tsx`,
+    `GeoNamePage.test.tsx`): `vi.mock('react-leaflet')` se stub komponentami
+    + `useMapEvents` zachytávajícím handler do `vi.hoisted` capture objektu.
+    Test pak triggerne click handler přímo s fake `latlng` (přepočítaným z
+    normalizovaných coords přes `TILE_META`). Real Leaflet rendering testujeme
+    jen v Playwright E2E.
+
+32. **Geo hit-test je ve square coord space (akceptujeme aspect distortion)** —
+    `pointHit` a `polylineHit` z `logic/hitTest.ts` počítají Euklidovu distanci
+    v normalizovaném 0..1 prostoru. Source JPEG je portrait 8192×12288, takže
+    1 jednotka v Y odpovídá menšímu počtu pixelů než v X. Pro práh medium 0.0233
+    to znamená cca 191 zdrojových px v X vs 286 v Y. Pro MVP fine. Pokud bude
+    bolet, vynásobit Y rozdílem (8192/12288 = 0.667) v hit-testu pro skutečně
+    izotropní distanci.
+
+33. **POI dataset je hardcoded TS literal** v `src/modules/geo/data/pois.ts`
+    s normalizovanými coords (0..1) ověřenými proti `docs/clean-map.jpg`. Pokud bys
+    posouval marker, edituj `position` / `path` v literálu a `pois.test.ts` to
+    validuje (range, alias non-collision). Pro hromadnou revizi POI použij
+    `gta-5-map.com` jako referenci.
+
+34. **Geo POI IDs v E2E seed musí být sync s daty** — `e2e/fixtures/seed.ts`
+    má hardcoded `GEO_POI_IDS` (30 IDs). Při přidání nové POI do `pois.ts`
+    rozšiř i list v seed.ts, jinak `pinNextGeoPoi` přestane saturovat 29/30
+    a picker pustí jiný target.
+
+35. **Geo ResetButton je per-mode** — `<GeoResetButton mode="blind" />` resetuje
+    JEN `geo.blind` slice. Druhý režim a `categoryFilter` zůstávají. Confirm
+    dialog testidy `geo-{mode}-reset-{button|confirm|cancel|confirm-yes}`.
+
+36. **GeoLayout je top-level modul, ne pod /laws** — `/geo/blind` a `/geo/name`
+    žijí na top-level routě. AppLayout nav má 4 odkazy (Codes/Laws/Geo/SASP),
+    HomePage 4 karty. Při testování home navigace přes `getByRole('link',
+    { name: 'Geografie', exact: true })` se shoduje na **navbar link**
+    (jednoduchý text), ne na home kartu (link + h2 + p + span = složitý
+    accessible name).
+
+37. **4 POI kategorie** — `POICategory = street | highway | city | state`
+    (Ulice / Dálnice / Body ve městě / Body ve státě). street+highway = polyline
+    geometrie, city+state = point. ID prefix == kategorie (`city.lsia`,
+    `highway.del-perro-fwy`). Test fixtures s `categoryFilter` literálem musí mít
+    všechna 4 pole (jinak TS type error). Při změně kategorií: update types.ts
+    + GeoCategoryFilter v storage.ts + initialState defaults + lenient read
+    backfill + GeoSidePanel CATEGORY_LABEL/ABBR/ORDER + GeoBlindPage
+    CATEGORY_LABEL + pois.test.ts counts + všechny test fixtures + e2e seed
+    (`seed.ts` typ + builder) + `geo-poi-ids.ts` (přejmenované ID).
+
+38. **POI s názvem rovným nějakému aliasu po normalize** = test fail
+    (`alias collision with name`). Příklad: name "PDM" + alias "pdm" — oba
+    normalizují na "pdm". Řešení: odebrat redundantní alias.
+
+39. **KRITICKÉ: clean-map.jpg NENÍ lineární projekce vanilla GTA světa** —
+    `docs/clean-map.jpg` (8192×12288, stitch 6 minimap textur přes
+    `scripts/extract-minimap.py`) je CUSTOM mapa serveru: stejný ostrov,
+    ale regionálně deformovaná geometrie vs. vanilla world coords (jih města
+    je až ~1 km „severněji", deformace je nelineární a neopravitelná žádnou
+    globální transformací — empiricky ověřeno fitem road grafu i měřením
+    křižovatek). Dřívější teorie „uniform projection x∈[-4000..4000],
+    y∈[-4000..8000] @1.024 px/m" je CHYBNÁ — historický `gtaProjection.ts`
+    a migrace na ní stavěly a rozbily pozice. **Jediný zdroj pravdy pro souřadnice je
+    samotný art** (jeho popisky ulic, route shields, parcelní čísla).
+    Z toho plyne: NEgenerovat geo souřadnice z vanilla GTA dat (path-node
+    dumpy, Foxxite GeoJSON apod.) — všechny takové pipelines byly smazány.
+
+40. **POI pozice = vizuálně ověřené proti artu**
+    — POI pozice jsou umístěné a vizuálně ověřené přímo proti artu
+    (`docs/clean-map.jpg`). Jediný zdroj pravdy = art (Gotcha 39). Nejisté
+    kandidáty doladit přes `/geo/calibrate` Drag&Drop.
+
+41. **Street centerlines jsou HAND-TRACED z artu** (`streets.generated.ts`,
+    navzdory názvu už NENÍ generovaný) — obkresleny podle popisků ulic a
+    route shields v artu (I-2 = Del Perro, I-4 = Olympic, I-5 = La Puerta,
+    I-1/„Los Santos Freeway" text = LS Fwy, US-13 = Senora, US-15 = Palomino,
+    US-1 = GOH, US-68 = Route 68, US-20 = Elysian oblast). Hit-test =
+    perpendikulární distance ≤ `POLYLINE_HIT_TOLERANCE` (0.015). Při
+    retuningu použít `/geo/blind` debug overlay (klávesa `D`: vykreslí
+    všechny centerlines + loguje normalized click coords do console) a
+    Drag&Drop editor `/geo/calibrate`, pak paste do `streets.generated.ts`.
+
+42. **Klikací tolerance bodových POI je per-`size`, ne fixní** — `evaluateClick`
+    bere práh z `SIZE_THRESHOLDS[poi.size ?? 'medium']` (`logic/hitTest.ts`):
+    tiny 0.01 / small 0.0167 / medium 0.0233 / large 0.0367 / huge 0.06. Velké
+    rozlehlé oblasti (letiště, doky, města, ropné pole — `size: "huge"`) mají
+    velkou klikací zónu, pinpoint budovy (`size: "small"`) malou. `size` je
+    volitelné na `POIBase`, ale prakticky platí jen pro point geometry (ulice
+    drží fixní `POLYLINE_HIT_TOLERANCE`). `HIT_THRESHOLD` je teď alias medium
+    (0.035, byl flat 0.03). Explicitní `threshold` param `evaluateClick` pořád
+    override-uje size (testy). `pois.test.ts` validuje, že každý point POI má
+    `size` z 5 hodnot. **`formatPoisTs` (calibrate export) emituje `size`** — bez
+    toho by re-export z `/geo/calibrate` pole smazal. Retuning hodnot: edituj
+    `SIZE_THRESHOLDS` (globálně) nebo per-POI `size` v `pois.ts`. Tier `tiny`
+    je zatím nepoužitý (k dispozici pro budoucí pinpoint POI).
+
 ## Konvence
 
 - Cesta s aliasem `@/...` mapuje na `src/...` (TS path + Vite/Vitest resolve.alias).
@@ -700,8 +984,22 @@ route s `<Outlet />`:
 - **Sdílený "law quiz engine"**: až bude 3. modul (Firearm Act), refaktorovat
   AnswerList/AnswerRow/SidePanel ProgressHeader/SCORE_CLASS do `src/shared/quiz/`.
   Aktuálně AnswerList/AnswerRow se importují z LEA (penal je závislý na LEA),
-  SidePanel je duplikovaný do 3 souborů (codes/lea/penal). YAGNI dokud se to
+  SidePanel je duplikovaný do 4 souborů (codes/lea/penal/geo). YAGNI dokud se to
   nezačne lišit nebo nezačne bolet při změnách.
+- **Geo polygon regiony / čtvrti** (`/geo`): MVP nemá kategorii `district` —
+  Vinewood, Del Perro atd. Polygon podpora byla z kódbáze odstraněna (typ
+  POIPolygon, polygon hit-test přes @turf/* — viz git historie). Pokud bude
+  poptávka, přidat 7. kategorii `district` s `geometry: 'polygon'` znovu:
+  typ + hit-test point-in-polygon + render + formatPoisTs větev.
+- **Geo tile zoom z=4** (native pixel sharpness): aktuálně cap z=3, max zoom
+  ~5x downscaled. Bumpe `MAX_ZOOM` v `scripts/generate-tiles.mjs` na 4 přidá
+  ~600 tiles (~25 MB). Smysl pokud user reportuje rozmazaný max zoom.
+- **Geo Hard mode persistence** (`geo.settings.hardMode`) — analog Penal Hard
+  mode persistence. Stejný argument: bumpni schema až bude poptávka.
+- **Geo POI dolaďení v Drag&drop** — pozice jsou vizuálně ověřené, ale ne
+  pixelově přesné. Když user zaregistruje konkrétní špatnou pozici, otevřít
+  `/geo/calibrate` (Drag&drop editor), drag-tune, export TS → paste do `pois.ts`.
+  Ulice (polyline) mají per-node draggable handles.
 - **SASP příručka** (`/sasp`) — zatím `<ComingSoonPage>`, `docs/sasp-manual.md`
   je v `.gitignore` (důvěrný zdroj).
 - **Penal scénky další** — některé reálné situace (korupce §53, vraždy §12,
