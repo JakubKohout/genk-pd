@@ -67,7 +67,7 @@ export function AppLayout() {
       </main>
 
       <footer className="mt-auto border-t border-sasp-navy-light/60 px-4 py-3 text-center text-xs text-sasp-ink-dim sm:px-6">
-        San Andreas State Police — Training tool · genk.cz
+        San Andreas State Police — Training tool · genk.cz · author Jake Hermann
       </footer>
     </div>
   );
