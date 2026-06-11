@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { DragDropTab } from './calibrate/DragDropTab';
 import { AnchorImportTab } from './calibrate/AnchorImportTab';
 import { AddPoiTab } from './calibrate/AddPoiTab';
+import { StreetAnchorsTab } from './calibrate/StreetAnchorsTab';
 
-type CalibTab = 'drag' | 'anchor' | 'add';
+type CalibTab = 'drag' | 'anchor' | 'add' | 'streets';
 
 const TABS: { key: CalibTab; label: string }[] = [
   { key: 'drag', label: 'Drag & drop' },
+  { key: 'streets', label: 'Kalibrace ulic' },
   { key: 'anchor', label: 'Anchor & import (MG)' },
   { key: 'add', label: 'Přidat POI' },
 ];
@@ -19,9 +21,10 @@ export function GeoCalibratePage() {
       <header className="space-y-2">
         <h1 className="text-2xl text-sasp-tan">Editor POI</h1>
         <p className="text-sm text-sasp-ink-dim">
-          3 nástroje pro správu geografického datasetu. Drag & drop ladí existující
-          POI, Anchor & import bulk-importuje z Map Genie po affine kalibraci,
-          Přidat POI vytváří úplně nové (typicky ulice, towns, MANUAL položky).
+          4 nástroje pro správu geografického datasetu. Drag & drop ladí
+          existující POI, Kalibrace ulic přemapuje Foxxite anchory → silnice se
+          přegenerují živě, Anchor & import bulk-importuje z Map Genie po affine
+          kalibraci, Přidat POI vytváří úplně nové (typicky towns, MANUAL položky).
         </p>
       </header>
 
@@ -49,6 +52,7 @@ export function GeoCalibratePage() {
       </nav>
 
       {tab === 'drag' && <DragDropTab />}
+      {tab === 'streets' && <StreetAnchorsTab />}
       {tab === 'anchor' && <AnchorImportTab />}
       {tab === 'add' && <AddPoiTab />}
     </section>

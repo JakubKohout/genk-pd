@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { POIS } from '../data/pois';
 import { isGeoComplete, pickNextPoi } from '../state/selection';
 import { useGeoNameProgress } from '../state/useGeoProgress';
+import { useGeoDebugMode } from '../state/useGeoDebugMode';
+import { GeoDebugOverlay } from './GeoDebugOverlay';
 import { useGeoSettings } from '../state/useGeoSettings';
 import { useMediaQuery } from '@/shared/useMediaQuery';
 import { GeoMap } from './GeoMap';
 import { GeoMarker } from './GeoMarker';
-import { GeoPolygon } from './GeoPolygon';
+import { GeoPolyline } from './GeoPolyline';
 import { GeoSidePanel } from './GeoSidePanel';
 import { GeoMobilePanel } from './GeoMobilePanel';
 import { GeoResetButton } from './GeoResetButton';
@@ -26,6 +28,7 @@ export function GeoNamePage() {
   const [hardMode, setHardMode] = useState(false);
   const [feedback, setFeedback] = useState<{ matched: POI | null; raw: string } | null>(null);
   const [completionTracked, setCompletionTracked] = useState(false);
+  const debug = useGeoDebugMode();
 
   useEffect(() => {
     if (current !== null) return;
@@ -137,19 +140,24 @@ export function GeoNamePage() {
         <GeoMap>
           {masteredPois
             .filter((p) => p.id !== current.id)
-            .map((p) =>
-              p.geometry === 'point' ? (
-                <GeoMarker
-                  key={p.id}
-                  position={p.position}
-                  variant="mastered"
-                  label={p.name}
-                  poiId={p.id}
-                />
-              ) : (
-                <GeoPolygon key={p.id} path={p.path} variant="mastered" />
-              ),
-            )}
+            .map((p) => {
+              if (p.geometry === 'point') {
+                return (
+                  <GeoMarker
+                    key={p.id}
+                    position={p.position}
+                    variant="mastered"
+                    label={p.name}
+                    poiId={p.id}
+                  />
+                );
+              }
+              if (p.geometry === 'polyline') {
+                return <GeoPolyline key={p.id} path={p.path} variant="mastered" />;
+              }
+              // p.geometry === 'polygon' — žádný street POI už polygon není; reserved pro budoucí districts.
+              return null;
+            })}
           {/* Asked POI: shown without label until reveal */}
           {current.geometry === 'point' ? (
             <GeoMarker
@@ -158,9 +166,9 @@ export function GeoNamePage() {
               label={phase === 'revealed' ? current.name : undefined}
               poiId={current.id}
             />
-          ) : (
+          ) : current.geometry === 'polyline' ? (
             <>
-              <GeoPolygon
+              <GeoPolyline
                 path={current.path}
                 variant={phase === 'revealed' ? (success ? 'target' : 'wrongClick') : 'asked'}
               />
@@ -171,7 +179,17 @@ export function GeoNamePage() {
                 poiId={current.id}
               />
             </>
+          ) : (
+            // current.geometry === 'polygon' — centroid marker for the asked
+            // location (reserved pro budoucí districts; streets jsou polyline).
+            <GeoMarker
+              position={current.centroid}
+              variant={phase === 'revealed' ? (success ? 'target' : 'wrongClick') : 'asked'}
+              label={phase === 'revealed' ? current.name : undefined}
+              poiId={current.id}
+            />
           )}
+          <GeoDebugOverlay enabled={debug} currentPoiId={current.id} />
         </GeoMap>
 
         {phase === 'answering' ? (

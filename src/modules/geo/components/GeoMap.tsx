@@ -11,11 +11,11 @@ const bounds: LatLngBoundsExpression = [
 ];
 
 // CRS.Simple defaults to 1 source-pixel = 1 leaflet-unit at zoom 0, which would
-// require 30x20 tiles to cover our 7463x5039 source map at z=0. Our tile script
-// instead generates a pyramid where z=MAX_ZOOM is native pixel (5039x7463 → 20x30
-// tiles) and z=0 is the whole map downscaled into a 3x4 grid. Override the CRS
-// transformation so source coords map by `factor = 1 / 2^MAX_ZOOM` at z=0; Leaflet
-// then doubles per zoom and at z=MAX_ZOOM the factor reaches 1 (native).
+// require 32x48 tiles to cover our 8192x12288 source map at z=0. Our tile script
+// instead generates a pyramid where z=MAX_ZOOM is native pixel (8192x12288 →
+// 32x48 tiles) and z=0 is the whole map downscaled into a 4x6 grid. Override
+// the CRS transformation so source coords map by `factor = 1 / 2^MAX_ZOOM` at
+// z=0; Leaflet then doubles per zoom and at z=MAX_ZOOM the factor reaches 1.
 const FACTOR = 1 / Math.pow(2, TILE_META.maxZoom);
 const geoCrs = L.extend({}, CRS.Simple, {
   transformation: new L.Transformation(FACTOR, 0, FACTOR, 0),

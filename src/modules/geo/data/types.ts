@@ -15,15 +15,30 @@ export interface POIPoint extends POIBase {
   position: Vec2;
 }
 
-export interface POIPolygon extends POIBase {
-  geometry: 'polygon';
-  /** Closed outer ring: first point equals last. ≥4 points (3 unique + closure). */
+export interface POIPolyline extends POIBase {
+  geometry: 'polyline';
+  /** Open path (centerline). First and last point are distinct. ≥2 points. */
   path: Vec2[];
-  /** Pre-computed area-weighted centroid in [0,1]². Used as label position. */
+  /** Pre-computed arc-length midpoint in [0,1]². Used as label position. */
   centroid: Vec2;
 }
 
-export type POI = POIPoint | POIPolygon;
+export interface POIPolygon extends POIBase {
+  geometry: 'polygon';
+  /**
+   * Polygon ring(s) in normalized 0..1 coords. First ring is outer boundary,
+   * subsequent rings are holes. Each ring is closed: first === last vertex.
+   * A street may be represented by multiple disjoint polygons — see callers
+   * that handle MultiPolygon input by flattening into multiple POIPolygon
+   * entries OR by using multiple top-level rings (we choose the former; one
+   * POI = one polygon).
+   */
+  rings: Vec2[][];
+  /** Mean of outer-ring vertices in [0,1]². Used as label / camera target. */
+  centroid: Vec2;
+}
+
+export type POI = POIPoint | POIPolyline | POIPolygon;
 
 export type TileMeta = {
   width: number;

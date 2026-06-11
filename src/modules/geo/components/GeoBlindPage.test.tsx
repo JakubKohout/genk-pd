@@ -8,7 +8,10 @@ import { TILE_META } from '../data/tileMeta';
 
 const { capturedHandlers } = vi.hoisted(() => ({
   capturedHandlers: {
-    click: null as null | ((e: { latlng: { lat: number; lng: number } }) => void),
+    // Real Leaflet allows multiple components to register click listeners on
+    // the same map. The mock mirrors that: every useMapEvents call adds to
+    // the list, and clickAt fans the event out to all of them.
+    clicks: [] as Array<(e: { latlng: { lat: number; lng: number } }) => void>,
   },
 }));
 
@@ -21,11 +24,12 @@ vi.mock('react-leaflet', () => {
     TileLayer: () => null,
     Marker: Stub,
     Tooltip: Stub,
+    Popup: Stub,
     Polyline: () => <span data-testid="mock-polyline" />,
     Polygon: () => <span data-testid="mock-polygon" />,
     useMapEvents: (handlers: { click?: (e: never) => void }) => {
       if (handlers.click) {
-        capturedHandlers.click = handlers.click as never;
+        capturedHandlers.clicks.push(handlers.click as never);
       }
       return null;
     },
@@ -37,7 +41,7 @@ import { GeoBlindPage } from './GeoBlindPage';
 beforeEach(() => {
   localStorage.clear();
   __resetCacheForTests();
-  capturedHandlers.click = null;
+  capturedHandlers.clicks.length = 0;
 });
 
 afterEach(() => {
@@ -71,11 +75,10 @@ function seedPinningTo(targetId: string): void {
 }
 
 function clickAt(normalized: { x: number; y: number }): void {
-  const handler = capturedHandlers.click;
-  if (!handler) throw new Error('click handler not captured');
-  handler({
-    latlng: { lat: normalized.y * TILE_META.height, lng: normalized.x * TILE_META.width },
-  });
+  const handlers = capturedHandlers.clicks;
+  if (handlers.length === 0) throw new Error('no click handler captured');
+  const latlng = { lat: normalized.y * TILE_META.height, lng: normalized.x * TILE_META.width };
+  for (const h of handlers) h({ latlng });
 }
 
 function renderPage() {

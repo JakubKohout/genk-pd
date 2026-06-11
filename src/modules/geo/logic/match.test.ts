@@ -15,13 +15,10 @@ const pois: POI[] = [
   {
     id: 'street.olympic-fwy',
     category: 'street',
-    geometry: 'polygon',
+    geometry: 'polyline',
     path: [
-      { x: 0, y: 0.49 },
-      { x: 1, y: 0.49 },
-      { x: 1, y: 0.51 },
-      { x: 0, y: 0.51 },
-      { x: 0, y: 0.49 },
+      { x: 0, y: 0.5 },
+      { x: 1, y: 0.5 },
     ],
     centroid: { x: 0.5, y: 0.5 },
     name: 'Olympic Fwy',

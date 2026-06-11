@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { POIS, POI_BY_ID } from './pois';
 import { normalize } from '@/shared/text/normalize';
-import { pointInPolygon, pointToPolygonEdgeDist } from '@/modules/geo/logic/hitTest';
 
 describe('POI dataset', () => {
   it('has the expected POI counts across categories', () => {
@@ -64,7 +63,7 @@ describe('POI dataset', () => {
     }
   });
 
-  it('has point coords in [0,1] for landmark and pd POIs', () => {
+  it('has point coords in [0,1] for non-street POIs', () => {
     for (const p of POIS) {
       if (p.geometry === 'point') {
         expect(p.position.x).toBeGreaterThanOrEqual(0);
@@ -75,17 +74,12 @@ describe('POI dataset', () => {
     }
   });
 
-  it('has polygon path with at least 4 closed points and all coords in [0,1] for streets', () => {
+  it('has polyline paths with ≥2 vertices and all coords in [0,1] for streets', () => {
     for (const p of POIS) {
       if (p.category === 'street') {
-        expect(p.geometry).toBe('polygon');
-        if (p.geometry !== 'polygon') continue;
-        expect(p.path.length).toBeGreaterThanOrEqual(4);
-        // Closed ring: first === last
-        const first = p.path[0]!;
-        const last = p.path[p.path.length - 1]!;
-        expect(first.x).toBeCloseTo(last.x);
-        expect(first.y).toBeCloseTo(last.y);
+        expect(p.geometry).toBe('polyline');
+        if (p.geometry !== 'polyline') continue;
+        expect(p.path.length).toBeGreaterThanOrEqual(2);
         for (const pt of p.path) {
           expect(pt.x).toBeGreaterThanOrEqual(0);
           expect(pt.x).toBeLessThanOrEqual(1);
@@ -96,18 +90,11 @@ describe('POI dataset', () => {
     }
   });
 
-  it('has centroid inside or near polygon edge for each street', () => {
-    // Centroid is used as marker position in "Co je tady" mode. We want it on
-    // or near the polygon. For self-intersecting / strongly concave polygons
-    // (post-TPS deformation), the area-weighted centroid may land outside —
-    // import script falls back to vertex-mean / nearest-vertex, which puts
-    // the marker within edge tolerance of the polygon.
+  it('has centroid inside [0,1]² for each polyline street', () => {
+    // Centroid is used as marker position in "Co je tady" mode. It must lie
+    // in the normalized image space.
     for (const p of POIS) {
-      if (p.geometry === 'polygon') {
-        const inside = pointInPolygon(p.centroid, p.path);
-        const edgeDist = pointToPolygonEdgeDist(p.centroid, p.path);
-        // Either inside, or close to polygon (within 2 % of image width).
-        expect(inside || edgeDist <= 0.02).toBe(true);
+      if (p.geometry === 'polyline') {
         expect(p.centroid.x).toBeGreaterThanOrEqual(0);
         expect(p.centroid.x).toBeLessThanOrEqual(1);
         expect(p.centroid.y).toBeGreaterThanOrEqual(0);
@@ -123,10 +110,10 @@ describe('POI dataset', () => {
     }
   });
 
-  it('uses polygon geometry only for streets, point for everything else', () => {
+  it('uses polyline geometry only for streets, point for everything else', () => {
     for (const p of POIS) {
       if (p.category === 'street') {
-        expect(p.geometry).toBe('polygon');
+        expect(p.geometry).toBe('polyline');
       } else {
         expect(p.geometry).toBe('point');
       }

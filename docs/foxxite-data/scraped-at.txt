@@ -1,5 +1,8 @@
-scraped_at: 2026-05-13T19:55:45.362Z
-source_url: https://raw.githubusercontent.com/Foxxite/GTAV-Geo-Json/master/street.geojson
-total_features: 226
+scraped_at: 2026-05-20T19:57:13.296Z
+street_url: https://raw.githubusercontent.com/Foxxite/GTAV-Geo-Json/master/street.geojson
+area_url: https://raw.githubusercontent.com/Foxxite/GTAV-Geo-Json/master/area.geojson
+total_street_features: 226
+total_area_features: 81
+gta_bounds: x[-4000..4000] y[-4000..8000]
 emitted: 20
 missed: 0

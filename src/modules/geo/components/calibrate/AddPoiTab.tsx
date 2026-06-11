@@ -3,12 +3,10 @@ import { divIcon, type LeafletEvent } from 'leaflet';
 import { Marker, Polyline, Tooltip } from 'react-leaflet';
 import { TILE_META } from '../../data/tileMeta';
 import { fromLatLng, toLatLng } from '../../logic/coords';
-import { formatPoisTs } from '../../logic/calibrate';
+import { formatPoisTs, polylineCentroid } from '../../logic/calibrate';
 import { GeoMap } from '../GeoMap';
 import type { POI, POICategory, Vec2 } from '../../data/types';
 
-// Polygon POI are auto-imported by scripts/import-foxxite-streets.mjs,
-// not user-addable through this form.
 type Geometry = 'point' | 'polyline';
 
 interface Draft {
@@ -68,9 +66,15 @@ export function AddPoiTab() {
       description: draft.description.trim(),
       aliases,
     };
-    // Only point geometry can be added here; polyline form mode is UI-only
-    // (dataset no longer uses polyline — streets are polygons).
-    const poi: POI = { ...base, geometry: 'point', position: placingPoint! };
+    const poi: POI =
+      draft.geometry === 'point'
+        ? { ...base, geometry: 'point', position: placingPoint! }
+        : {
+            ...base,
+            geometry: 'polyline',
+            path: [...placingPath],
+            centroid: polylineCentroid(placingPath),
+          };
     setAdded((prev) => [...prev, poi]);
     setDraft(EMPTY_DRAFT);
     setPlacingPoint(null);
@@ -86,6 +90,16 @@ export function AddPoiTab() {
       prev.map((p) =>
         p.id === id && p.geometry === 'point' ? { ...p, position: pos } : p,
       ),
+    );
+  };
+
+  const movePolylineNode = (id: string, index: number, pos: Vec2) => {
+    setAdded((prev) =>
+      prev.map((p) => {
+        if (p.id !== id || p.geometry !== 'polyline') return p;
+        const path = p.path.map((pt, i) => (i === index ? pos : pt));
+        return { ...p, path, centroid: polylineCentroid(path) };
+      }),
     );
   };
 
@@ -250,7 +264,18 @@ export function AddPoiTab() {
               if (poi.geometry === 'point') {
                 return <AddedPoint key={poi.id} poi={poi} onMove={movePoint} />;
               }
-              return null; // polygon: auto-imported, not editable here
+              if (poi.geometry === 'polyline') {
+                return (
+                  <AddedPolyline
+                    key={poi.id}
+                    poi={poi}
+                    onMoveNode={movePolylineNode}
+                  />
+                );
+              }
+              // poi.geometry === 'polygon' — AddPoi UI does not yet support
+              // drawing polygons; they come from the Foxxite import script.
+              return null;
             })}
           </GeoMap>
 
@@ -399,6 +424,69 @@ function AddedPoint({
         {poi.name}
       </Tooltip>
     </Marker>
+  );
+}
+
+function AddedPolyline({
+  poi,
+  onMoveNode,
+}: {
+  poi: Extract<POI, { geometry: 'polyline' }>;
+  onMoveNode: (id: string, index: number, pos: Vec2) => void;
+}) {
+  const positions = poi.path.map((p) => toLatLng(p, TILE_META));
+  return (
+    <>
+      <Polyline
+        positions={positions}
+        pathOptions={{ color: '#7fc99a', weight: 4, opacity: 0.75 }}
+      >
+        <Tooltip direction="center" opacity={0.85} sticky>
+          {poi.name}
+        </Tooltip>
+      </Polyline>
+      {poi.path.map((pt, idx) => (
+        <AddedPolylineNode
+          key={idx}
+          poiId={poi.id}
+          index={idx}
+          position={pt}
+          onMove={onMoveNode}
+        />
+      ))}
+    </>
+  );
+}
+
+function AddedPolylineNode({
+  poiId,
+  index,
+  position,
+  onMove,
+}: {
+  poiId: string;
+  index: number;
+  position: Vec2;
+  onMove: (id: string, index: number, pos: Vec2) => void;
+}) {
+  const icon = divIcon({
+    html: `<div class="geo-vertex-handle" data-poi-id="${poiId}" data-vertex-idx="${index}"></div>`,
+    className: '',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5],
+  });
+  return (
+    <Marker
+      position={toLatLng(position, TILE_META)}
+      icon={icon}
+      draggable
+      eventHandlers={{
+        dragend: (e: LeafletEvent) => {
+          const m = e.target as { getLatLng: () => { lat: number; lng: number } };
+          onMove(poiId, index, fromLatLng(m.getLatLng(), TILE_META));
+        },
+      }}
+    />
   );
 }
 

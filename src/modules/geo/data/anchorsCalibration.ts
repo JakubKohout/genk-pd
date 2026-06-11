@@ -19,13 +19,15 @@ interface DefaultAnchor {
   label: string;
 }
 
+// ourCoord = gtaToNorm(gtaWorld) using the canonical uniform projection
+// from `gtaProjection.ts`. Recompute via that helper if gtaWorld changes.
 export const DEFAULT_ANCHORS: readonly DefaultAnchor[] = [
-  { mgLocationId: 12624, ourCoord: { x: 0.316, y: 0.744 }, gtaWorld: { x: -1109, y: -845 }, label: 'Vespucci Police Department' },
-  { mgLocationId: 13825, ourCoord: { x: 0.359, y: 0.205 }, gtaWorld: { x: 140, y: 6580 }, label: 'Paleto Forest Motel' },
-  { mgLocationId: 12807, ourCoord: { x: 0.822, y: 0.375 }, gtaWorld: { x: 3666, y: 3735 }, label: 'Humane Labs and Research' },
-  { mgLocationId: 13868, ourCoord: { x: 0.461, y: 0.944 }, gtaWorld: { x: 479, y: -3173 }, label: 'Helicopter (Lookout Point, far south)' },
-  { mgLocationId: 13326, ourCoord: { x: 0.387, y: 0.590 }, gtaWorld: { x: -438, y: 1227 }, label: 'Galileo Observatory' },
-  { mgLocationId: 13748, ourCoord: { x: 0.622, y: 0.466 }, gtaWorld: { x: 1846, y: 2616 }, label: 'Bolingbroke Penitentiary' },
+  { mgLocationId: 12624, ourCoord: { x: 0.3614, y: 0.7371 }, gtaWorld: { x: -1109, y: -845 }, label: 'Vespucci Police Department' },
+  { mgLocationId: 13825, ourCoord: { x: 0.5175, y: 0.1183 }, gtaWorld: { x: 140, y: 6580 }, label: 'Paleto Forest Motel' },
+  { mgLocationId: 12807, ourCoord: { x: 0.9583, y: 0.3554 }, gtaWorld: { x: 3666, y: 3735 }, label: 'Humane Labs and Research' },
+  { mgLocationId: 13868, ourCoord: { x: 0.5599, y: 0.9311 }, gtaWorld: { x: 479, y: -3173 }, label: 'Helicopter (Lookout Point, far south)' },
+  { mgLocationId: 13326, ourCoord: { x: 0.4453, y: 0.5644 }, gtaWorld: { x: -438, y: 1227 }, label: 'Galileo Observatory' },
+  { mgLocationId: 13748, ourCoord: { x: 0.7308, y: 0.4487 }, gtaWorld: { x: 1846, y: 2616 }, label: 'Bolingbroke Penitentiary' },
 ];
 
 /** Expand to full `AnchorPair[]` by looking up lat/lng from filtered MG data. */

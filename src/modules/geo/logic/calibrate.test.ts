@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { applyAffine, calibratePoi, fitAffine, formatPoisTs } from './calibrate';
-import type { POI, POIPolygon } from '../data/types';
+import {
+  applyAffine,
+  calibratePoi,
+  fitAffine,
+  formatPoisTs,
+  polylineCentroid,
+} from './calibrate';
+import type { POI, POIPolyline } from '../data/types';
 
 describe('fitAffine', () => {
   it('recovers identity when before == after', () => {
@@ -63,6 +69,36 @@ describe('applyAffine', () => {
   });
 });
 
+describe('polylineCentroid', () => {
+  it('returns the midpoint of a single straight segment', () => {
+    const c = polylineCentroid([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+    ]);
+    expect(c.x).toBeCloseTo(0.5);
+    expect(c.y).toBeCloseTo(0);
+  });
+
+  it('returns arc-length midpoint of an L-shaped path', () => {
+    // Two unit segments, total length 2, midpoint at end of first segment
+    const c = polylineCentroid([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+    ]);
+    expect(c.x).toBeCloseTo(1);
+    expect(c.y).toBeCloseTo(0);
+  });
+
+  it('handles single-point degenerate input', () => {
+    expect(polylineCentroid([{ x: 0.3, y: 0.7 }])).toEqual({ x: 0.3, y: 0.7 });
+  });
+
+  it('handles empty input', () => {
+    expect(polylineCentroid([])).toEqual({ x: 0, y: 0 });
+  });
+});
+
 describe('calibratePoi', () => {
   const t = { ax: 1, bx: 0.1, ay: 1, by: 0.2 };
 
@@ -83,63 +119,57 @@ describe('calibratePoi', () => {
     }
   });
 
-  it('shifts every node of a polygon POI and recalculates centroid', () => {
+  it('shifts every node of a polyline POI and recalculates centroid', () => {
     const p: POI = {
       id: 'street.x',
       category: 'street',
-      geometry: 'polygon',
+      geometry: 'polyline',
       path: [
         { x: 0.1, y: 0.2 },
         { x: 0.3, y: 0.2 },
-        { x: 0.3, y: 0.4 },
-        { x: 0.1, y: 0.4 },
-        { x: 0.1, y: 0.2 },
+        { x: 0.5, y: 0.2 },
       ],
-      centroid: { x: 0.2, y: 0.3 },
+      centroid: { x: 0.3, y: 0.2 },
       name: 'X',
       description: 'd',
       aliases: ['x'],
     };
     const r = calibratePoi(p, t);
-    expect(r.geometry).toBe('polygon');
-    if (r.geometry === 'polygon') {
-      // ax=1 bx=0.1, ay=1 by=0.2 → x+0.1, y+0.2
+    expect(r.geometry).toBe('polyline');
+    if (r.geometry === 'polyline') {
       expect(r.path[0]!.x).toBeCloseTo(0.2);
       expect(r.path[0]!.y).toBeCloseTo(0.4);
-      expect(r.path[2]!.x).toBeCloseTo(0.4);
-      expect(r.path[2]!.y).toBeCloseTo(0.6);
-      // centroid should shift by the same transform
-      expect(r.centroid.x).toBeCloseTo(0.3);
-      expect(r.centroid.y).toBeCloseTo(0.5);
+      expect(r.path[2]!.x).toBeCloseTo(0.6);
+      expect(r.path[2]!.y).toBeCloseTo(0.4);
+      // Arc-length midpoint of three collinear points lies on the middle one
+      expect(r.centroid.x).toBeCloseTo(0.4);
+      expect(r.centroid.y).toBeCloseTo(0.4);
     }
   });
 });
 
 describe('formatPoisTs', () => {
-  it('emits polygon path + centroid in TS literal', () => {
-    const polygon: POIPolygon = {
+  it('emits polyline path + centroid in TS literal', () => {
+    const polyline: POIPolyline = {
       id: 'street.example',
       category: 'street',
       name: 'Example St',
       description: 'desc',
       aliases: ['ex'],
-      geometry: 'polygon',
+      geometry: 'polyline',
       path: [
         { x: 0.1, y: 0.2 },
         { x: 0.3, y: 0.2 },
-        { x: 0.3, y: 0.4 },
-        { x: 0.1, y: 0.4 },
-        { x: 0.1, y: 0.2 },
+        { x: 0.5, y: 0.2 },
       ],
-      centroid: { x: 0.2, y: 0.3 },
+      centroid: { x: 0.3, y: 0.2 },
     };
-    const out = formatPoisTs([polygon]);
-    expect(out).toContain('geometry: "polygon"');
+    const out = formatPoisTs([polyline]);
+    expect(out).toContain('geometry: "polyline"');
     expect(out).toContain('path: [');
-    expect(out).toContain('centroid: { x: 0.2, y: 0.3 }');
-    // Verify all path points are present
+    expect(out).toContain('centroid: { x: 0.3, y: 0.2 }');
     expect(out).toContain('{ x: 0.1, y: 0.2 }');
-    expect(out).toContain('{ x: 0.3, y: 0.4 }');
+    expect(out).toContain('{ x: 0.5, y: 0.2 }');
   });
 
   it('emits point geometry without path or centroid', () => {
@@ -158,5 +188,4 @@ describe('formatPoisTs', () => {
     expect(out).not.toContain('path:');
     expect(out).not.toContain('centroid:');
   });
-
 });

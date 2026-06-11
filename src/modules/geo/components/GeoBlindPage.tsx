@@ -3,14 +3,16 @@ import { POIS } from '../data/pois';
 import { evaluateClick } from '../logic/hitTest';
 import { isGeoComplete, pickNextPoi } from '../state/selection';
 import { useGeoBlindProgress } from '../state/useGeoProgress';
+import { useGeoDebugMode } from '../state/useGeoDebugMode';
 import { useGeoSettings } from '../state/useGeoSettings';
 import { useMediaQuery } from '@/shared/useMediaQuery';
 import { GeoMap } from './GeoMap';
 import { GeoMarker } from './GeoMarker';
-import { GeoPolygon } from './GeoPolygon';
+import { GeoPolyline } from './GeoPolyline';
 import { GeoSidePanel } from './GeoSidePanel';
 import { GeoMobilePanel } from './GeoMobilePanel';
 import { GeoResetButton } from './GeoResetButton';
+import { GeoDebugOverlay } from './GeoDebugOverlay';
 import type { POI, Vec2 } from '../data/types';
 import { trackGeoAnswered, trackGeoCompleted, trackQuestionSkipped } from '@/shared/analytics';
 
@@ -29,6 +31,7 @@ export function GeoBlindPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const blind = useGeoBlindProgress();
   const { categoryFilter, setCategory } = useGeoSettings();
+  const debug = useGeoDebugMode();
 
   const [current, setCurrent] = useState<POI | null>(null);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -148,19 +151,24 @@ export function GeoBlindPage() {
         <GeoMap onMapClick={phase === 'answering' ? handleMapClick : undefined}>
           {masteredPois
             .filter((p) => p.id !== current.id)
-            .map((p) =>
-              p.geometry === 'point' ? (
-                <GeoMarker
-                  key={p.id}
-                  position={p.position}
-                  variant="mastered"
-                  label={p.name}
-                  poiId={p.id}
-                />
-              ) : (
-                <GeoPolygon key={p.id} path={p.path} variant="mastered" />
-              ),
-            )}
+            .map((p) => {
+              if (p.geometry === 'point') {
+                return (
+                  <GeoMarker
+                    key={p.id}
+                    position={p.position}
+                    variant="mastered"
+                    label={p.name}
+                    poiId={p.id}
+                  />
+                );
+              }
+              if (p.geometry === 'polyline') {
+                return <GeoPolyline key={p.id} path={p.path} variant="mastered" />;
+              }
+              // p.geometry === 'polygon' — žádný street POI už polygon není; reserved pro budoucí districts.
+              return null;
+            })}
           {phase === 'revealed' &&
             (current.geometry === 'point' ? (
               <GeoMarker
@@ -169,12 +177,13 @@ export function GeoBlindPage() {
                 label={current.name}
                 poiId={current.id}
               />
-            ) : (
-              <GeoPolygon path={current.path} variant="target" />
-            ))}
+            ) : current.geometry === 'polyline' ? (
+              <GeoPolyline path={current.path} variant="target" />
+            ) : null)}
           {phase === 'revealed' && userClick && hit === false && (
             <GeoMarker position={userClick} variant="wrongClick" />
           )}
+          <GeoDebugOverlay enabled={debug} currentPoiId={current.id} />
         </GeoMap>
 
         {phase === 'revealed' && (

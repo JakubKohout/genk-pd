@@ -26,7 +26,7 @@ funkční moduly:
    Side panel na recall obsahuje jen čísla paragrafů, na scénkách jejich `ref`
    + zkrácený prompt.
 4. **Geografie** (`/geo`) — interaktivní mapa Los Santos a Blaine County
-   (Leaflet + CRS.Simple + tile pyramid 0..3 nad `clean-map.jpg` 5944×8075),
+   (Leaflet + CRS.Simple + tile pyramid 0..3 nad `clean-map.jpg` 8192×12288),
    2 herní režimy + interní kalibrátor:
    - **Slepá mapa** (`/geo/blind`, default index) — uživatel dostane prompt
      „Klikni na X — popis" a kliká na mapu. Hit-test binární s prahem 0.03
@@ -78,16 +78,26 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **384 unit/component + 67 E2E = 451 testů**.
+`npm run test:all` musí být zelené: **414 unit/component + 67 E2E = 481 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
 `node scripts/generate-tiles.mjs` po výměně source mapy. Výstup `public/tiles/`
 je commitnutý.
 
+Pokud bys znovu regeneroval `docs/clean-map.jpg` z Rockstar minimapů:
+`pip install pillow texture2ddecoder && python3 scripts/extract-minimap.py`,
+pak `node scripts/generate-tiles.mjs`. `docs/map-original/` (zdrojové `.ytd`)
+je v `.gitignore` — uživatel je extrahuje z `scaleform_generic.rpf` přes OpenIV.
+
 Map Genie scrape (geo modul) se NEspouští v `npm run build` — je to one-time
 idempotentní skript `node scripts/scrape-mapgenie.mjs`. Zapisuje archiv do
 `docs/mapgenie-data/` (commitnuté).
+
+Street centerlines (geo modul) jsou hand-traced z artu přímo v
+`src/modules/geo/data/streets.generated.ts` — NEgenerovat skriptem
+(YND pipeline je superseded, viz Gotcha 47). Retuning přes `/geo/calibrate`
+Drag&Drop nebo debug overlay (`D` v `/geo/blind`).
 
 ## Adresářová struktura
 
@@ -144,16 +154,20 @@ src/
                                     # hoverTitle}), PenalSubmitFooter, PenalResetButton
     geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + kalibrátor)
       data/
-        types.ts                    # POIBase, POIPoint, POIStreet, POI discriminated union,
+        types.ts                    # POIBase, POIPoint, POIPolyline, POIPolygon, POI union,
                                     # POICategory: 6 hodnot (street/landmark/pd/fire/ems/ammu)
         pois.ts                     # POIS — 68 POI z uživatelova zadávacího seznamu:
                                     # 43 landmark + 2 pd + 1 fire + 1 ems + 1 ammu + 20 street.
-                                    # 34 landmarků MG-derived (Δ ≤ 0.0005), zbytek manuál.
-                                    # Coords 0..1 vůči clean-map.jpg (5944×8075). POI_BY_ID.
-        anchorsCalibration.ts       # DEFAULT_ANCHORS — 6 persistentních kotev (Vespucci PD,
-                                    # Paleto Motel, Humane Labs, Helicopter lookout, Galileo
-                                    # Observatory, Bolingbroke Penitentiary). UI nahrává
-                                    # automaticky při mountu Anchor & import tabu.
+                                    # Non-street: point geometry, pozice přenesené z HEAD
+                                    # přes image-affine + vizuálně ověřené (Gotcha 45).
+                                    # Streets: koncat z streets.generated.ts.
+        streets.generated.ts        # HAND-TRACED z artu (navzdory názvu negenerovaný) —
+                                    # 20 street polyline centerlines dle popisků v artu
+                                    # (Gotcha 46)
+        foxxiteSource.generated.ts  # AUTO-GENERATED (import-foxxite-streets.mjs) — raw Foxxite
+                                    # polygony, jen pro legacy StreetAnchorsTab overlay
+        anchorsCalibration.ts       # DEFAULT_ANCHORS — persistentní kotvy pro MG import.
+                                    # UI nahrává automaticky při mountu Anchor & import tabu.
         mapgenieLocations.ts        # Typed wrapper nad docs/mapgenie-data/filtered.json
                                     # (355 lokací). MG_LOCATIONS + MG_LOCATION_BY_ID.
         tileMeta.ts                 # TILE_META — auto-generovaný skriptem generate-tiles.mjs
@@ -161,8 +175,12 @@ src/
                                     # canonical id prefix per category, geometry consistency)
       logic/
         coords.ts                   # toLatLng / fromLatLng helpery (CRS.Simple [y,x])
-        hitTest.ts                  # pointHit, polylineHit (perpendikulární seg distance),
-                                    # evaluateClick(poi, click, threshold=0.03)
+        gtaProjection.ts            # gtaToNorm — kanonický GTA-world → normalized transform
+        hitTest.ts                  # evaluateClick: point (euklid threshold 0.03), polyline
+                                    # (perpendikulární distance ≤ 0.015), polygon
+                                    # (point-in-polygon přes turf — reserved pro districts).
+                                    # hitTest.streets.test.ts: 12 real-coordinate fixtures
+                                    # ověřených proti satelitnímu artu
         match.ts                    # matchPoi — strict equality po normalize, name + aliases
         suggest.ts                  # suggestPois — substring autocomplete, min 2, max 5
         calibrate.ts                # fitAffine (4-param), fitAffine6 (6-param: +rotace,shear),
@@ -224,10 +242,22 @@ src/
 scripts/
   generate-tiles.mjs                # Tile generator: docs/clean-map.jpg → public/tiles/{z}/{x}/{y}.jpg
                                     # + tileMeta.ts. Spouští se ručně (`node scripts/...`)
+  extract-minimap.py                # Stitch Rockstar minimap .ytd textur (docs/map-original/,
+                                    # gitignored) → docs/clean-map.jpg (8192×12288)
   scrape-mapgenie.mjs               # MG scraper: fetch gta-5-map.com HTML, parse inline
                                     # window.mapData, write docs/mapgenie-data/*. Idempotentní,
                                     # filtr 15 relevantních kategorií (Police, Hospital,
                                     # Building, Misc, Executive Office, Facility, atd.).
+  fetch-ynd-data.mjs                # SUPERSEDED (Gotcha 47): stáhne GTA V path-node dump
+                                    # (DurtyFree) do data/raw/ (~144 MB, gitignored)
+  build-streets-from-ynd.mjs        # SUPERSEDED (Gotcha 47): centerlines z vanilla node
+                                    # grafu — na custom artu nesedí, NEPOUŠTĚT (přepsal by
+                                    # hand-traced streets.generated.ts)
+  import-foxxite-streets.mjs        # Archiv Foxxite street/area polygonů →
+                                    # foxxiteSource.generated.ts (jen legacy kalibrátor;
+                                    # street geometrii už NEgeneruje)
+  migrate-poi-coords.mjs            # SUPERSEDED (Gotcha 47): chybná one-shot migrace,
+                                    # NEPOUŠTĚT
 
 public/
   tiles/                            # Vygenerované Leaflet CRS.Simple tiles, z=0..3,
@@ -961,10 +991,49 @@ route s `<Outlet />`:
 
 43. **Map Genie tiles jsou za hotlink-protection** — vrací 403 bez Referer
     z `gta-5-map.com`. Obejít přes spoofing = TOS violation, **nedělat**.
-    Používáme jen jejich JSON data (inlined v HTML, public). Pokud bychom
-    chtěli jejich kvalitnější satelitku, legitimní cesta = veřejný Rockstar
-    Social Club atlas nebo CC-licensovaný community render + regenerovat
-    `public/tiles/` z něj.
+    Používáme jen jejich JSON data (inlined v HTML, public). Pro satelitku
+    používáme přímo Rockstar minimap textury (viz Gotcha 44).
+
+44. **KRITICKÉ: clean-map.jpg NENÍ lineární projekce vanilla GTA světa** —
+    `docs/clean-map.jpg` (8192×12288, stitch 6 minimap textur přes
+    `scripts/extract-minimap.py`) je CUSTOM mapa serveru: stejný ostrov,
+    ale regionálně deformovaná geometrie vs. vanilla world coords (jih města
+    je až ~1 km „severněji", deformace je nelineární a neopravitelná žádnou
+    globální transformací — empiricky ověřeno fitem road grafu i měřením
+    křižovatek). Dřívější teorie „uniform projection x∈[-4000..4000],
+    y∈[-4000..8000] @1.024 px/m" je CHYBNÁ — `gtaProjection.ts` a
+    `scripts/migrate-poi-coords.mjs` na ní stavěly a rozbily pozice (proto
+    vznikla session „všechny POI jsou špatně umístěny"). **Jediný zdroj
+    pravdy pro souřadnice je samotný art** (jeho popisky ulic, route shields,
+    parcelní čísla).
+
+45. **POI pozice = HEAD pozice přenesené image-affine + vizuální verifikace**
+    — pozice v `pois.ts` vznikly přenosem pozic z předchozí mapy (HEAD
+    5944×8075, stejný artwork v jiném výřezu) přes empiricky nafitovanou
+    afinitu `x_new = 1.0137·x_old + 0.0172; y_new = 0.9106·y_old + 0.0041`
+    (3 přesné páry: Chumash pier, Maze Bank Arena, Procopio Point; residua
+    ≤ 0.004) + per-POI vizuální kontrola proti artu (opraveny: molo,
+    maze-bank-arena, north-chumash, chumash). Nejisté kandidáty na drag-tune:
+    weazel, g6, prehrada (hráz vs. břeh), letiste-sandy.
+
+46. **Street centerlines jsou HAND-TRACED z artu** (`streets.generated.ts`,
+    navzdory názvu už NENÍ generovaný) — obkresleny podle popisků ulic a
+    route shields v artu (I-2 = Del Perro, I-4 = Olympic, I-5 = La Puerta,
+    I-1/„Los Santos Freeway" text = LS Fwy, US-13 = Senora, US-15 = Palomino,
+    US-1 = GOH, US-68 = Route 68, US-20 = Elysian oblast). Hit-test =
+    perpendikulární distance ≤ `POLYLINE_HIT_TOLERANCE` (0.015). Při
+    retuningu použít `/geo/blind` debug overlay (klávesa `D`: vykreslí
+    všechny centerlines + loguje normalized click coords do console) a
+    Drag&Drop tab kalibrátoru, pak paste do `streets.generated.ts`.
+
+47. **YND pipeline (fetch-ynd-data.mjs + build-streets-from-ynd.mjs) je
+    superseded** — stavěla centerlines z vanilla path-node dumpu, což na
+    custom artu nesedí (viz Gotcha 44). Skripty zůstávají jako reference
+    (graf, diameter path, sea-clip algoritmy), ale `streets.generated.ts`
+    NEPŘEPISOVAT jejich spuštěním. Stejně tak `migrate-poi-coords.mjs`
+    je one-shot omyl — NEspouštět. Foxxite polygony (hrubé konvexní hully
+    zón) jsou taky nepoužitelné pro hit-test; `import-foxxite-streets.mjs`
+    živí už jen legacy StreetAnchorsTab overlay.
 
 ## Konvence
 

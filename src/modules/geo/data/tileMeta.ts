@@ -2,8 +2,8 @@
 import type { TileMeta } from './types';
 
 export const TILE_META: TileMeta = {
-  width: 5944,
-  height: 8075,
+  width: 8192,
+  height: 12288,
   maxZoom: 3,
   tileSize: 256,
 };

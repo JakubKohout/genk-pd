@@ -1,21 +1,19 @@
 import { useMemo, useState } from 'react';
-import { divIcon, type LeafletEvent } from 'leaflet';
-import { Marker, Polygon, Tooltip } from 'react-leaflet';
+import { divIcon, type LeafletEvent, type LeafletMouseEvent } from 'leaflet';
+import { Marker, Polyline, Tooltip } from 'react-leaflet';
 import { POIS } from '../../data/pois';
 import { TILE_META } from '../../data/tileMeta';
 import { fromLatLng, toLatLng } from '../../logic/coords';
-import { formatPoisTs, polygonCentroid } from '../../logic/calibrate';
+import { formatPoisTs, polylineCentroid } from '../../logic/calibrate';
+import { pointToSegmentDist } from '../../logic/hitTest';
 import { GeoMap } from '../GeoMap';
 import type { POI, Vec2 } from '../../data/types';
 
 /**
- * Per-POI drag-and-drop editor. Each point POI = draggable marker. Each polygon
- * POI = polygon outline + per-vertex draggable handles. On every drag, local
- * state updates and the TS literal output is regenerated for paste-back into
- * pois.ts (or streetPolygons.generated.ts for streets).
- *
- * Closure note: polygon ring's first and last point are identical (closed). When
- * the first vertex is dragged, the last is updated to match (and vice versa).
+ * Per-POI drag-and-drop editor. Points = draggable markers. Polylines (streets) =
+ * Leaflet Polyline + per-node draggable handles. Click on the polyline body
+ * inserts a new node at the projection point; double-click on a node deletes it
+ * (min 2 nodes). Centroid recomputes as arc-length midpoint on every edit.
  */
 export function DragDropTab() {
   const [pois, setPois] = useState<POI[]>(() => POIS.map((p) => structuredClone(p)));
@@ -28,16 +26,44 @@ export function DragDropTab() {
     );
   };
 
-  const updatePolygonVertex = (id: string, index: number, pos: Vec2) => {
+  const updatePolylineNode = (id: string, index: number, pos: Vec2) => {
     setPois((prev) =>
       prev.map((p) => {
-        if (p.id !== id || p.geometry !== 'polygon') return p;
+        if (p.id !== id || p.geometry !== 'polyline') return p;
+        const path = p.path.map((pt, i) => (i === index ? pos : pt));
+        return { ...p, path, centroid: polylineCentroid(path) };
+      }),
+    );
+  };
+
+  const insertPolylineNode = (id: string, click: Vec2) => {
+    setPois((prev) =>
+      prev.map((p) => {
+        if (p.id !== id || p.geometry !== 'polyline') return p;
+        // Find the segment closest to the click, insert node at projection.
+        let bestSeg = 0;
+        let bestDist = Infinity;
+        for (let i = 0; i < p.path.length - 1; i++) {
+          const d = pointToSegmentDist(click, p.path[i]!, p.path[i + 1]!);
+          if (d < bestDist) {
+            bestDist = d;
+            bestSeg = i;
+          }
+        }
         const path = [...p.path];
-        path[index] = pos;
-        // Maintain closed-ring invariant: first === last
-        if (index === 0) path[path.length - 1] = pos;
-        else if (index === path.length - 1) path[0] = pos;
-        return { ...p, path, centroid: polygonCentroid(path) };
+        path.splice(bestSeg + 1, 0, click);
+        return { ...p, path, centroid: polylineCentroid(path) };
+      }),
+    );
+  };
+
+  const deletePolylineNode = (id: string, index: number) => {
+    setPois((prev) =>
+      prev.map((p) => {
+        if (p.id !== id || p.geometry !== 'polyline') return p;
+        if (p.path.length <= 2) return p; // keep min 2 nodes
+        const path = p.path.filter((_, i) => i !== index);
+        return { ...p, path, centroid: polylineCentroid(path) };
       }),
     );
   };
@@ -63,12 +89,12 @@ export function DragDropTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-sasp-ink-dim">
-        Každý POI je <strong>tažitelný marker</strong>. Body se táhnou přímo,
-        polygony (ulice) mají na každém vertexu malý oranžový čtvercový
-        handle. Vnitřek polygonu se přepočítá automaticky. Až bude vše umístěné,
-        zkopíruj výstup dole a paste do <code>src/modules/geo/data/pois.ts</code>
-        (pro body) nebo <code>streetPolygons.generated.ts</code> (pro ulice — to
-        se ale při příštím spuštění importu přepíše).
+        Body se táhnou přímo. <strong>Polyline</strong> (ulice) má každý uzel jako
+        oranžový handle — <strong>drag</strong> uzel přesune, <strong>klik na čáru</strong>{' '}
+        vloží nový uzel na pozici kliku, <strong>dvojklik na uzel</strong> ho smaže
+        (min 2 uzly). Až bude vše umístěné, zkopíruj výstup dole a paste do{' '}
+        <code>src/modules/geo/data/pois.ts</code> (pro body) nebo přepiš obsah{' '}
+        <code>streets.generated.ts</code> (pro ulice).
       </p>
 
       <div className="flex flex-wrap gap-2">
@@ -107,15 +133,22 @@ export function DragDropTab() {
               />
             );
           }
-          return (
-            <DraggablePolygon
-              key={poi.id}
-              poi={poi}
-              selected={selectedId === poi.id}
-              onSelect={() => setSelectedId(poi.id)}
-              onMoveVertex={updatePolygonVertex}
-            />
-          );
+          if (poi.geometry === 'polyline') {
+            return (
+              <DraggablePolyline
+                key={poi.id}
+                poi={poi}
+                selected={selectedId === poi.id}
+                onSelect={() => setSelectedId(poi.id)}
+                onMoveNode={updatePolylineNode}
+                onInsertNode={insertPolylineNode}
+                onDeleteNode={deletePolylineNode}
+              />
+            );
+          }
+          // poi.geometry === 'polygon' — no in-place editor yet; rings are
+          // sourced from Foxxite GeoJSON via the import script, not hand-drawn.
+          return null;
         })}
       </GeoMap>
 
@@ -179,30 +212,40 @@ function DraggablePoint({ poi, selected, onSelect, onMove }: DraggablePointProps
   );
 }
 
-interface DraggablePolygonProps {
-  poi: Extract<POI, { geometry: 'polygon' }>;
+interface DraggablePolylineProps {
+  poi: Extract<POI, { geometry: 'polyline' }>;
   selected: boolean;
   onSelect: () => void;
-  onMoveVertex: (id: string, index: number, pos: Vec2) => void;
+  onMoveNode: (id: string, index: number, pos: Vec2) => void;
+  onInsertNode: (id: string, click: Vec2) => void;
+  onDeleteNode: (id: string, index: number) => void;
 }
 
-function DraggablePolygon({ poi, selected, onSelect, onMoveVertex }: DraggablePolygonProps) {
+function DraggablePolyline({
+  poi,
+  selected,
+  onSelect,
+  onMoveNode,
+  onInsertNode,
+  onDeleteNode,
+}: DraggablePolylineProps) {
   const positions = poi.path.map((p) => toLatLng(p, TILE_META));
-  // Ring is closed (first === last); render N-1 handles to avoid double-dragging
-  // the closure vertex. Index 0 also visually represents the last vertex.
-  const handleCount = poi.path.length - 1;
   return (
     <>
-      <Polygon
+      <Polyline
         positions={positions}
         pathOptions={{
           color: selected ? '#d4a256' : '#7fc99a',
-          fillColor: selected ? '#d4a256' : '#7fc99a',
-          fillOpacity: selected ? 0.25 : 0.12,
-          weight: selected ? 2.5 : 1.5,
+          weight: selected ? 5 : 3.5,
           opacity: selected ? 1 : 0.7,
         }}
-        eventHandlers={{ click: onSelect }}
+        eventHandlers={{
+          click: (e: LeafletMouseEvent) => {
+            onSelect();
+            const click = fromLatLng(e.latlng, TILE_META);
+            onInsertNode(poi.id, click);
+          },
+        }}
       >
         <Tooltip
           direction="center"
@@ -212,32 +255,45 @@ function DraggablePolygon({ poi, selected, onSelect, onMoveVertex }: DraggablePo
         >
           {poi.name}
         </Tooltip>
-      </Polygon>
-      {Array.from({ length: handleCount }, (_, idx) => (
-        <VertexHandle
+      </Polyline>
+      {poi.path.map((pt, idx) => (
+        <NodeHandle
           key={`${poi.id}-${idx}`}
           poiId={poi.id}
           index={idx}
-          position={poi.path[idx]!}
+          position={pt}
           selected={selected}
+          canDelete={poi.path.length > 2}
           onSelect={onSelect}
-          onMove={onMoveVertex}
+          onMove={onMoveNode}
+          onDelete={onDeleteNode}
         />
       ))}
     </>
   );
 }
 
-interface VertexHandleProps {
+interface NodeHandleProps {
   poiId: string;
   index: number;
   position: Vec2;
   selected: boolean;
+  canDelete: boolean;
   onSelect: () => void;
   onMove: (id: string, index: number, pos: Vec2) => void;
+  onDelete: (id: string, index: number) => void;
 }
 
-function VertexHandle({ poiId, index, position, selected, onSelect, onMove }: VertexHandleProps) {
+function NodeHandle({
+  poiId,
+  index,
+  position,
+  selected,
+  canDelete,
+  onSelect,
+  onMove,
+  onDelete,
+}: NodeHandleProps) {
   const cls = selected ? 'geo-vertex-handle geo-vertex-handle--selected' : 'geo-vertex-handle';
   const icon = divIcon({
     html: `<div class="${cls}" data-poi-id="${poiId}" data-vertex-idx="${index}"></div>`,
@@ -257,6 +313,9 @@ function VertexHandle({ poiId, index, position, selected, onSelect, onMove }: Ve
           const m = e.target as { getLatLng: () => { lat: number; lng: number } };
           const pos = fromLatLng(m.getLatLng(), TILE_META);
           onMove(poiId, index, pos);
+        },
+        dblclick: () => {
+          if (canDelete) onDelete(poiId, index);
         },
       }}
     />

@@ -1,3 +1,5 @@
+import { booleanPointInPolygon } from '@turf/boolean-point-in-polygon';
+import { point as turfPoint, polygon as turfPolygon } from '@turf/helpers';
 import type { POI, Vec2 } from '../data/types';
 
 export const HIT_THRESHOLD = 0.03;
@@ -32,65 +34,56 @@ export function pointToPolylineDist(p: Vec2, path: readonly Vec2[]): number {
   return best;
 }
 
-/**
- * Point-in-polygon ray casting. Polygon is given as a closed ring (first === last);
- * the algorithm works regardless. Boundary behavior is undefined-ish but acceptable
- * for hit-test (off-by-pixel on edge is irrelevant — we add edge tolerance separately).
- */
-export function pointInPolygon(p: Vec2, ring: readonly Vec2[]): boolean {
-  if (ring.length < 3) return false;
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const a = ring[i]!;
-    const b = ring[j]!;
-    const intersects =
-      a.y > p.y !== b.y > p.y &&
-      p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x;
-    if (intersects) inside = !inside;
-  }
-  return inside;
-}
-
-/** Polygon edge-tolerance used by `polygonHit` and `evaluateClick`. */
-export const POLYGON_EDGE_TOLERANCE = 0.015;
-
-/**
- * Smallest perpendicular distance from `p` to any edge of a closed polygon ring.
- * Treats consecutive vertices as segments; if ring is not explicitly closed,
- * also considers the implicit last→first segment.
- */
-export function pointToPolygonEdgeDist(p: Vec2, ring: readonly Vec2[]): number {
-  if (ring.length === 0) return Infinity;
-  if (ring.length === 1) return distance(p, ring[0]!);
-  let best = Infinity;
-  for (let i = 0; i < ring.length; i++) {
-    const a = ring[i]!;
-    const b = ring[(i + 1) % ring.length]!;
-    const d = pointToSegmentDist(p, a, b);
-    if (d < best) best = d;
-  }
-  return best;
-}
-
-/**
- * Touch-friendly polygon hit-test: true if click is inside polygon OR within
- * `tolerance` of any edge. Allows users to "miss" by up to `tolerance` and still
- * register a hit — important for narrow streets on small screens.
- */
-export function polygonHit(
-  ring: readonly Vec2[],
-  click: Vec2,
-  tolerance = POLYGON_EDGE_TOLERANCE,
-): boolean {
-  if (pointInPolygon(click, ring)) return true;
-  return pointToPolygonEdgeDist(click, ring) <= tolerance;
-}
+/** Touch-friendly tolerance: clicks within this perpendicular distance hit the line. */
+export const POLYLINE_HIT_TOLERANCE = 0.015;
 
 export type EvaluatedClick = {
   hit: boolean;
-  /** Normalized distance to the POI (0..√2). */
+  /** Normalized distance to the POI (0..√2). For polygon POIs this is 0 when
+   *  inside and `Infinity` when outside — point-in-polygon is binary, not a
+   *  continuous metric. */
   distance: number;
 };
+
+/**
+ * Defensive: GeoJSON polygon rings MUST be closed (first === last vertex).
+ * Foxxite source rings are closed by the spec, and our import script preserves
+ * that. This helper guards against hand-authored / malformed rings.
+ */
+function ensureClosed(ring: readonly Vec2[]): [number, number][] {
+  if (ring.length === 0) return [];
+  // Turf coords are [x, y] (= [lng, lat] in the geographic naming convention;
+  // we work in a flat normalized image space, so axis labels are nominal).
+  const coords: [number, number][] = ring.map((v) => [v.x, v.y]);
+  const first = coords[0]!;
+  const last = coords[coords.length - 1]!;
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    coords.push([first[0], first[1]]);
+  }
+  return coords;
+}
+
+/**
+ * Point-in-polygon over a POIPolygon's rings array. Treats ring 0 as the outer
+ * boundary and rings 1+ as holes (GeoJSON Polygon semantics — see
+ * scripts/import-foxxite-streets.mjs commentary). Foxxite source has no holes
+ * and no MultiPolygons in practice, so in the common case `rings.length === 1`
+ * and this reduces to a single outer-ring check.
+ *
+ * Coordinate convention: Turf takes `[lng, lat]` ordered pairs. Our `Vec2`
+ * fields are `{x, y}` in flat normalized image space — we map x → lng, y → lat
+ * directly. There is NO axis swap. Leaflet's `[lat, lng]` ordering only
+ * applies to its own API; we already converted away from it in coords.ts.
+ */
+function pointInRings(click: Vec2, rings: readonly (readonly Vec2[])[]): boolean {
+  if (rings.length === 0) return false;
+  const closed = rings.map(ensureClosed).filter((r) => r.length >= 4);
+  if (closed.length === 0) return false;
+  // turfPolygon expects Position[][] (= array of rings). `closed` is already
+  // that shape — ring 0 = outer, rings 1+ = holes.
+  const poly = turfPolygon(closed);
+  return booleanPointInPolygon(turfPoint([click.x, click.y]), poly);
+}
 
 /** Evaluate a click against a POI: returns hit status and distance to target. */
 export function evaluateClick(
@@ -102,9 +95,16 @@ export function evaluateClick(
     const d = distance(click, poi.position);
     return { hit: d < threshold, distance: d };
   }
-  // polygon: hit determined by polygonHit with edge tolerance; distance is 0
-  // when inside, else distance to nearest edge.
-  const hit = polygonHit(poi.path, click, POLYGON_EDGE_TOLERANCE);
-  const d = hit ? 0 : pointToPolygonEdgeDist(click, poi.path);
-  return { hit, distance: d };
+  if (poi.geometry === 'polyline') {
+    const d = pointToPolylineDist(click, poi.path);
+    return { hit: d <= POLYLINE_HIT_TOLERANCE, distance: d };
+  }
+  // poi.geometry === 'polygon' — point-in-polygon, no tolerance.
+  const inside = pointInRings(click, poi.rings);
+  return { hit: inside, distance: inside ? 0 : Infinity };
+}
+
+/** Exposed for tests / debug overlays so callers can probe rings independently. */
+export function isClickInsidePolygon(rings: readonly (readonly Vec2[])[], click: Vec2): boolean {
+  return pointInRings(click, rings);
 }

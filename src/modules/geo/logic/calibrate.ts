@@ -273,31 +273,137 @@ export function calibratePoi(poi: POI, t: AffineTransform): POI {
   if (poi.geometry === 'point') {
     return { ...poi, position: applyAffine(poi.position, t) };
   }
-  // polygon — transform path AND recalculate centroid
-  const newPath = poi.path.map((pt) => applyAffine(pt, t));
-  return { ...poi, path: newPath, centroid: polygonCentroid(newPath) };
+  if (poi.geometry === 'polyline') {
+    const newPath = poi.path.map((pt) => applyAffine(pt, t));
+    return { ...poi, path: newPath, centroid: polylineCentroid(newPath) };
+  }
+  // poi.geometry === 'polygon'
+  const newRings = poi.rings.map((ring) => ring.map((pt) => applyAffine(pt, t)));
+  const outer = newRings[0] ?? [];
+  let cx = 0;
+  let cy = 0;
+  for (const pt of outer) {
+    cx += pt.x;
+    cy += pt.y;
+  }
+  const centroid: Vec2 =
+    outer.length > 0 ? { x: cx / outer.length, y: cy / outer.length } : poi.centroid;
+  return { ...poi, rings: newRings, centroid };
 }
 
-export function polygonCentroid(ring: Vec2[]): Vec2 {
-  let cx = 0,
-    cy = 0,
-    a2 = 0;
-  for (let i = 0; i < ring.length - 1; i++) {
-    const p = ring[i]!;
-    const q = ring[i + 1]!;
-    const cross = p.x * q.y - q.x * p.y;
-    a2 += cross;
-    cx += (p.x + q.x) * cross;
-    cy += (p.y + q.y) * cross;
+/**
+ * Approximate a polygon ring with a centerline polyline via PCA + along-axis
+ * binning. Mirrors `polygonToCenterline` in scripts/import-foxxite-streets.mjs.
+ * Foxxite street polygons represent street zones (sidewalks + asphalt context),
+ * not the road itself. PCA's major axis is the along-road direction; binning
+ * vertices along that axis and averaging within each bin produces points near
+ * the road centerline.
+ */
+export function polygonToCenterline(
+  ring: readonly Vec2[],
+  numBins = 8,
+): Vec2[] {
+  const uniq =
+    ring.length > 1 &&
+    ring[0]!.x === ring[ring.length - 1]!.x &&
+    ring[0]!.y === ring[ring.length - 1]!.y
+      ? ring.slice(0, -1)
+      : ring.slice();
+  const n = uniq.length;
+  if (n < 2) return uniq.map((p) => ({ x: p.x, y: p.y }));
+  let mx = 0, my = 0;
+  for (const p of uniq) { mx += p.x; my += p.y; }
+  mx /= n; my /= n;
+  let cxx = 0, cxy = 0, cyy = 0;
+  for (const p of uniq) {
+    const dx = p.x - mx, dy = p.y - my;
+    cxx += dx * dx; cxy += dx * dy; cyy += dy * dy;
   }
-  if (Math.abs(a2) < 1e-12) {
-    const sum = ring.reduce(
+  cxx /= n; cxy /= n; cyy /= n;
+  const tr = cxx + cyy;
+  const det = cxx * cyy - cxy * cxy;
+  const disc = Math.sqrt(Math.max(0, (tr * tr) / 4 - det));
+  const l1 = tr / 2 + disc;
+  let vx: number, vy: number;
+  if (Math.abs(cxy) > 1e-10) {
+    vx = l1 - cyy;
+    vy = cxy;
+  } else {
+    vx = cxx >= cyy ? 1 : 0;
+    vy = cxx >= cyy ? 0 : 1;
+  }
+  const vn = Math.hypot(vx, vy) || 1;
+  const major = { x: vx / vn, y: vy / vn };
+  const projected = uniq.map((p) => ({
+    pt: p,
+    t: (p.x - mx) * major.x + (p.y - my) * major.y,
+  }));
+  let tMin = Infinity, tMax = -Infinity;
+  for (const q of projected) {
+    if (q.t < tMin) tMin = q.t;
+    if (q.t > tMax) tMax = q.t;
+  }
+  if (tMax - tMin < 1e-9) return [{ x: mx, y: my }];
+  const bins: { pt: Vec2; t: number }[][] = Array.from(
+    { length: numBins },
+    () => [],
+  );
+  for (const q of projected) {
+    const f = (q.t - tMin) / (tMax - tMin);
+    let idx = Math.floor(f * numBins);
+    if (idx >= numBins) idx = numBins - 1;
+    bins[idx]!.push(q);
+  }
+  const centerline: { x: number; y: number; t: number }[] = [];
+  for (const bin of bins) {
+    if (bin.length === 0) continue;
+    let sx = 0, sy = 0, st = 0;
+    for (const q of bin) { sx += q.pt.x; sy += q.pt.y; st += q.t; }
+    centerline.push({
+      x: sx / bin.length,
+      y: sy / bin.length,
+      t: st / bin.length,
+    });
+  }
+  centerline.sort((a, b) => a.t - b.t);
+  return centerline.map(({ x, y }) => ({ x, y }));
+}
+
+/**
+ * Arc-length midpoint of an open polyline — the point that lies at half of the
+ * total path length, measured along the segments. Falls back to vertex mean for
+ * degenerate (single-point or zero-length) paths.
+ */
+export function polylineCentroid(path: readonly Vec2[]): Vec2 {
+  if (path.length === 0) return { x: 0, y: 0 };
+  if (path.length === 1) return { x: path[0]!.x, y: path[0]!.y };
+  let total = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i]!;
+    const b = path[i + 1]!;
+    total += Math.hypot(b.x - a.x, b.y - a.y);
+  }
+  if (total < 1e-12) {
+    const sum = path.reduce(
       (acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }),
       { x: 0, y: 0 },
     );
-    return { x: sum.x / ring.length, y: sum.y / ring.length };
+    return { x: sum.x / path.length, y: sum.y / path.length };
   }
-  return { x: cx / (3 * a2), y: cy / (3 * a2) };
+  const target = total / 2;
+  let walked = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i]!;
+    const b = path[i + 1]!;
+    const segLen = Math.hypot(b.x - a.x, b.y - a.y);
+    if (walked + segLen >= target) {
+      const t = (target - walked) / segLen;
+      return { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
+    }
+    walked += segLen;
+  }
+  const last = path[path.length - 1]!;
+  return { x: last.x, y: last.y };
 }
 
 /**
@@ -322,11 +428,24 @@ export function formatPoisTs(pois: readonly POI[]): string {
       lines.push(
         `    position: { x: ${formatCoord(p.position.x)}, y: ${formatCoord(p.position.y)} },`,
       );
-    } else {
-      // polygon — emit path + centroid
+    } else if (p.geometry === 'polyline') {
       lines.push(`    path: [`);
       for (const pt of p.path) {
         lines.push(`      { x: ${formatCoord(pt.x)}, y: ${formatCoord(pt.y)} },`);
+      }
+      lines.push(`    ],`);
+      lines.push(
+        `    centroid: { x: ${formatCoord(p.centroid.x)}, y: ${formatCoord(p.centroid.y)} },`,
+      );
+    } else {
+      // p.geometry === 'polygon'
+      lines.push(`    rings: [`);
+      for (const ring of p.rings) {
+        lines.push(`      [`);
+        for (const pt of ring) {
+          lines.push(`        { x: ${formatCoord(pt.x)}, y: ${formatCoord(pt.y)} },`);
+        }
+        lines.push(`      ],`);
       }
       lines.push(`    ],`);
       lines.push(
