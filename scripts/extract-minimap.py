@@ -79,7 +79,7 @@ def main() -> None:
     canvas.save(OUT_PATH, "JPEG", quality=90, optimize=True)
     size_mb = OUT_PATH.stat().st_size / 1e6
     print(f"\nWrote {OUT_PATH} ({canvas.size[0]}×{canvas.size[1]}, {size_mb:.1f} MB)")
-    print("Next: node scripts/generate-tiles.mjs && node scripts/import-foxxite-streets.mjs")
+    print("Next: node scripts/generate-tiles.mjs")
 
 
 if __name__ == "__main__":

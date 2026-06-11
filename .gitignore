@@ -29,9 +29,5 @@ coverage
 # To regenerate clean-map.jpg from these, see scripts/extract-minimap.py.
 /docs/map-original/
 
-# GTA V path-node dump (~144 MB) — fetched by scripts/fetch-ynd-data.mjs,
-# consumed by scripts/build-streets-from-ynd.mjs. Output is committed.
-/data/
-
 # Superpowers skill internal state (brainstorm transcripts, etc.)
 .superpowers/
