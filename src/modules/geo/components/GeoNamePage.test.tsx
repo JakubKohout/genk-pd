@@ -38,7 +38,7 @@ function seedPinningTo(targetId: string): void {
     if (p.id !== targetId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 6,
+    schemaVersion: 7,
     codes: {
       progress: {},
       turn: 0,
@@ -52,7 +52,7 @@ function seedPinningTo(targetId: string): void {
     geo: {
       blind: { progress: {}, turn: 0 },
       name: { progress, turn: 0 },
-      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   });
 }
@@ -67,7 +67,7 @@ function renderPage() {
 
 describe('<GeoNamePage />', () => {
   it('renders the name prompt without revealing the target name', async () => {
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-name-prompt'));
     expect(screen.getByTestId('geo-name-prompt')).toHaveTextContent('Co je tady?');
@@ -76,7 +76,7 @@ describe('<GeoNamePage />', () => {
 
   it('correct submission scores +2 and shows hit feedback', async () => {
     const user = userEvent.setup();
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-answer-input'));
     await user.type(screen.getByTestId('geo-answer-input'), 'Vinewood Sign');
@@ -85,12 +85,12 @@ describe('<GeoNamePage />', () => {
       expect(screen.getByTestId('geo-name-feedback')).toHaveAttribute('data-hit', 'true'),
     );
     const after = loadState();
-    expect(after.geo.name.progress['landmark.vinewood-sign']?.score).toBe(2);
+    expect(after.geo.name.progress['city.vinewood-sign']?.score).toBe(2);
   });
 
   it('wrong submission scores -2 and shows miss feedback', async () => {
     const user = userEvent.setup();
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-answer-input'));
     await user.type(screen.getByTestId('geo-answer-input'), 'Maják');
@@ -99,12 +99,12 @@ describe('<GeoNamePage />', () => {
       expect(screen.getByTestId('geo-name-feedback')).toHaveAttribute('data-hit', 'false'),
     );
     const after = loadState();
-    expect(after.geo.name.progress['landmark.vinewood-sign']?.score).toBe(-2);
+    expect(after.geo.name.progress['city.vinewood-sign']?.score).toBe(-2);
   });
 
   it('hard mode toggle disables autocomplete', async () => {
     const user = userEvent.setup();
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-answer-input'));
     await user.type(screen.getByTestId('geo-answer-input'), 'vine');
@@ -117,11 +117,11 @@ describe('<GeoNamePage />', () => {
 
   it('skip masters POI (+2) and advances', async () => {
     const user = userEvent.setup();
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-name-prompt'));
     await user.click(screen.getByTestId('geo-name-skip'));
     const after = loadState();
-    expect(after.geo.name.progress['landmark.vinewood-sign']?.score).toBe(2);
+    expect(after.geo.name.progress['city.vinewood-sign']?.score).toBe(2);
   });
 });

@@ -74,7 +74,7 @@ describe('pointToPolylineDist', () => {
 describe('evaluateClick', () => {
   const point: POIPoint = {
     id: 'landmark.x',
-    category: 'landmark',
+    category: 'city',
     name: 'X',
     description: 'desc',
     aliases: ['x'],
@@ -135,7 +135,7 @@ describe('evaluateClick', () => {
 describe('evaluateClick size tiers', () => {
   const pointWithSize = (size?: POISize): POIPoint => ({
     id: 'landmark.x',
-    category: 'landmark',
+    category: 'city',
     name: 'X',
     description: 'desc',
     aliases: ['x'],
@@ -147,28 +147,28 @@ describe('evaluateClick size tiers', () => {
   it('defaults to the medium threshold when size is omitted', () => {
     expect(SIZE_THRESHOLDS.medium).toBe(HIT_THRESHOLD);
     const poi = pointWithSize();
-    // click at distance 0.03 along x — inside medium (0.035)
-    expect(evaluateClick(poi, { x: 0.53, y: 0.5 }).hit).toBe(true);
-    // click at distance 0.05 — outside medium
-    expect(evaluateClick(poi, { x: 0.55, y: 0.5 }).hit).toBe(false);
+    // click at distance 0.02 along x — inside medium (0.0233)
+    expect(evaluateClick(poi, { x: 0.52, y: 0.5 }).hit).toBe(true);
+    // click at distance 0.03 — outside medium
+    expect(evaluateClick(poi, { x: 0.53, y: 0.5 }).hit).toBe(false);
   });
 
   it('exposes the five expected tier thresholds in increasing order', () => {
     expect(SIZE_THRESHOLDS).toEqual({
-      tiny: 0.015,
-      small: 0.025,
-      medium: 0.035,
-      large: 0.055,
-      huge: 0.09,
+      tiny: 0.01,
+      small: 0.0167,
+      medium: 0.0233,
+      large: 0.0367,
+      huge: 0.06,
     });
   });
 
   it.each([
-    ['tiny', 0.015],
-    ['small', 0.025],
-    ['medium', 0.035],
-    ['large', 0.055],
-    ['huge', 0.09],
+    ['tiny', 0.01],
+    ['small', 0.0167],
+    ['medium', 0.0233],
+    ['large', 0.0367],
+    ['huge', 0.06],
   ] as const)('hits just inside and misses just outside the %s radius', (size, threshold) => {
     const poi = pointWithSize(size);
     const inside = evaluateClick(poi, { x: 0.5 + threshold - 0.002, y: 0.5 });
@@ -178,7 +178,7 @@ describe('evaluateClick size tiers', () => {
   });
 
   it('treats a huge POI click as a hit where a medium POI would miss', () => {
-    const click = { x: 0.5 + 0.07, y: 0.5 }; // 0.07: outside medium, inside huge
+    const click = { x: 0.5 + 0.04, y: 0.5 }; // 0.04: outside medium (0.0233), inside huge (0.06)
     expect(evaluateClick(pointWithSize('huge'), click).hit).toBe(true);
     expect(evaluateClick(pointWithSize('medium'), click).hit).toBe(false);
   });

@@ -3,12 +3,12 @@ import { eligiblePois, isGeoComplete, pickNextPoi } from './selection';
 import type { POI } from '../data/types';
 import type { GeoCategoryFilter } from '@/shared/storage';
 
-const allCats: GeoCategoryFilter = { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true };
+const allCats: GeoCategoryFilter = { street: true, highway: true, city: true, state: true };
 
 const pois: POI[] = [
   {
     id: 'landmark.a',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0, y: 0 },
     name: 'A',
@@ -30,7 +30,7 @@ const pois: POI[] = [
   },
   {
     id: 'pd.c',
-    category: 'pd',
+    category: 'state',
     geometry: 'point',
     position: { x: 0.5, y: 0.5 },
     name: 'C',
@@ -52,13 +52,13 @@ describe('eligiblePois', () => {
   });
 
   it('excludes disabled categories', () => {
-    const filter: GeoCategoryFilter = { street: false, landmark: true, pd: true, fire: true, ems: true, ammu: true };
+    const filter: GeoCategoryFilter = { street: false, city: true, state: true, highway: true };
     const result = eligiblePois({ progress: {}, turn: 0 }, pois, filter);
     expect(result.map((p) => p.id)).toEqual(['landmark.a', 'pd.c']);
   });
 
   it('combines filters with mastery', () => {
-    const filter: GeoCategoryFilter = { street: true, landmark: false, pd: true, fire: true, ems: true, ammu: true };
+    const filter: GeoCategoryFilter = { street: true, city: false, state: true, highway: true };
     const progress = { 'pd.c': { score: 2, lastAskedAtTurn: 0 } };
     const result = eligiblePois({ progress, turn: 0 }, pois, filter);
     expect(result.map((p) => p.id)).toEqual(['street.b']);
@@ -80,7 +80,7 @@ describe('isGeoComplete', () => {
   });
 
   it('true when only enabled categories are mastered (filter scope)', () => {
-    const filter: GeoCategoryFilter = { street: true, landmark: false, pd: false, fire: true, ems: true, ammu: true };
+    const filter: GeoCategoryFilter = { street: true, city: false, state: false, highway: true };
     const progress = { 'street.b': { score: 2, lastAskedAtTurn: 0 } };
     expect(isGeoComplete({ progress, turn: 0 }, pois, filter)).toBe(true);
   });
@@ -88,12 +88,12 @@ describe('isGeoComplete', () => {
 
 describe('pickNextPoi', () => {
   it('returns null when no eligible POIs remain', () => {
-    const filter: GeoCategoryFilter = { street: false, landmark: false, pd: false, fire: true, ems: true, ammu: true };
+    const filter: GeoCategoryFilter = { street: false, city: false, state: false, highway: true };
     expect(pickNextPoi({ progress: {}, turn: 0 }, pois, filter)).toBeNull();
   });
 
   it('returns a POI from the eligible pool', () => {
-    const filter: GeoCategoryFilter = { street: false, landmark: true, pd: false, fire: true, ems: true, ammu: true };
+    const filter: GeoCategoryFilter = { street: false, city: true, state: false, highway: true };
     const result = pickNextPoi({ progress: {}, turn: 0 }, pois, filter);
     expect(result?.id).toBe('landmark.a');
   });

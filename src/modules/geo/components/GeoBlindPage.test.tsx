@@ -54,7 +54,7 @@ function seedPinningTo(targetId: string): void {
     if (p.id !== targetId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 6,
+    schemaVersion: 7,
     codes: {
       progress: {},
       turn: 0,
@@ -68,7 +68,7 @@ function seedPinningTo(targetId: string): void {
     geo: {
       blind: { progress, turn: 0 },
       name: { progress: {}, turn: 0 },
-      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   });
 }
@@ -90,28 +90,28 @@ function renderPage() {
 
 describe('<GeoBlindPage />', () => {
   it('shows the prompt for the targeted POI', async () => {
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-blind-prompt'));
     expect(screen.getByTestId('geo-blind-prompt')).toHaveTextContent('Vinewood Sign');
   });
 
   it('correct click marks POI as mastered (+2) and shows hit feedback', async () => {
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-blind-prompt'));
-    const target = POIS.find((p) => p.id === 'landmark.vinewood-sign');
+    const target = POIS.find((p) => p.id === 'city.vinewood-sign');
     if (!target || target.geometry !== 'point') throw new Error('target lookup');
     clickAt(target.position); // exact target position from current data
     await waitFor(() =>
       expect(screen.getByTestId('geo-blind-feedback')).toHaveAttribute('data-hit', 'true'),
     );
     const after = loadState();
-    expect(after.geo.blind.progress['landmark.vinewood-sign']?.score).toBe(2);
+    expect(after.geo.blind.progress['city.vinewood-sign']?.score).toBe(2);
   });
 
   it('miss click marks POI score down (-2) and shows miss feedback', async () => {
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-blind-prompt'));
     clickAt({ x: 0.9, y: 0.9 }); // far from target
@@ -119,24 +119,24 @@ describe('<GeoBlindPage />', () => {
       expect(screen.getByTestId('geo-blind-feedback')).toHaveAttribute('data-hit', 'false'),
     );
     const after = loadState();
-    expect(after.geo.blind.progress['landmark.vinewood-sign']?.score).toBe(-2);
+    expect(after.geo.blind.progress['city.vinewood-sign']?.score).toBe(-2);
   });
 
   it('skip masters the POI (+2) and advances', async () => {
     const user = userEvent.setup();
-    seedPinningTo('landmark.vinewood-sign');
+    seedPinningTo('city.vinewood-sign');
     renderPage();
     await waitFor(() => screen.getByTestId('geo-blind-prompt'));
     await user.click(screen.getByTestId('geo-blind-skip'));
     const after = loadState();
-    expect(after.geo.blind.progress['landmark.vinewood-sign']?.score).toBe(2);
+    expect(after.geo.blind.progress['city.vinewood-sign']?.score).toBe(2);
   });
 
   it('shows congrats when all POIs in enabled categories mastered', async () => {
     const progress: Record<string, { score: number; lastAskedAtTurn: number }> = {};
     for (const p of POIS) progress[p.id] = { score: 2, lastAskedAtTurn: 0 };
     saveState({
-      schemaVersion: 6,
+      schemaVersion: 7,
       codes: {
         progress: {},
         turn: 0,
@@ -150,7 +150,7 @@ describe('<GeoBlindPage />', () => {
       geo: {
         blind: { progress, turn: 0 },
         name: { progress: {}, turn: 0 },
-        settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+        settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
       },
     });
     renderPage();

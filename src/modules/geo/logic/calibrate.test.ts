@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatPoisTs, polylineCentroid } from './calibrate';
-import type { POI, POIPolyline } from '../data/types';
+import { formatPoisTs, polylineCentroid, toleranceRing } from './calibrate';
+import { fromLatLng } from './coords';
+import { distance } from './hitTest';
+import type { POI, POIPolyline, TileMeta } from '../data/types';
+
+const META: TileMeta = { width: 8192, height: 12288, maxZoom: 3, tileSize: 256 };
 
 describe('polylineCentroid', () => {
   it('returns the midpoint of a single straight segment', () => {
@@ -59,7 +63,7 @@ describe('formatPoisTs', () => {
   it('emits point geometry without path or centroid', () => {
     const point: POI = {
       id: 'landmark.y',
-      category: 'landmark',
+      category: 'city',
       name: 'Point Y',
       description: 'desc',
       aliases: ['y'],
@@ -76,7 +80,7 @@ describe('formatPoisTs', () => {
   it('preserves the size tier for point POIs that define one', () => {
     const point: POI = {
       id: 'landmark.big',
-      category: 'landmark',
+      category: 'city',
       name: 'Big',
       description: 'desc',
       aliases: ['b'],
@@ -91,7 +95,7 @@ describe('formatPoisTs', () => {
   it('omits the size line for POIs without a size', () => {
     const point: POI = {
       id: 'landmark.plain',
-      category: 'landmark',
+      category: 'city',
       name: 'Plain',
       description: 'desc',
       aliases: ['p'],
@@ -100,5 +104,33 @@ describe('formatPoisTs', () => {
     };
     const out = formatPoisTs([point]);
     expect(out).not.toContain('size:');
+  });
+});
+
+describe('toleranceRing', () => {
+  const center = { x: 0.5, y: 0.4 };
+  const radius = 0.035;
+
+  it('returns the requested number of ring points', () => {
+    expect(toleranceRing(center, radius, META, 64)).toHaveLength(64);
+  });
+
+  it('places every point at the radius distance from center in normalized space', () => {
+    for (const latlng of toleranceRing(center, radius, META, 32)) {
+      const back = fromLatLng({ lat: latlng[0], lng: latlng[1] }, META);
+      expect(distance(back, center)).toBeCloseTo(radius, 5);
+    }
+  });
+
+  it('renders as an ellipse in pixel space (taller than wide on a portrait map)', () => {
+    const ring = toleranceRing(center, radius, META, 64);
+    const lats = ring.map((p) => p[0]);
+    const lngs = ring.map((p) => p[1]);
+    const xExtent = Math.max(...lngs) - Math.min(...lngs);
+    const yExtent = Math.max(...lats) - Math.min(...lats);
+    // semi-axes: radius*width in x, radius*height in y → full extent is 2× that
+    expect(xExtent).toBeCloseTo(2 * radius * META.width, 0);
+    expect(yExtent).toBeCloseTo(2 * radius * META.height, 0);
+    expect(yExtent).toBeGreaterThan(xExtent);
   });
 });

@@ -7,7 +7,7 @@ import type { POI } from '../data/types';
 const pool: POI[] = [
   {
     id: 'landmark.vinewood-sign',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0.31, y: 0.55 },
     name: 'Vinewood Sign',
@@ -16,7 +16,7 @@ const pool: POI[] = [
   },
   {
     id: 'landmark.maják',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0.7, y: 0.07 },
     name: 'Maják',

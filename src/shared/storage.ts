@@ -41,11 +41,9 @@ export type PenalSlice = {
 
 export type GeoCategoryFilter = {
   street: boolean;
-  landmark: boolean;
-  pd: boolean;
-  fire: boolean;
-  ems: boolean;
-  ammu: boolean;
+  highway: boolean;
+  city: boolean;
+  state: boolean;
 };
 
 export type GeoQuizSlice = {
@@ -62,7 +60,7 @@ export type GeoSlice = {
 };
 
 export type PersistedState = {
-  schemaVersion: 6;
+  schemaVersion: 7;
   codes: CodesSlice;
   lea: LeaSlice;
   penal: PenalSlice;
@@ -70,7 +68,7 @@ export type PersistedState = {
 };
 
 export const initialState: PersistedState = {
-  schemaVersion: 6,
+  schemaVersion: 7,
   codes: {
     progress: {},
     turn: 0,
@@ -96,11 +94,9 @@ export const initialState: PersistedState = {
     settings: {
       categoryFilter: {
         street: true,
-        landmark: true,
-        pd: true,
-        fire: true,
-        ems: true,
-        ammu: true,
+        highway: true,
+        city: true,
+        state: true,
       },
     },
   },
@@ -146,7 +142,23 @@ type StoredV5 = {
   codes: CodesSlice;
   lea: LeaSlice;
   penal: PenalSlice;
-  geo: GeoSlice;
+  geo: GeoLikeSlice;
+};
+
+// v5 and v6 shared the same geo shape but with the legacy 6-key category filter.
+// Typed loosely so the new 4-key GeoCategoryFilter doesn't fight the migrations.
+type GeoLikeSlice = {
+  blind: GeoQuizSlice;
+  name: GeoQuizSlice;
+  settings: { categoryFilter: Record<string, boolean> };
+};
+
+type StoredV6 = {
+  schemaVersion: 6;
+  codes: CodesSlice;
+  lea: LeaSlice;
+  penal: PenalSlice;
+  geo: GeoLikeSlice;
 };
 
 function migrateV1ToV2(v1: StoredV1): StoredV2 {
@@ -246,7 +258,7 @@ function migrateV4ToV5(v4: StoredV4): StoredV5 {
   };
 }
 
-function migrateV5ToV6(v5: StoredV5): PersistedState {
+function migrateV5ToV6(v5: StoredV5): StoredV6 {
   return {
     schemaVersion: 6,
     codes: v5.codes,
@@ -256,10 +268,26 @@ function migrateV5ToV6(v5: StoredV5): PersistedState {
       blind: { progress: {}, turn: 0 },
       name: { progress: {}, turn: 0 },
       settings: {
-        categoryFilter: {
-          ...initialState.geo.settings.categoryFilter,
-          ...(v5.geo?.settings?.categoryFilter ?? {}),
-        },
+        categoryFilter: { ...(v5.geo?.settings?.categoryFilter ?? {}) },
+      },
+    },
+  };
+}
+
+// v6 → v7: geo categories were redefined (street/highway/city/state) and every
+// POI ID was renamed, so the old category filter and geo progress are obsolete.
+// Reset geo to defaults; codes/lea/penal carry over untouched.
+function migrateV6ToV7(v6: StoredV6): PersistedState {
+  return {
+    schemaVersion: 7,
+    codes: v6.codes,
+    lea: v6.lea,
+    penal: v6.penal,
+    geo: {
+      blind: { progress: {}, turn: 0 },
+      name: { progress: {}, turn: 0 },
+      settings: {
+        categoryFilter: { ...initialState.geo.settings.categoryFilter },
       },
     },
   };
@@ -271,69 +299,76 @@ function readFromStorage(): PersistedState {
   if (!raw) return cloneInitial();
   try {
     const parsed = JSON.parse(raw) as Partial<
-      PersistedState | StoredV5 | StoredV4 | StoredV3 | StoredV2 | StoredV1
+      PersistedState | StoredV6 | StoredV5 | StoredV4 | StoredV3 | StoredV2 | StoredV1
     >;
-    if (parsed?.schemaVersion === 6 && parsed.codes) {
-      const v6 = parsed as Partial<PersistedState>;
+    if (parsed?.schemaVersion === 7 && parsed.codes) {
+      const v7 = parsed as Partial<PersistedState>;
       return {
-        schemaVersion: 6,
+        schemaVersion: 7,
         codes: {
-          progress: v6.codes?.progress ?? {},
-          turn: v6.codes?.turn ?? 0,
+          progress: v7.codes?.progress ?? {},
+          turn: v7.codes?.turn ?? 0,
           settings: {
             importanceFilter: {
               ...initialState.codes.settings.importanceFilter,
-              ...(v6.codes?.settings?.importanceFilter ?? {}),
+              ...(v7.codes?.settings?.importanceFilter ?? {}),
             },
           },
         },
         lea: {
-          progress: v6.lea?.progress ?? {},
-          turn: v6.lea?.turn ?? 0,
+          progress: v7.lea?.progress ?? {},
+          turn: v7.lea?.turn ?? 0,
         },
         penal: {
           scenarios: {
-            progress: v6.penal?.scenarios?.progress ?? {},
-            turn: v6.penal?.scenarios?.turn ?? 0,
+            progress: v7.penal?.scenarios?.progress ?? {},
+            turn: v7.penal?.scenarios?.turn ?? 0,
           },
           recall: {
-            progress: v6.penal?.recall?.progress ?? {},
-            turn: v6.penal?.recall?.turn ?? 0,
+            progress: v7.penal?.recall?.progress ?? {},
+            turn: v7.penal?.recall?.turn ?? 0,
           },
         },
         geo: {
           blind: {
-            progress: v6.geo?.blind?.progress ?? {},
-            turn: v6.geo?.blind?.turn ?? 0,
+            progress: v7.geo?.blind?.progress ?? {},
+            turn: v7.geo?.blind?.turn ?? 0,
           },
           name: {
-            progress: v6.geo?.name?.progress ?? {},
-            turn: v6.geo?.name?.turn ?? 0,
+            progress: v7.geo?.name?.progress ?? {},
+            turn: v7.geo?.name?.turn ?? 0,
           },
           settings: {
             categoryFilter: {
               ...initialState.geo.settings.categoryFilter,
-              ...(v6.geo?.settings?.categoryFilter ?? {}),
+              ...(v7.geo?.settings?.categoryFilter ?? {}),
             },
           },
         },
       };
     }
+    if (parsed?.schemaVersion === 6 && parsed.codes) {
+      return migrateV6ToV7(parsed as StoredV6);
+    }
     if (parsed?.schemaVersion === 5 && parsed.codes) {
-      return migrateV5ToV6(parsed as StoredV5);
+      return migrateV6ToV7(migrateV5ToV6(parsed as StoredV5));
     }
     if (parsed?.schemaVersion === 4 && parsed.codes) {
-      return migrateV5ToV6(migrateV4ToV5(parsed as StoredV4));
+      return migrateV6ToV7(migrateV5ToV6(migrateV4ToV5(parsed as StoredV4)));
     }
     if (parsed?.schemaVersion === 3 && parsed.codes) {
-      return migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(parsed as StoredV3)));
+      return migrateV6ToV7(migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(parsed as StoredV3))));
     }
     if (parsed?.schemaVersion === 2 && parsed.codes) {
-      return migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(parsed as StoredV2))));
+      return migrateV6ToV7(
+        migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(parsed as StoredV2)))),
+      );
     }
     if (parsed?.schemaVersion === 1 && parsed.codes) {
-      return migrateV5ToV6(
-        migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(migrateV1ToV2(parsed as StoredV1)))),
+      return migrateV6ToV7(
+        migrateV5ToV6(
+          migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(migrateV1ToV2(parsed as StoredV1)))),
+        ),
       );
     }
   } catch {

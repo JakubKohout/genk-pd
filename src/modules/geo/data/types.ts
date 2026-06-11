@@ -1,4 +1,4 @@
-export type POICategory = 'street' | 'landmark' | 'pd' | 'fire' | 'ems' | 'ammu';
+export type POICategory = 'street' | 'highway' | 'city' | 'state';
 
 /** Click-tolerance tier for point POIs. Omitted = 'medium'. See SIZE_THRESHOLDS. */
 export type POISize = 'tiny' | 'small' | 'medium' | 'large' | 'huge';

@@ -17,7 +17,7 @@ function seedSinglePool(codeId: string): void {
     }
   }
   saveState({
-    schemaVersion: 6,
+    schemaVersion: 7,
     codes: {
       progress,
       turn: 0,
@@ -31,7 +31,7 @@ function seedSinglePool(codeId: string): void {
     geo: {
       blind: { progress: {}, turn: 0 },
       name: { progress: {}, turn: 0 },
-      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   });
 }

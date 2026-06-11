@@ -20,11 +20,9 @@ type Phase = 'answering' | 'revealed';
 
 const CATEGORY_LABEL: Record<POI['category'], string> = {
   street: 'ULICE',
-  landmark: 'LANDMARK',
-  pd: 'PD',
-  fire: 'HASIČI',
-  ems: 'EMS',
-  ammu: 'AMMU',
+  highway: 'DÁLNICE',
+  city: 'BOD VE MĚSTĚ',
+  state: 'BOD VE STÁTĚ',
 };
 
 export function GeoBlindPage() {

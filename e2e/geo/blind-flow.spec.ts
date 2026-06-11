@@ -4,7 +4,7 @@ import { pinNextGeoPoi, seed } from '../fixtures/seed';
 test.describe('Geo blind map flow', () => {
   test('navigates from home to /geo/blind and shows the prompt', async ({ page }) => {
     await seed(page, {
-      geo: { blind: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { blind: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 1,
     });
     await page.goto('/');
@@ -16,7 +16,7 @@ test.describe('Geo blind map flow', () => {
 
   test('skip masters the POI (+2) and advances', async ({ page }) => {
     await seed(page, {
-      geo: { blind: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { blind: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 2,
     });
     await page.goto('/#/geo/blind');
@@ -26,12 +26,12 @@ test.describe('Geo blind map flow', () => {
     await expect(page.getByTestId('geo-blind-congrats')).toBeVisible();
     const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
     const parsed = JSON.parse(stored!);
-    expect(parsed.geo.blind.progress['landmark.vinewood-sign'].score).toBe(2);
+    expect(parsed.geo.blind.progress['city.vinewood-sign'].score).toBe(2);
   });
 
   test('clicking the map produces a feedback card and advances available', async ({ page }) => {
     await seed(page, {
-      geo: { blind: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { blind: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 3,
     });
     await page.goto('/#/geo/blind');
@@ -51,7 +51,7 @@ test.describe('Geo blind map flow', () => {
     await seed(page, {
       geo: {
         blind: {
-          progress: { 'landmark.majak': { score: 2, lastAskedAtTurn: 0 } },
+          progress: { 'city.majak': { score: 2, lastAskedAtTurn: 0 } },
           turn: 1,
         },
       },

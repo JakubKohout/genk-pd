@@ -8,18 +8,14 @@ describe('POI dataset', () => {
     expect(POIS.length).toBeGreaterThanOrEqual(60);
     const byCategory = {
       street: POIS.filter((p) => p.category === 'street').length,
-      landmark: POIS.filter((p) => p.category === 'landmark').length,
-      pd: POIS.filter((p) => p.category === 'pd').length,
-      fire: POIS.filter((p) => p.category === 'fire').length,
-      ems: POIS.filter((p) => p.category === 'ems').length,
-      ammu: POIS.filter((p) => p.category === 'ammu').length,
+      highway: POIS.filter((p) => p.category === 'highway').length,
+      city: POIS.filter((p) => p.category === 'city').length,
+      state: POIS.filter((p) => p.category === 'state').length,
     };
-    expect(byCategory.street).toBeGreaterThanOrEqual(15);
-    expect(byCategory.landmark).toBeGreaterThanOrEqual(30);
-    expect(byCategory.pd).toBeGreaterThanOrEqual(2);
-    expect(byCategory.fire).toBeGreaterThanOrEqual(1);
-    expect(byCategory.ems).toBeGreaterThanOrEqual(1);
-    expect(byCategory.ammu).toBeGreaterThanOrEqual(1);
+    expect(byCategory.street).toBeGreaterThanOrEqual(10);
+    expect(byCategory.highway).toBeGreaterThanOrEqual(5);
+    expect(byCategory.city).toBeGreaterThanOrEqual(20);
+    expect(byCategory.state).toBeGreaterThanOrEqual(5);
   });
 
   it('has unique IDs', () => {
@@ -77,7 +73,7 @@ describe('POI dataset', () => {
 
   it('has polyline paths with ≥2 vertices and all coords in [0,1] for streets', () => {
     for (const p of POIS) {
-      if (p.category === 'street') {
+      if (p.category === 'street' || p.category === 'highway') {
         expect(p.geometry).toBe('polyline');
         if (p.geometry !== 'polyline') continue;
         expect(p.path.length).toBeGreaterThanOrEqual(2);
@@ -120,9 +116,9 @@ describe('POI dataset', () => {
     }
   });
 
-  it('uses polyline geometry only for streets, point for everything else', () => {
+  it('uses polyline geometry for streets/highways, point for city/state', () => {
     for (const p of POIS) {
-      if (p.category === 'street') {
+      if (p.category === 'street' || p.category === 'highway') {
         expect(p.geometry).toBe('polyline');
       } else {
         expect(p.geometry).toBe('point');

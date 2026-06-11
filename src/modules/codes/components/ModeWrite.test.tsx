@@ -23,7 +23,7 @@ function seedSinglePool(codeId: string, score = 0): void {
   if (score !== 0) progress[codeId] = { score, lastAskedAtTurn: -10 };
 
   saveState({
-    schemaVersion: 6,
+    schemaVersion: 7,
     codes: {
       progress,
       turn: 0,
@@ -37,7 +37,7 @@ function seedSinglePool(codeId: string, score = 0): void {
     geo: {
       blind: { progress: {}, turn: 0 },
       name: { progress: {}, turn: 0 },
-      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   });
 }
@@ -104,7 +104,7 @@ describe('<ModeWrite />', () => {
       }
     }
     saveState({
-      schemaVersion: 6,
+      schemaVersion: 7,
       codes: {
         progress,
         turn: 0,
@@ -118,7 +118,7 @@ describe('<ModeWrite />', () => {
       geo: {
         blind: { progress: {}, turn: 0 },
         name: { progress: {}, turn: 0 },
-        settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+        settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
       },
     });
     render(<ModeWrite />);

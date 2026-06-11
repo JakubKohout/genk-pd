@@ -31,7 +31,7 @@ funkční moduly:
    - **Slepá mapa** (`/geo/blind`, default index) — uživatel dostane prompt
      „Klikni na X — popis" a kliká na mapu. Hit-test binární s **prahem dle
      velikosti POI** (pole `size`, 5 tierů tiny/small/medium/large/huge →
-     0.015/0.025/0.035/0.055/0.09 normalizovaných jednotek; default medium
+     0.01/0.0167/0.0233/0.0367/0.06 normalizovaných jednotek; default medium
      když `size` chybí). Velké oblasti (letiště, doky, města) = huge, pinpoint
      budovy = small. Bodové POI: euklidovská distance. Polyline POI (ulice):
      minimum perpendikulární distance segmentu (fixní 0.015).
@@ -42,11 +42,14 @@ funkční moduly:
      markery a polyline nody tažitelné, export TS literálu pro paste zpět
      do `pois.ts` / `streets.generated.ts`.
    Mastered POI zůstávají faded markery / polyline s názvem na mapě → mapa
-   se postupně „odemyká". Společný `categoryFilter` (6 kategorií:
-   street/landmark/pd/fire/ems/ammu) v `geo.settings`. Per-režim progress
-   (jako Penal). **68 POI dataset** (`pois.ts`): 43 landmark + 2 pd + 1 fire
-   + 1 ems + 1 ammu + 20 street. Pozice přenesené z předchozí mapy přes
-   image-affine + vizuálně ověřené proti artu (Gotcha 45), ulice hand-traced.
+   se postupně „odemyká". Společný `categoryFilter` (4 kategorie:
+   street=Ulice / highway=Dálnice / city=Body ve městě / state=Body ve státě)
+   v `geo.settings`. Per-režim progress (jako Penal). **68 POI dataset**
+   (`pois.ts` + `streets.generated.ts`): 37 city + 11 state + 11 street +
+   9 highway. ID prefix == kategorie (`city.lsia`, `state.paleto-bay`,
+   `street.vespucci-blvd`, `highway.del-perro-fwy`). Pozice přenesené z
+   předchozí mapy přes image-affine + vizuálně ověřené proti artu (Gotcha 45),
+   ulice hand-traced.
 
 Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
 **Firearm Act** je disabled (`aria-disabled`, čeká na implementaci).
@@ -54,7 +57,7 @@ Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
 samostatný top-level modul, ne pod `/laws`.
 
 Pure-frontend, žádný backend. Veškerý stav v `localStorage` (klíč `genk-pd:v1`,
-schemaVersion 6).
+schemaVersion 7).
 
 ## Stack
 
@@ -80,7 +83,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **407 unit/component + 67 E2E = 474 testů**.
+`npm run test:all` musí být zelené: **410 unit/component + 67 E2E = 477 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -154,11 +157,10 @@ src/
     geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + editor pozic)
       data/
         types.ts                    # POIBase, POIPoint, POIPolyline, POI union,
-                                    # POICategory: 6 hodnot (street/landmark/pd/fire/ems/ammu),
+                                    # POICategory: 4 hodnoty (street/highway/city/state),
                                     # POISize: 5 tierů (tiny..huge) — volitelné pole `size`
-        pois.ts                     # POIS — 68 POI z uživatelova zadávacího seznamu:
-                                    # 43 landmark + 2 pd + 1 fire + 1 ems + 1 ammu + 20 street.
-                                    # Non-street: point geometry, pozice přenesené z HEAD
+        pois.ts                     # POIS — 68 POI: 37 city + 11 state (point) + 20 street/highway
+                                    # (z streets.generated.ts). Point: pozice přenesené z HEAD
                                     # přes image-affine + vizuálně ověřené (Gotcha 45),
                                     # každý má `size` tier pro klikací toleranci (Gotcha 47).
                                     # Streets: koncat z streets.generated.ts.
@@ -172,32 +174,35 @@ src/
         coords.ts                   # toLatLng / fromLatLng helpery (CRS.Simple [y,x])
         hitTest.ts                  # evaluateClick: point (euklid threshold dle
                                     # POI size, SIZE_THRESHOLDS 5 tierů, default
-                                    # medium 0.035), polyline
+                                    # medium 0.0233), polyline
                                     # (perpendikulární distance ≤ 0.015).
                                     # hitTest.streets.test.ts: 12 real-coordinate fixtures
                                     # ověřených proti satelitnímu artu
         match.ts                    # matchPoi — strict equality po normalize, name + aliases
         suggest.ts                  # suggestPois — substring autocomplete, min 2, max 5
         calibrate.ts                # polylineCentroid (arc-length midpoint) + formatPoisTs
-                                    # (TS literál pro paste do pois.ts) — jen pro DragDropTab
+                                    # (TS literál pro paste do pois.ts) + toleranceRing
+                                    # (prsten tolerance vybraného POI, elipsa v px) — jen DragDropTab
       state/
         selection.ts                # pickNextPoi(state, pois, filter) přes pickNextFromPool,
                                     # eligiblePois, isGeoComplete
         useGeoProgress.ts           # Generický hook useGeoSliceProgress('blind'|'name') →
                                     # 2 veřejné: useGeoBlindProgress, useGeoNameProgress
-        useGeoSettings.ts           # Category filter (6 kategorií), persistuje
+        useGeoSettings.ts           # Category filter (4 kategorie), persistuje
       components/                   # GeoLayout (tabs + Outlet), GeoBlindPage (mode 1),
                                     # GeoNamePage (mode 2), GeoMap (Leaflet wrapper +
                                     # MapClickCapture), GeoMarker, GeoPolyline, GeoSidePanel,
                                     # GeoMobilePanel (<details>), GeoAnswerInput, GeoResetButton,
                                     # GeoCalibratePage (renderuje DragDropTab), GeoDebugOverlay
         calibrate/                  # · DragDropTab — POI markery tažitelné, polyline nody
-                                    #   draggable, export TS přes formatPoisTs
+                                    #   draggable, export TS přes formatPoisTs. Vybraný point
+                                    #   POI dostane prsten tolerance (toleranceRing → Polygon,
+                                    #   non-interactive, elipsa kvůli portrait mapě)
   shared/
-    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 6,
-                                    # chained migrate v1→…→v6 při readu, lenient v6 read.
-                                    # migrateV5ToV6: clear geo.blind.progress + geo.name.progress
-                                    # (POI IDs přepsány při novém datasetu), settings zachovat
+    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 7,
+                                    # chained migrate v1→…→v7 při readu, lenient v7 read.
+                                    # migrateV6ToV7: clear geo.blind/name.progress (POI IDs
+                                    # přejmenovány) + reset categoryFilter na 4-kat default
     rng.ts                          # Pluggable RNG (mulberry32, seed přes localStorage)
     useMediaQuery.ts                # SSR-safe matchMedia hook
     text/normalize.ts               # NFD strip diakritiky + lowercase + whitespace collapse
@@ -232,7 +237,7 @@ docs/poi-mapping.md                 # Mapování uživatelova POI seznamu → CZ
 
 e2e/
   fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?, penal?, geo?, randomSeed? })`
-                                    # Píše schemaVersion 6, exportuje LEA_QUESTION_IDS,
+                                    # Píše schemaVersion 7, exportuje LEA_QUESTION_IDS,
                                     # PENAL_SCENARIO_IDS, PENAL_PARAGRAPH_IDS, GEO_POI_IDS,
                                     # pinNext{Question, LeaQuestion, PenalScenario,
                                     # PenalParagraph, GeoPoi}
@@ -276,23 +281,22 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
     name:  { progress: { [poiId]: ProgressEntry }, turn: number },
     settings: {
       categoryFilter: {
-        street: bool, landmark: bool, pd: bool,
-        fire: bool, ems: bool, ammu: bool
+        street: bool, highway: bool, city: bool, state: bool
       }
     }
   }
 }
 ```
 
-**Migrace v1 → v2 → v3 → v4 → v5 → v6** (`src/shared/storage.ts`): při readu se
-starší payload chained-migruje v paměti. v1: codes zachováno, lea přidáno default.
-v2: codes+lea zachováno, penal přidáno default. v3: codes+lea+penal zachováno,
-geo přidáno default. v4 → v5: vynulování geo progress (první rewrite POI datasetu)
-+ doplnění kategorií fire/ems/ammu. **v5 → v6**: `migrateV5ToV6` znovu vynuluje
-`geo.blind.progress` + `geo.name.progress` (POI IDs přepsané při druhém rewrite
-datasetu), settings se přenese. `saveState` vždy zapisuje v6.
+**Migrace v1 → … → v7** (`src/shared/storage.ts`): při readu se starší payload
+chained-migruje v paměti. v1: codes zachováno, lea přidáno default. v2: +penal.
+v3: +geo default. v4 → v5 → v6: opakovaná vynulování geo progress při rewrite
+datasetů. **v6 → v7**: `migrateV6ToV7` vynuluje `geo.blind/name.progress` (POI IDs
+přejmenované na nové kategorie city/state/street/highway) **a resetuje
+`categoryFilter` na 4-kategoriový default** (staré 6-kat hodnoty jsou nepřevoditelné
+— kategorie změnily význam). codes/lea/penal se přenese. `saveState` vždy zapisuje v7.
 
-**Lenient v6 read**: pokud v6 payload chybí `geo` nebo některá sub-slice
+**Lenient v7 read**: pokud v7 payload chybí `geo` nebo některá sub-slice
 (`blind` / `name` / `settings`), dopočítáme prázdné defaults. categoryFilter
 doplní missing kategorie z initialState (každá true). Stejně lenient pro
 `penal`. (Test `storage.test.ts`.)
@@ -680,7 +684,7 @@ route s `<Outlet />`:
 
 `GeoSidePanel` (sdílený obě módy přes prop `mode: 'blind'|'name'`):
 - ProgressHeader s testid `geo-{mode}-progress-percent` / `-bar`.
-- 3 checkboxy `geo-filter-{street|landmark|pd}`. Mění `geo.settings.categoryFilter`
+- 4 checkboxy `geo-filter-{street|highway|city|state}`. Mění `geo.settings.categoryFilter`
   přes `useGeoSettings` (sdílený hook). Filter platí pro oba módy.
 - POI seznam — chips s 3-znakovou kategorií (ULI/LMK/PD), name, ✓ pro mastered.
 - Mobile přes `<details>` v `GeoMobilePanel`.
@@ -746,12 +750,12 @@ route s `<Outlet />`:
     `<details>`). RTL `getByTestId` najde i hidden elementy uvnitř collapsed details,
     takže existující testy fungují.
 
-11. **`schemaVersion` v test seedech musí být `6` se všemi slices**.
+11. **`schemaVersion` v test seedech musí být `7` se všemi slices**.
     Hardcoded literály ve všech `*.test.tsx` které volají `saveState({...})` musí mít
-    `schemaVersion: 6`, `lea: { progress: {}, turn: 0 }`,
+    `schemaVersion: 7`, `lea: { progress: {}, turn: 0 }`,
     `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`
-    a `geo` slice s `settings.categoryFilter` (všech 6 kategorií).
-    Pokud přidáš další slice, bumpni schema (v6 → v7) a doplň migraci v `storage.ts`.
+    a `geo` slice s `settings.categoryFilter` (4 kategorie street/highway/city/state).
+    Pokud přidáš další slice, bumpni schema (v7 → v8) a doplň migraci v `storage.ts`.
 
 12. **Vite dev server je default lockdown na `localhost`.** Pro ngrok/cloudflared
     tunel je v `vite.config.ts` `server.allowedHosts: ['.ngrok-free.app', '.ngrok.app',
@@ -852,13 +856,13 @@ route s `<Outlet />`:
     — nechtěl jsem komplikovat storage schema o UI preference. Pokud má persist,
     přidat do `penal.scenarios.settings.hardMode` a bumpnout schema.
 
-29. **Schema je v6** — bumpnuto z v5 při druhém rewrite geo POI datasetu (POI
-    IDs přepsané, stará progress garbage). **Všechny test seedy s hardcoded
-    `saveState({...})` literálem musí mít `schemaVersion: 6` + `geo.settings.
-    categoryFilter` se **všemi 6 kategoriemi**** (`street, landmark, pd, fire,
-    ems, ammu` — všechny true defaultně). Stejně tak `e2e/fixtures/seed.ts`.
-    Pokud přidáš další modul nebo zase přepíšeš POI dataset, bumpni v6 → v7
-    a doplň migraci.
+29. **Schema je v7** — bumpnuto z v6 při přechodu na 4 geo kategorie (POI IDs
+    přejmenované city/state/street/highway, stará progress + 6-kat filtr
+    garbage). **Všechny test seedy s hardcoded `saveState({...})` literálem musí
+    mít `schemaVersion: 7` + `geo.settings.categoryFilter` se **všemi 4
+    kategoriemi**** (`street, highway, city, state` — všechny true defaultně).
+    Stejně tak `e2e/fixtures/seed.ts`. Pokud přidáš další modul nebo zase
+    přepíšeš POI dataset/kategorie, bumpni v7 → v8 a doplň migraci.
 
 30. **Tile pipeline NEní v `npm run build`** — `scripts/generate-tiles.mjs` je
     jednorázový skript spouštěný ručně (`node scripts/generate-tiles.mjs`).
@@ -880,8 +884,8 @@ route s `<Outlet />`:
 32. **Geo hit-test je ve square coord space (akceptujeme aspect distortion)** —
     `pointHit` a `polylineHit` z `logic/hitTest.ts` počítají Euklidovu distanci
     v normalizovaném 0..1 prostoru. Source PNG je portrait 5039×7463, takže
-    1 jednotka v Y odpovídá menšímu počtu pixelů než v X. Pro práh medium 0.035
-    to znamená cca 176 zdrojových px v X vs 261 v Y. Pro MVP fine. Pokud bude
+    1 jednotka v Y odpovídá menšímu počtu pixelů než v X. Pro práh medium 0.0233
+    to znamená cca 117 zdrojových px v X vs 174 v Y. Pro MVP fine. Pokud bude
     bolet, vynásobit Y rozdílem (5039/7463 = 0.675) v hit-testu pro skutečně
     izotropní distanci.
 
@@ -911,12 +915,15 @@ route s `<Outlet />`:
 37. _(smazáno — MG import tooling odstraněn; Web Mercator insight viz git
     historie `transform.ts`, kdyby se import někdy vracel)_
 
-38. **6 POI kategorií, ne 3** — `POICategory = street | landmark | pd | fire |
-    ems | ammu`. Test fixtures s `categoryFilter` literálem musí mít všech 6
-    polí (jinak TS type error). Při přidávání nové kategorie: update types.ts
+38. **4 POI kategorie** — `POICategory = street | highway | city | state`
+    (Ulice / Dálnice / Body ve městě / Body ve státě). street+highway = polyline
+    geometrie, city+state = point. ID prefix == kategorie (`city.lsia`,
+    `highway.del-perro-fwy`). Test fixtures s `categoryFilter` literálem musí mít
+    všechna 4 pole (jinak TS type error). Při změně kategorií: update types.ts
     + GeoCategoryFilter v storage.ts + initialState defaults + lenient read
     backfill + GeoSidePanel CATEGORY_LABEL/ABBR/ORDER + GeoBlindPage
-    CATEGORY_LABEL + všechny test fixtures + e2e seed.
+    CATEGORY_LABEL + pois.test.ts counts + všechny test fixtures + e2e seed
+    (`seed.ts` typ + builder) + `geo-poi-ids.ts` (přejmenované ID).
 
 39.–41. _(smazáno — anchor kalibrace a MG import odstraněny z kódbáze)_
 
@@ -961,7 +968,7 @@ route s `<Outlet />`:
 
 47. **Klikací tolerance bodových POI je per-`size`, ne fixní** — `evaluateClick`
     bere práh z `SIZE_THRESHOLDS[poi.size ?? 'medium']` (`logic/hitTest.ts`):
-    tiny 0.015 / small 0.025 / medium 0.035 / large 0.055 / huge 0.09. Velké
+    tiny 0.01 / small 0.0167 / medium 0.0233 / large 0.0367 / huge 0.06. Velké
     rozlehlé oblasti (letiště, doky, města, ropné pole — `size: "huge"`) mají
     velkou klikací zónu, pinpoint budovy (`size: "small"`) malou. `size` je
     volitelné na `POIBase`, ale prakticky platí jen pro point geometry (ulice

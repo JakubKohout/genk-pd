@@ -21,7 +21,7 @@ afterEach(() => {
 
 function seedGeo(): void {
   const state: PersistedState = {
-    schemaVersion: 6,
+    schemaVersion: 7,
     codes: {
       progress: {},
       turn: 0,
@@ -43,7 +43,7 @@ function seedGeo(): void {
         progress: { 'landmark.b': { score: 2, lastAskedAtTurn: 0 } },
         turn: 3,
       },
-      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   };
   saveState(state);

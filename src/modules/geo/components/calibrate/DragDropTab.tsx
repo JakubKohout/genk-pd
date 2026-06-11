@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { divIcon, type LeafletEvent, type LeafletMouseEvent } from 'leaflet';
-import { Marker, Polyline, Tooltip } from 'react-leaflet';
+import { Marker, Polygon, Polyline, Tooltip } from 'react-leaflet';
 import { POIS } from '../../data/pois';
 import { TILE_META } from '../../data/tileMeta';
 import { fromLatLng, toLatLng } from '../../logic/coords';
-import { formatPoisTs, polylineCentroid } from '../../logic/calibrate';
-import { pointToSegmentDist } from '../../logic/hitTest';
+import { formatPoisTs, polylineCentroid, toleranceRing } from '../../logic/calibrate';
+import { SIZE_THRESHOLDS, pointToSegmentDist } from '../../logic/hitTest';
 import { GeoMap } from '../GeoMap';
 import type { POI, Vec2 } from '../../data/types';
 
@@ -179,8 +179,26 @@ function DraggablePoint({ poi, selected, onSelect, onMove }: DraggablePointProps
     iconSize: [16, 16],
     iconAnchor: [8, 8],
   });
+  const ring = selected
+    ? toleranceRing(poi.position, SIZE_THRESHOLDS[poi.size ?? 'medium'], TILE_META)
+    : null;
   return (
-    <Marker
+    <>
+      {ring && (
+        <Polygon
+          positions={ring}
+          interactive={false}
+          pathOptions={{
+            color: '#d4a256',
+            weight: 1.5,
+            opacity: 0.9,
+            fillColor: '#d4a256',
+            fillOpacity: 0.12,
+            dashArray: '4 4',
+          }}
+        />
+      )}
+      <Marker
       position={toLatLng(poi.position, TILE_META)}
       icon={icon}
       draggable
@@ -203,7 +221,8 @@ function DraggablePoint({ poi, selected, onSelect, onMove }: DraggablePointProps
       >
         {poi.name}
       </Tooltip>
-    </Marker>
+      </Marker>
+    </>
   );
 }
 

@@ -4,7 +4,7 @@ import { pinNextGeoPoi, seed } from '../fixtures/seed';
 test.describe('Geo name (what is here) flow', () => {
   test('switches to /geo/name via tab and shows the input', async ({ page }) => {
     await seed(page, {
-      geo: { name: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { name: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 1,
     });
     await page.goto('/#/geo/blind');
@@ -16,7 +16,7 @@ test.describe('Geo name (what is here) flow', () => {
 
   test('correct name submission marks POI mastered', async ({ page }) => {
     await seed(page, {
-      geo: { name: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { name: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 2,
     });
     await page.goto('/#/geo/name');
@@ -25,12 +25,12 @@ test.describe('Geo name (what is here) flow', () => {
     await expect(page.getByTestId('geo-name-feedback')).toHaveAttribute('data-hit', 'true');
     const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
     const parsed = JSON.parse(stored!);
-    expect(parsed.geo.name.progress['landmark.vinewood-sign'].score).toBe(2);
+    expect(parsed.geo.name.progress['city.vinewood-sign'].score).toBe(2);
   });
 
   test('alias also matches (cedule -> Vinewood Sign)', async ({ page }) => {
     await seed(page, {
-      geo: { name: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { name: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 3,
     });
     await page.goto('/#/geo/name');
@@ -41,7 +41,7 @@ test.describe('Geo name (what is here) flow', () => {
 
   test('hard mode toggle hides autocomplete', async ({ page }) => {
     await seed(page, {
-      geo: { name: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { name: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 4,
     });
     await page.goto('/#/geo/name');
@@ -55,7 +55,7 @@ test.describe('Geo name (what is here) flow', () => {
 
   test('skip masters POI (+2) and advances', async ({ page }) => {
     await seed(page, {
-      geo: { name: { progress: pinNextGeoPoi('landmark.vinewood-sign'), turn: 0 } },
+      geo: { name: { progress: pinNextGeoPoi('city.vinewood-sign'), turn: 0 } },
       randomSeed: 5,
     });
     await page.goto('/#/geo/name');
@@ -63,6 +63,6 @@ test.describe('Geo name (what is here) flow', () => {
     await expect(page.getByTestId('geo-name-congrats')).toBeVisible();
     const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
     const parsed = JSON.parse(stored!);
-    expect(parsed.geo.name.progress['landmark.vinewood-sign'].score).toBe(2);
+    expect(parsed.geo.name.progress['city.vinewood-sign'].score).toBe(2);
   });
 });

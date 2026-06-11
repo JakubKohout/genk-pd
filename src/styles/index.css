@@ -162,7 +162,10 @@
     @apply grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px];
   }
   .geo-map-shell {
-    @apply rounded-lg overflow-hidden border border-sasp-navy-light;
+    /* `isolate` contains Leaflet's internal pane/control z-indexes (200–1000)
+       within this stacking context so they can't paint over the sticky header
+       (z-20). Without it the high Leaflet z-indexes escape into the root context. */
+    @apply relative z-0 isolate rounded-lg overflow-hidden border border-sasp-navy-light;
     height: clamp(360px, 60vh, 720px);
   }
   .geo-map-shell .leaflet-container {

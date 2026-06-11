@@ -5,7 +5,7 @@ import type { POI } from '../data/types';
 const pois: POI[] = [
   {
     id: 'landmark.vinewood-sign',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0.31, y: 0.55 },
     name: 'Vinewood Sign',
@@ -14,7 +14,7 @@ const pois: POI[] = [
   },
   {
     id: 'landmark.vinewood-lake',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0.5, y: 0.6 },
     name: 'Vinewood Lake',
@@ -63,7 +63,7 @@ describe('suggestPois', () => {
   it('caps results to max', () => {
     const many: POI[] = Array.from({ length: 20 }, (_, i) => ({
       id: `landmark.test-${i}`,
-      category: 'landmark',
+      category: 'city',
       geometry: 'point',
       position: { x: 0.5, y: 0.5 },
       name: `Test ${i}`,
@@ -77,7 +77,7 @@ describe('suggestPois', () => {
     const sample: POI[] = [
       {
         id: 'landmark.long',
-        category: 'landmark',
+        category: 'city',
         geometry: 'point',
         position: { x: 0, y: 0 },
         name: 'Far away from match here',
@@ -86,7 +86,7 @@ describe('suggestPois', () => {
       },
       {
         id: 'landmark.short',
-        category: 'landmark',
+        category: 'city',
         geometry: 'point',
         position: { x: 0, y: 0 },
         name: 'Match',

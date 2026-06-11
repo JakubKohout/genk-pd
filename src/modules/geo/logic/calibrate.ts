@@ -1,4 +1,5 @@
-import type { POI, Vec2 } from '../data/types';
+import type { POI, TileMeta, Vec2 } from '../data/types';
+import { toLatLng } from './coords';
 
 /**
  * Arc-length midpoint of an open polyline — the point that lies at half of the
@@ -35,6 +36,32 @@ export function polylineCentroid(path: readonly Vec2[]): Vec2 {
   }
   const last = path[path.length - 1]!;
   return { x: last.x, y: last.y };
+}
+
+/**
+ * Boundary ring of a point POI's click tolerance, as Leaflet CRS.Simple [lat,lng]
+ * tuples ready for a <Polygon>. The hit-test measures distance in normalized
+ * *square* space (Gotcha 32), so the ring is a circle of `radius` there; once
+ * mapped through toLatLng onto the portrait pixel grid it becomes an ellipse
+ * (taller than wide), which is what the click region actually looks like.
+ */
+export function toleranceRing(
+  center: Vec2,
+  radius: number,
+  meta: TileMeta,
+  segments = 64,
+): [number, number][] {
+  const ring: [number, number][] = [];
+  for (let i = 0; i < segments; i++) {
+    const a = (i / segments) * 2 * Math.PI;
+    ring.push(
+      toLatLng(
+        { x: center.x + radius * Math.cos(a), y: center.y + radius * Math.sin(a) },
+        meta,
+      ),
+    );
+  }
+  return ring;
 }
 
 /**

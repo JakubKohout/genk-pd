@@ -9,11 +9,9 @@ import {
 
 const DEFAULT_CATEGORY_FILTER = {
   street: true,
-  landmark: true,
-  pd: true,
-  fire: true,
-  ems: true,
-  ammu: true,
+  highway: true,
+  city: true,
+  state: true,
 };
 
 beforeEach(() => {
@@ -27,9 +25,9 @@ afterEach(() => {
 });
 
 describe('storage migration', () => {
-  it('returns initialState (schemaVersion 6) when no data exists', () => {
+  it('returns initialState (schemaVersion 7) when no data exists', () => {
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({});
     expect(state.lea.progress).toEqual({});
     expect(state.lea.turn).toBe(0);
@@ -40,7 +38,7 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('migrates a stored v1 payload all the way to v6', () => {
+  it('migrates a stored v1 payload all the way to v7', () => {
     const v1 = {
       schemaVersion: 1,
       codes: {
@@ -52,7 +50,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v1));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.codes.turn).toBe(7);
     expect(state.lea).toEqual({ progress: {}, turn: 0 });
@@ -63,7 +61,7 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('migrates a stored v2 payload to v6, preserving codes and lea', () => {
+  it('migrates a stored v2 payload to v7, preserving codes and lea', () => {
     const v2 = {
       schemaVersion: 2,
       codes: {
@@ -79,7 +77,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v2));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 3 } });
     expect(state.lea.turn).toBe(4);
@@ -89,7 +87,7 @@ describe('storage migration', () => {
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
   });
 
-  it('migrates a stored v3 payload to v6, preserving all prior slices', () => {
+  it('migrates a stored v3 payload to v7, preserving all prior slices', () => {
     const v3 = {
       schemaVersion: 3,
       codes: {
@@ -115,7 +113,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v3));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 3 } });
     expect(state.penal.scenarios.progress).toEqual({
@@ -129,9 +127,9 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('migrates a stored v4 payload to v6, wiping geo progress but preserving everything else', () => {
-    // v4 had geo POI IDs that the v5 dataset replaces wholesale — progress is reset
-    // intentionally. Settings (categoryFilter) carry over with new categories backfilled.
+  it('migrates a stored v4 payload to v7, wiping geo progress and resetting the filter', () => {
+    // The v7 category model (street/highway/city/state) is incompatible with the old
+    // categories and POI IDs, so geo progress is wiped and the filter resets to default.
     const v4 = {
       schemaVersion: 4,
       codes: {
@@ -146,7 +144,7 @@ describe('storage migration', () => {
       },
       geo: {
         blind: {
-          progress: { 'landmark.maják': { score: 2, lastAskedAtTurn: 0 } },
+          progress: { 'landmark.majak': { score: 2, lastAskedAtTurn: 0 } },
           turn: 5,
         },
         name: {
@@ -159,7 +157,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v4));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 3 } });
     expect(state.penal.scenarios.progress).toEqual({
@@ -167,18 +165,10 @@ describe('storage migration', () => {
     });
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
-    // Old filter preserved + new categories backfilled to default (true)
-    expect(state.geo.settings.categoryFilter).toEqual({
-      street: false,
-      landmark: true,
-      pd: true,
-      fire: true,
-      ems: true,
-      ammu: true,
-    });
+    expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('round-trips v5 saves with geo slice', () => {
+  it('round-trips v7 saves with geo slice', () => {
     const next = JSON.parse(JSON.stringify(initialState));
     next.lea.progress = { 'lea.7': { score: 2, lastAskedAtTurn: 1 } };
     next.lea.turn = 3;
@@ -186,15 +176,15 @@ describe('storage migration', () => {
     next.penal.scenarios.turn = 1;
     next.penal.recall.progress = { 'penal.25': { score: -2, lastAskedAtTurn: 2 } };
     next.penal.recall.turn = 5;
-    next.geo.blind.progress = { 'landmark.vinewood-sign': { score: 2, lastAskedAtTurn: 0 } };
+    next.geo.blind.progress = { 'city.vinewood-sign': { score: 2, lastAskedAtTurn: 0 } };
     next.geo.blind.turn = 2;
-    next.geo.name.progress = { 'street.olympic-fwy': { score: -1, lastAskedAtTurn: 1 } };
+    next.geo.name.progress = { 'highway.olympic-fwy': { score: -1, lastAskedAtTurn: 1 } };
     next.geo.name.turn = 3;
     next.geo.settings.categoryFilter = {
       ...DEFAULT_CATEGORY_FILTER,
       street: true,
-      landmark: false,
-      pd: true,
+      city: false,
+      state: true,
     };
     saveState(next);
     __resetCacheForTests();
@@ -208,14 +198,14 @@ describe('storage migration', () => {
       'penal.25': { score: -2, lastAskedAtTurn: 2 },
     });
     expect(reloaded.geo.blind.progress).toEqual({
-      'landmark.vinewood-sign': { score: 2, lastAskedAtTurn: 0 },
+      'city.vinewood-sign': { score: 2, lastAskedAtTurn: 0 },
     });
     expect(reloaded.geo.blind.turn).toBe(2);
     expect(reloaded.geo.name.progress).toEqual({
-      'street.olympic-fwy': { score: -1, lastAskedAtTurn: 1 },
+      'highway.olympic-fwy': { score: -1, lastAskedAtTurn: 1 },
     });
     expect(reloaded.geo.name.turn).toBe(3);
-    expect(reloaded.geo.settings.categoryFilter.landmark).toBe(false);
+    expect(reloaded.geo.settings.categoryFilter.city).toBe(false);
     expect(reloaded.geo.settings.categoryFilter.street).toBe(true);
   });
 
@@ -226,9 +216,9 @@ describe('storage migration', () => {
     expect(state).toEqual(initialState);
   });
 
-  it('reads a v5 payload with missing geo slice as v6 with empty geo (no data loss)', () => {
+  it('reads a v7 payload with missing geo slice as empty geo (no data loss elsewhere)', () => {
     const partial = {
-      schemaVersion: 6,
+      schemaVersion: 7,
       codes: {
         progress: { '10-4': { score: 2, lastAskedAtTurn: 5 } },
         turn: 7,
@@ -244,7 +234,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 1 } });
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
@@ -252,9 +242,9 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('reads a v6 payload with partial categoryFilter (backfills new categories)', () => {
+  it('reads a v7 payload with partial categoryFilter (backfills missing categories)', () => {
     const partial = {
-      schemaVersion: 6,
+      schemaVersion: 7,
       codes: {
         progress: {},
         turn: 0,
@@ -267,31 +257,29 @@ describe('storage migration', () => {
       },
       geo: {
         blind: {
-          progress: { 'landmark.lsia': { score: 2, lastAskedAtTurn: 0 } },
+          progress: { 'city.lsia': { score: 2, lastAskedAtTurn: 0 } },
           turn: 1,
         },
         // name missing
-        settings: { categoryFilter: { street: false, landmark: true, pd: true } },
+        settings: { categoryFilter: { street: false, city: true } },
       },
     };
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
     expect(state.geo.blind.progress).toEqual({
-      'landmark.lsia': { score: 2, lastAskedAtTurn: 0 },
+      'city.lsia': { score: 2, lastAskedAtTurn: 0 },
     });
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
     expect(state.geo.settings.categoryFilter).toEqual({
       street: false,
-      landmark: true,
-      pd: true,
-      fire: true,
-      ems: true,
-      ammu: true,
+      highway: true,
+      city: true,
+      state: true,
     });
   });
 
-  it('reads a v3 payload with missing penal slice and migrates to v5', () => {
+  it('reads a v3 payload with missing penal slice and migrates to v7', () => {
     const partial = {
       schemaVersion: 3,
       codes: {
@@ -305,7 +293,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.lea.progress).toEqual({ 'lea.7': { score: 2, lastAskedAtTurn: 1 } });
     expect(state.penal.scenarios).toEqual({ progress: {}, turn: 0 });
@@ -314,39 +302,39 @@ describe('storage migration', () => {
   });
 });
 
-describe('storage migration v5 → v6', () => {
+describe('storage migration v6 → v7', () => {
   beforeEach(() => {
     localStorage.clear();
     __resetCacheForTests();
   });
 
-  it('resets geo.blind.progress and geo.name.progress', () => {
-    const v5: any = {
-      schemaVersion: 5,
+  it('resets geo.blind.progress and geo.name.progress (POI IDs renamed)', () => {
+    const v6: any = {
+      schemaVersion: 6,
       codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
       lea: { progress: {}, turn: 0 },
       penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } },
       geo: {
-        blind: { progress: { 'street.old-id': { score: 2, lastAskedAtTurn: 5 } }, turn: 7 },
-        name: { progress: { 'street.old-id': { score: 1, lastAskedAtTurn: 3 } }, turn: 4 },
+        blind: { progress: { 'landmark.lsia': { score: 2, lastAskedAtTurn: 5 } }, turn: 7 },
+        name: { progress: { 'street.olympic-fwy': { score: 1, lastAskedAtTurn: 3 } }, turn: 4 },
         settings: { categoryFilter: { street: true, landmark: false, pd: true, fire: true, ems: true, ammu: true } },
       },
     };
-    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
+    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v6));
     __resetCacheForTests();
 
     const state = loadState();
 
-    expect(state.schemaVersion).toBe(6);
+    expect(state.schemaVersion).toBe(7);
     expect(state.geo.blind.progress).toEqual({});
     expect(state.geo.name.progress).toEqual({});
     expect(state.geo.blind.turn).toBe(0);
     expect(state.geo.name.turn).toBe(0);
   });
 
-  it('preserves geo.settings.categoryFilter through v5 → v6', () => {
-    const v5: any = {
-      schemaVersion: 5,
+  it('resets geo.settings.categoryFilter to the new 4-category default', () => {
+    const v6: any = {
+      schemaVersion: 6,
       codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
       lea: { progress: {}, turn: 0 },
       penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } },
@@ -356,23 +344,22 @@ describe('storage migration v5 → v6', () => {
         settings: { categoryFilter: { street: false, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
       },
     };
-    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
+    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v6));
     __resetCacheForTests();
 
     const state = loadState();
-    expect(state.geo.settings.categoryFilter.street).toBe(false);
-    expect(state.geo.settings.categoryFilter.landmark).toBe(true);
+    expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('preserves codes, lea, penal slices through v5 → v6', () => {
-    const v5: any = {
-      schemaVersion: 5,
+  it('preserves codes, lea, penal slices through v6 → v7', () => {
+    const v6: any = {
+      schemaVersion: 6,
       codes: { progress: { 'code.10-4': { score: 2, lastAskedAtTurn: 5 } }, turn: 5, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
       lea: { progress: { 'lea.7': { score: 1, lastAskedAtTurn: 2 } }, turn: 3 },
       penal: { scenarios: { progress: { 'penal.A1': { score: 2, lastAskedAtTurn: 1 } }, turn: 2 }, recall: { progress: {}, turn: 0 } },
-      geo: { blind: { progress: {}, turn: 0 }, name: { progress: {}, turn: 0 }, settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } } },
+      geo: { blind: { progress: {}, turn: 0 }, name: { progress: {}, turn: 0 }, settings: { categoryFilter: {} } },
     };
-    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
+    localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v6));
     __resetCacheForTests();
 
     const state = loadState();

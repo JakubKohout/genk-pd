@@ -6,7 +6,7 @@ import { saveState, loadState } from '@/shared/storage';
 
 function seedLea(): void {
   saveState({
-    schemaVersion: 6,
+    schemaVersion: 7,
     codes: {
       progress: { '10-4': { score: 2, lastAskedAtTurn: 0 } },
       turn: 5,
@@ -25,7 +25,7 @@ function seedLea(): void {
     geo: {
       blind: { progress: {}, turn: 0 },
       name: { progress: {}, turn: 0 },
-      settings: { categoryFilter: { street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true } },
+      settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
     },
   });
 }

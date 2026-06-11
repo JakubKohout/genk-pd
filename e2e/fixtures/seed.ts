@@ -21,11 +21,9 @@ export type SeedInput = {
     name?: { progress?: SeedProgress; turn?: number };
     categoryFilter?: {
       street?: boolean;
-      landmark?: boolean;
-      pd?: boolean;
-      fire?: boolean;
-      ems?: boolean;
-      ammu?: boolean;
+      highway?: boolean;
+      city?: boolean;
+      state?: boolean;
     };
   };
   randomSeed?: number;
@@ -40,7 +38,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 6 as const,
+    schemaVersion: 7 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -78,11 +76,9 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
       settings: {
         categoryFilter: {
           street: input.geo?.categoryFilter?.street ?? true,
-          landmark: input.geo?.categoryFilter?.landmark ?? true,
-          pd: input.geo?.categoryFilter?.pd ?? true,
-          fire: input.geo?.categoryFilter?.fire ?? true,
-          ems: input.geo?.categoryFilter?.ems ?? true,
-          ammu: input.geo?.categoryFilter?.ammu ?? true,
+          highway: input.geo?.categoryFilter?.highway ?? true,
+          city: input.geo?.categoryFilter?.city ?? true,
+          state: input.geo?.categoryFilter?.state ?? true,
         },
       },
     },

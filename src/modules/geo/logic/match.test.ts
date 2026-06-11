@@ -5,7 +5,7 @@ import type { POI } from '../data/types';
 const pois: POI[] = [
   {
     id: 'landmark.vinewood-sign',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0.31, y: 0.55 },
     name: 'Vinewood Sign',

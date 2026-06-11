@@ -7,7 +7,7 @@ import type { POI } from '../data/types';
 const pois: POI[] = [
   {
     id: 'landmark.a',
-    category: 'landmark',
+    category: 'city',
     geometry: 'point',
     position: { x: 0.5, y: 0.5 },
     name: 'Landmark A',
@@ -29,7 +29,7 @@ const pois: POI[] = [
   },
   {
     id: 'pd.c',
-    category: 'pd',
+    category: 'state',
     geometry: 'point',
     position: { x: 0.3, y: 0.4 },
     name: 'PD C',
@@ -45,7 +45,7 @@ describe('<GeoSidePanel />', () => {
         mode="blind"
         pois={pois}
         progress={{}}
-        filter={{ street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true }}
+        filter={{ street: true, highway: true, city: true, state: true }}
         onSetCategory={() => {}}
       />,
     );
@@ -60,7 +60,7 @@ describe('<GeoSidePanel />', () => {
         mode="blind"
         pois={pois}
         progress={{}}
-        filter={{ street: false, landmark: true, pd: false, fire: true, ems: true, ammu: true }}
+        filter={{ street: false, city: true, state: false, highway: true }}
         onSetCategory={() => {}}
       />,
     );
@@ -79,7 +79,7 @@ describe('<GeoSidePanel />', () => {
         mode="blind"
         pois={pois}
         progress={progress}
-        filter={{ street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true }}
+        filter={{ street: true, highway: true, city: true, state: true }}
         onSetCategory={() => {}}
       />,
     );
@@ -96,7 +96,7 @@ describe('<GeoSidePanel />', () => {
         mode="blind"
         pois={pois}
         progress={progress}
-        filter={{ street: false, landmark: true, pd: false, fire: true, ems: true, ammu: true }}
+        filter={{ street: false, city: true, state: false, highway: true }}
         onSetCategory={() => {}}
       />,
     );
@@ -111,12 +111,12 @@ describe('<GeoSidePanel />', () => {
         mode="name"
         pois={pois}
         progress={{}}
-        filter={{ street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true }}
+        filter={{ street: true, highway: true, city: true, state: true }}
         onSetCategory={onSetCategory}
       />,
     );
-    await user.click(screen.getByTestId('geo-filter-pd'));
-    expect(onSetCategory).toHaveBeenCalledWith('pd', false);
+    await user.click(screen.getByTestId('geo-filter-state'));
+    expect(onSetCategory).toHaveBeenCalledWith('state', false);
   });
 
   it('marks current POI with aria-current', () => {
@@ -125,7 +125,7 @@ describe('<GeoSidePanel />', () => {
         mode="blind"
         pois={pois}
         progress={{}}
-        filter={{ street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true }}
+        filter={{ street: true, highway: true, city: true, state: true }}
         onSetCategory={() => {}}
         currentId="street.b"
       />,
@@ -140,7 +140,7 @@ describe('<GeoSidePanel />', () => {
         mode="name"
         pois={pois}
         progress={{}}
-        filter={{ street: true, landmark: true, pd: true, fire: true, ems: true, ammu: true }}
+        filter={{ street: true, highway: true, city: true, state: true }}
         onSetCategory={() => {}}
       />,
     );

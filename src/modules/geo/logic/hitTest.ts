@@ -2,11 +2,11 @@ import type { POI, POISize, Vec2 } from '../data/types';
 
 /** Per-size click tolerances in normalized units (0..1 over map width). */
 export const SIZE_THRESHOLDS: Record<POISize, number> = {
-  tiny: 0.015,
-  small: 0.025,
-  medium: 0.035,
-  large: 0.055,
-  huge: 0.09,
+  tiny: 0.01,
+  small: 0.0167,
+  medium: 0.0233,
+  large: 0.0367,
+  huge: 0.06,
 };
 
 /** Default point tolerance (alias for the medium tier). */

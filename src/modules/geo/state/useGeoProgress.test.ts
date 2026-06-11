@@ -67,19 +67,17 @@ describe('useGeoSettings', () => {
     const { result } = renderHook(() => useGeoSettings());
     expect(result.current.categoryFilter).toEqual({
       street: true,
-      landmark: true,
-      pd: true,
-      fire: true,
-      ems: true,
-      ammu: true,
+      highway: true,
+      city: true,
+      state: true,
     });
   });
 
   it('setCategory toggles individual category and persists', () => {
     const { result } = renderHook(() => useGeoSettings());
-    act(() => result.current.setCategory('pd', false));
-    expect(result.current.categoryFilter.pd).toBe(false);
+    act(() => result.current.setCategory('city', false));
+    expect(result.current.categoryFilter.city).toBe(false);
     expect(result.current.categoryFilter.street).toBe(true);
-    expect(loadState().geo.settings.categoryFilter.pd).toBe(false);
+    expect(loadState().geo.settings.categoryFilter.city).toBe(false);
   });
 });

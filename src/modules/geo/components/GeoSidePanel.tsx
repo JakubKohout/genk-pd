@@ -13,23 +13,19 @@ const SCORE_CLASS: Record<number, string> = {
 
 const CATEGORY_LABEL: Record<POICategory, string> = {
   street: 'Ulice',
-  landmark: 'Landmarky',
-  pd: 'PD',
-  fire: 'Hasiči',
-  ems: 'EMS',
-  ammu: 'Ammu',
+  highway: 'Dálnice',
+  city: 'Body ve městě',
+  state: 'Body ve státě',
 };
 
 const CATEGORY_ABBR: Record<POICategory, string> = {
   street: 'ULI',
-  landmark: 'LMK',
-  pd: 'PD',
-  fire: 'FD',
-  ems: 'EMS',
-  ammu: 'AMU',
+  highway: 'DÁL',
+  city: 'MĚS',
+  state: 'STÁT',
 };
 
-const CATEGORY_ORDER: POICategory[] = ['landmark', 'pd', 'fire', 'ems', 'ammu', 'street'];
+const CATEGORY_ORDER: POICategory[] = ['city', 'state', 'street', 'highway'];
 
 interface Props {
   mode: 'blind' | 'name';

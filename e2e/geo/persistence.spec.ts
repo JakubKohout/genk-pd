@@ -5,7 +5,7 @@ test('Geo progress persists across reload', async ({ page }) => {
   await seed(page, {
     geo: {
       blind: {
-        progress: { 'landmark.majak': { score: 2, lastAskedAtTurn: 0 } },
+        progress: { 'city.majak': { score: 2, lastAskedAtTurn: 0 } },
         turn: 1,
       },
     },
@@ -21,7 +21,7 @@ test('Geo progress persists across reload', async ({ page }) => {
 test('Category filter persists across modes and reloads', async ({ page }) => {
   await seed(page, {
     geo: {
-      categoryFilter: { street: false, landmark: true, pd: true },
+      categoryFilter: { street: false, city: true, state: true },
     },
   });
   await page.goto('/#/geo/blind');
@@ -35,8 +35,8 @@ test('Category filter persists across modes and reloads', async ({ page }) => {
 test('Reset of one mode does not affect the other', async ({ page }) => {
   await seed(page, {
     geo: {
-      blind: { progress: { 'landmark.majak': { score: 2, lastAskedAtTurn: 0 } }, turn: 1 },
-      name: { progress: { 'landmark.pila': { score: 2, lastAskedAtTurn: 0 } }, turn: 1 },
+      blind: { progress: { 'city.majak': { score: 2, lastAskedAtTurn: 0 } }, turn: 1 },
+      name: { progress: { 'city.pila': { score: 2, lastAskedAtTurn: 0 } }, turn: 1 },
     },
   });
   await page.goto('/#/geo/blind');
@@ -45,5 +45,5 @@ test('Reset of one mode does not affect the other', async ({ page }) => {
   const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
   const parsed = JSON.parse(stored!);
   expect(parsed.geo.blind.progress).toEqual({});
-  expect(parsed.geo.name.progress['landmark.pila']?.score).toBe(2);
+  expect(parsed.geo.name.progress['city.pila']?.score).toBe(2);
 });
