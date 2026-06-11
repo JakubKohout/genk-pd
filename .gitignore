@@ -24,3 +24,10 @@ coverage
 
 # Confidential source material (parsed app data is fine, raw manual is not)
 /docs/sasp-manual.md
+
+# Rockstar minimap source files (.ytd, ~55 MB) — extracted ad-hoc, not committed.
+# To regenerate clean-map.jpg from these, see scripts/extract-minimap.py.
+/docs/map-original/
+
+# Superpowers skill internal state (brainstorm transcripts, etc.)
+.superpowers/
