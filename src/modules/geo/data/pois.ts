@@ -472,7 +472,7 @@ export const POIS: readonly POI[] = [
     geometry: "point",
     position: { x: 0.593, y: 0.734 },
     name: "Hasiči",
-    description: "Hlavní stanice LSFD v Rockford Hills",
+    description: "Hasičská stanice na El Rancho",
     aliases: ["lsfd","fire dept","fire station","fire department hq"],
   },
   {
