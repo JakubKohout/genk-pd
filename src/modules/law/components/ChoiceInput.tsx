@@ -4,7 +4,7 @@ import type { LawChoice } from '../data/types';
 
 interface Props {
   question: LawChoice;
-  /** order[pozice] = index do question.options; submit vraci puvodni indexy */
+  /** order[position] = index into question.options; submit returns the original indices */
   order: number[];
   onSubmit: (selected: number[], correct: boolean) => void;
 }

@@ -1,6 +1,6 @@
-// Ručně udržovaný seznam POI IDs — MUSÍ být sync s src/modules/geo/data/pois.ts
-// (viz CLAUDE.md Gotcha 34: pinNextGeoPoi saturuje pool přes tento seznam).
-// Regenerováno z POIS (68 IDs).
+// Manually maintained list of POI IDs — MUST stay in sync with src/modules/geo/data/pois.ts
+// (see CLAUDE.md Gotcha 34: pinNextGeoPoi saturates the pool via this list).
+// Regenerated from POIS (68 IDs).
 
 export const GEO_POI_IDS = [
   "city.arcadius",

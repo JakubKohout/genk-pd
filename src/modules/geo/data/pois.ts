@@ -1,9 +1,9 @@
 import type { POI } from './types';
 import { STREETS } from './streets.generated';
 
-// Non-street POI (48) jako hardcoded literál; pozice drag-tuned v /geo/calibrate.
-// Ulice (20 polyline) se concatují ze streets.generated.ts (single source of truth
-// pro calibrate/debug overlay).
+// Non-street POI (48) as a hardcoded literal; positions drag-tuned in /geo/calibrate.
+// Streets (20 polyline) are concatenated from streets.generated.ts (single source of truth
+// for calibrate/debug overlay).
 export const POIS: readonly POI[] = [
   {
     id: "city.lsia",

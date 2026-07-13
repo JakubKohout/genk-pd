@@ -5,7 +5,7 @@
  * Usage: node scripts/generate-tiles.mjs
  *
  * Inputs:
- *   docs/clean-map.jpg   (slepá mapa bez popisků — preferred for blind quizzes)
+ *   docs/clean-map.jpg   (blind map without labels — preferred for blind quizzes)
  *
  * Outputs:
  *   public/tiles/{z}/{x}/{y}.jpg     (z=0..MAX_ZOOM, JPEG q=80, 256x256)

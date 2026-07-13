@@ -34,90 +34,90 @@ interface StreetClickCase {
 const CASES: readonly StreetClickCase[] = [
   // --- POSITIVE (8) ---
   {
-    name: 'pos · Del Perro Fwy · střed dálnice u maríny',
+    name: 'pos · Del Perro Fwy · middle of the freeway near the marina',
     streetId: 'highway.del-perro-fwy',
     click: { x: 0.44, y: 0.664 },
     expected: true,
-    note: 'Klikni doprostřed asfaltu Del Perro Fwy severně od Little Seoul.',
+    note: 'Click the middle of the Del Perro Fwy asphalt north of Little Seoul.',
   },
   {
-    name: 'pos · Olympic Fwy · estakáda nad Pillbox',
+    name: 'pos · Olympic Fwy · overpass above Pillbox',
     streetId: 'highway.olympic-fwy',
     click: { x: 0.48, y: 0.714 },
     expected: true,
-    note: 'Klikni na estakádu Olympic Fwy (Route 22) nad downtown.',
+    note: 'Click the Olympic Fwy overpass (Route 22) above downtown.',
   },
   {
-    name: 'pos · Los Santos Fwy · severní úsek',
+    name: 'pos · Los Santos Fwy · northern stretch',
     streetId: 'highway.los-santos-fwy',
     click: { x: 0.56, y: 0.618 },
     expected: true,
-    note: 'Klikni na asfalt Los Santos Fwy u Vinewoodu.',
+    note: 'Click the Los Santos Fwy asphalt near Vinewood.',
   },
   {
-    name: 'pos · Great Ocean Hwy · pobřežní zatáčka u Chumash',
+    name: 'pos · Great Ocean Hwy · coastal bend near Chumash',
     streetId: 'highway.goh',
     click: { x: 0.115, y: 0.51 },
     expected: true,
-    note: 'Klikni na asfalt Great Ocean Hwy v zatáčce u Chumash / North Chumash.',
+    note: 'Click the Great Ocean Hwy asphalt at the bend near Chumash / North Chumash.',
   },
   {
-    name: 'pos · Route 68 · střed venkovského úseku',
+    name: 'pos · Route 68 · middle of the rural stretch',
     streetId: 'highway.route-68',
     click: { x: 0.449, y: 0.414 },
     expected: true,
-    note: 'Klikni doprostřed Route 68 u Harmony.',
+    note: 'Click the middle of Route 68 near Harmony.',
   },
   {
-    name: 'pos · Vinewood Blvd · ve Vinewoodu',
+    name: 'pos · Vinewood Blvd · in Vinewood',
     streetId: 'street.vinewood-blvd',
     click: { x: 0.499, y: 0.613 },
     expected: true,
-    note: 'Klikni na Vinewood Blvd ve Vinewoodu.',
+    note: 'Click Vinewood Blvd in Vinewood.',
   },
   {
-    name: 'pos · Vespucci Blvd · v downtownu',
+    name: 'pos · Vespucci Blvd · in downtown',
     streetId: 'street.vespucci-blvd',
     click: { x: 0.46, y: 0.695 },
     expected: true,
-    note: 'Klikni na asfalt Vespucci Blvd v downtownu (u LSC Sheriff).',
+    note: 'Click the Vespucci Blvd asphalt in downtown (near LSC Sheriff).',
   },
   {
-    name: 'pos · Calais Ave · podél kanálu',
+    name: 'pos · Calais Ave · along the canal',
     streetId: 'street.calais-ave',
     click: { x: 0.399, y: 0.6975 },
     expected: true,
-    note: 'Klikni na Calais Ave podél kanálu západně od downtownu.',
+    note: 'Click Calais Ave along the canal west of downtown.',
   },
 
   // --- NEGATIVE (4) ---
   {
-    name: 'neg · klik na Pacifik západně od Vespucci · NE Del Perro Fwy',
+    name: 'neg · click on the Pacific west of Vespucci · NOT Del Perro Fwy',
     streetId: 'highway.del-perro-fwy',
     click: { x: 0.12, y: 0.73 },
     expected: false,
-    note: 'Klikni do oceánu západně od Vespucci pláže. Nesmí to být hit pro Del Perro Fwy.',
+    note: 'Click the ocean west of Vespucci beach. Must not be a hit for Del Perro Fwy.',
   },
   {
-    name: 'neg · klik na Olympic Fwy · NE Los Santos Fwy (sousední dálnice)',
+    name: 'neg · click on Olympic Fwy · NOT Los Santos Fwy (neighbouring freeway)',
     streetId: 'highway.los-santos-fwy',
     click: { x: 0.46, y: 0.711 },
     expected: false,
-    note: 'Klikni doprostřed Olympic Fwy. Testuje, že sousední dálnice se nepřekrývají.',
+    note: 'Click the middle of Olympic Fwy. Tests that neighbouring freeways do not overlap.',
   },
   {
-    name: 'neg · klik do pouště u Sandy · NE Route 68',
+    name: 'neg · click in the desert near Sandy · NOT Route 68',
     streetId: 'highway.route-68',
     click: { x: 0.6, y: 0.39 },
     expected: false,
-    note: 'Klikni do pouštního terénu vedle Route 68 (mimo silnici).',
+    note: 'Click desert terrain next to Route 68 (off the road).',
   },
   {
-    name: 'neg · klik na osu Vinewood Blvd · NE Calais Ave',
+    name: 'neg · click on the Vinewood Blvd axis · NOT Calais Ave',
     streetId: 'street.calais-ave',
     click: { x: 0.499, y: 0.613 },
     expected: false,
-    note: 'Klikni přímo na osu Vinewood Blvd. Test rozlišuje, že to není Calais Ave.',
+    note: 'Click directly on the Vinewood Blvd axis. Tests that it is distinguished from Calais Ave.',
   },
 ];
 
@@ -134,7 +134,7 @@ describe('street click validation — real fixtures (verified against satellite 
     expect(poi).toBeDefined();
     if (!c.click) {
       throw new Error(
-        `TODO: doplň click souřadnice (${c.note}). Zapni DEBUG (klávesa D), klikni v UI, zkopíruj { x, y } z console.`,
+        `TODO: fill in click coordinates (${c.note}). Enable DEBUG (key D), click in the UI, copy { x, y } from the console.`,
       );
     }
     const result = evaluateClick(poi!, c.click);

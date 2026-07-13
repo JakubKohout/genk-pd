@@ -7,9 +7,9 @@ export type ParagraphLookup =
   | { kind: 'unparseable' };
 
 /**
- * Rozliší feedback pro paragraph matcher: validní (existující) paragraf umí
- * pojmenovat, parseovatelné-ale-neexistující číslo odliší od nesrozumitelného
- * vstupu.
+ * Distinguishes feedback for the paragraph matcher: a valid (existing)
+ * paragraph can be named, while a parseable-but-nonexistent number is
+ * distinguished from unparseable input.
  */
 export function lookupParagraph(
   raw: string,

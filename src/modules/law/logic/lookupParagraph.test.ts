@@ -22,7 +22,7 @@ describe('lookupParagraph', () => {
   });
 
   it('reports a valid paragraph with non-existent sub as unknown', () => {
-    // §9 nemá žádné subs
+    // §9 has no subs
     expect(lookupParagraph('9b', PENAL_PARAGRAPHS)).toEqual({ kind: 'unknown' });
   });
 

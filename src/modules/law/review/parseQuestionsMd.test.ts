@@ -10,77 +10,77 @@ const CHOICE: LawQuestion = {
 };
 const validMd = () => serializeQuestions([CHOICE]);
 
-describe('parseQuestionsMd — chybové stavy', () => {
-  it('SMAZAT vyřadí otázku a vrátí její id', () => {
+describe('parseQuestionsMd — error states', () => {
+  it('SMAZAT drops the question and returns its id', () => {
     const md = validMd().replace('**Zadání:**', 'SMAZAT\n**Zadání:**');
     const parsed = parseQuestionsMd(md);
     expect(parsed.questions).toHaveLength(0);
     expect(parsed.deletedIds).toEqual(['sasp.choice.vybava.1']);
   });
-  it('hlásí nadpis bez ID v backticks s číslem řádku', () => {
+  it('reports a heading without an ID in backticks, with a line number', () => {
     const md = validMd().replace(' `sasp.choice.vybava.1`', '');
     expect(() => parseQuestionsMd(md)).toThrow(/řádek \d+: nadpis otázky/);
   });
-  it('hlásí duplicitní ID', () => {
+  it('reports a duplicate ID', () => {
     const md = validMd() + '\n' + validMd();
     expect(() => parseQuestionsMd(md)).toThrow(/duplicitní ID/);
   });
-  it('hlásí neznámý typ', () => {
+  it('reports an unknown type', () => {
     const md = validMd().replace('type: choice', 'type: kviz');
     expect(() => parseQuestionsMd(md)).toThrow(/neznámý typ "kviz"/);
   });
-  it('hlásí neznámé téma', () => {
+  it('reports an unknown theme', () => {
     const md = validMd().replace('theme: vybava', 'theme: vybva');
     expect(() => parseQuestionsMd(md)).toThrow(/neznámé téma "vybva"/);
   });
-  it('hlásí sentinel překlep (new místo NEW)', () => {
+  it('reports a sentinel typo (new instead of NEW)', () => {
     const md = validMd().replace(/`sasp\.choice\.vybava\.1`/g, '`new`');
     expect(() => parseQuestionsMd(md)).toThrow(/překlep sentinelu NEW/);
   });
-  it('hlásí rozbitý checkbox', () => {
+  it('reports a broken checkbox', () => {
     const md = validMd().replace('- [ ] b', '- [b');
     expect(() => parseQuestionsMd(md)).toThrow(/možnost musí začínat/);
   });
-  it('hlásí méně než 5 možností', () => {
+  it('reports fewer than 5 options', () => {
     const md = validMd().replace('- [ ] e\n', '');
     expect(() => parseQuestionsMd(md)).toThrow(/méně než 5 možností/);
   });
-  it('hlásí žádnou správnou možnost', () => {
+  it('reports no option checked as correct', () => {
     const md = validMd().replace('- [x] a', '- [ ] a');
     expect(() => parseQuestionsMd(md)).toThrow(/žádná možnost není zaškrtnutá/);
   });
-  it('hlásí titulek přes 40 znaků', () => {
+  it('reports a title over 40 characters', () => {
     const md = validMd().replace('### T ', `### ${'x'.repeat(41)} `);
     expect(() => parseQuestionsMd(md)).toThrow(/titulek delší než 40/);
   });
-  it('hlásí chybějící Zadání', () => {
+  it('reports a missing Zadání field', () => {
     const md = validMd().replace(/\*\*Zadání:\*\* P\?\n/, '');
     expect(() => parseQuestionsMd(md)).toThrow(/chybí "\*\*Zadání:\*\*"/);
   });
-  it('agreguje víc chyb najednou', () => {
-    // dvě různé otázky, každá s jinou chybou — obě hlášky musí být v jednom throw
+  it('aggregates multiple errors at once', () => {
+    // two different questions, each with a different error — both messages must be in a single throw
     const a = validMd().replace('- [x] a', '- [ ] a');
     const b = validMd()
       .replace(/vybava\.1/g, 'vybava.2')
       .replace('type: choice', 'type: kviz');
     expect(() => parseQuestionsMd(a + '\n' + b)).toThrow(/zaškrtnutá[\s\S]*neznámý typ|neznámý typ[\s\S]*zaškrtnutá/);
   });
-  it('hlásí nerozpoznaný řádek (překlep v poli)', () => {
+  it('reports an unrecognized line (typo in a field)', () => {
     const md = validMd().replace('**Zadání:**', '*Zadání:**');
     expect(() => parseQuestionsMd(md)).toThrow(/nerozpoznaný řádek/);
   });
-  it('hlásí nerozpoznaný řádek (překlep v checkboxu bez pomlčky-mezery)', () => {
+  it('reports an unrecognized line (typo in a checkbox missing dash-space)', () => {
     const md = validMd().replace('- [ ] c', '-[ ] c');
     expect(() => parseQuestionsMd(md)).toThrow(/nerozpoznaný řádek|možnost musí začínat/);
   });
-  it('toleruje CRLF konce řádků', () => {
+  it('tolerates CRLF line endings', () => {
     const md = validMd().replace(/\n/g, '\r\n');
     const parsed = parseQuestionsMd(md);
     expect(parsed.questions).toHaveLength(1);
   });
 });
 
-describe('parseQuestionsMd — nové otázky (NEW)', () => {
+describe('parseQuestionsMd — new questions (NEW)', () => {
   const NEW_SECTION = [
     '### Nová otázka `NEW`',
     '- type: choice | theme: vybava',
@@ -135,7 +135,7 @@ describe('parseQuestionsMd — nové otázky (NEW)', () => {
     expect(() => parseQuestionsMd(md)).toThrow(/key/);
   });
 
-  it('NEW sekce s jinou chybou hlásí titulek, ne placeholder', () => {
+  it('NEW section with a different error reports the title, not the placeholder', () => {
     const md = validMd() + '\n' + [
       '### Rozbitá nová `NEW`',
       '- type: choice | theme: vybava',

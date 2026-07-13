@@ -492,8 +492,8 @@ describe('law slice migrations (v10)', () => {
     expect(s.schemaVersion).toBe(10);
     expect((s.law.settings as Record<string, unknown>).sourceFilter).toBeUndefined();
     expect(s.law.settings.themeFilter.scenky).toBe(true);
-    expect(s.law.settings.themeFilter.pojmy).toBe(false); // stávající volby přežijí
-    expect(s.law.progress['lea.7']?.score).toBe(2); // progress přežije
+    expect(s.law.settings.themeFilter.pojmy).toBe(false); // existing choices survive
+    expect(s.law.progress['lea.7']?.score).toBe(2); // progress survives
   });
 
   it('lenient v10 read backfills missing themeFilter keys', () => {

@@ -114,11 +114,12 @@ export const initialState: PersistedState = {
 let cachedSnapshot: PersistedState | null = null;
 const listeners = new Set<() => void>();
 
-// Jediný migrační terminál: lenient v10 read pro libovolný historický payload
-// (v1 az v10). Aditivní historie (lea / penal.scenarios / sasp) se sjednocuje do
-// law slice; zrušené slices a law.settings.sourceFilter zanikají tím, že se
-// nekopírují. Reálně nasazené verze byly jen v1 az v4 (main) a v10 — mezitvary
-// v5 az v9 existovaly pouze ve vývoji a pokrývají je spready níže.
+// Single migration terminal: lenient v10 read for any historical payload
+// (v1 to v10). Additive history (lea / penal.scenarios / sasp) is unioned into
+// the law slice; removed slices and law.settings.sourceFilter disappear simply by
+// not being copied. The only versions actually deployed were v1 through v4 (main)
+// and v10 — the intermediate shapes v5 through v9 existed only during development
+// and are covered by the spreads below.
 function normalizeToV10(s: any): PersistedState {
   return {
     schemaVersion: 10,
@@ -149,7 +150,7 @@ function normalizeToV10(s: any): PersistedState {
       },
     },
     law: {
-      // Union legacy kvízů (tvary v2 az v7) + law slice (v7+); law vyhrává per-key.
+      // Union of legacy quizzes (v2 through v7 shapes) + law slice (v7+); law wins per-key.
       progress: {
         ...(s.lea?.progress ?? {}),
         ...(s.penal?.scenarios?.progress ?? {}),

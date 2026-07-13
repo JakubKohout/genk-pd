@@ -8,21 +8,22 @@ const { questions, deletedIds } = parseQuestionsMd(readFileSync(mdPath, 'utf8'))
 
 const allIds = questions.map((q) => q.id);
 
-// Cross-check proti aktuálnímu datasetu PŘED jakýmkoliv zápisem — id vygenerované
-// importem (`q<n>`, sentinel NEW) je vždy legitimní nová otázka; `q<n>`, které už
-// v datasetu existuje, je existující otázka. Cokoliv jiného, co v datasetu není,
-// je buď překlep sentinelu (`NEWX` apod.), nebo omylem přepsané ID existující
-// otázky — obojí by jinak potichu osiřelo (ztráta progress hráče). Radši selhat
-// hned, než zapsat cokoliv.
+// Cross-check against the current dataset BEFORE any write — an id generated
+// by the import (`q<n>`, sentinel NEW) is always a legitimate new question; a `q<n>`
+// that already exists in the dataset is an existing question. Anything else that
+// isn't in the dataset is either a typo in the sentinel (`NEWX` etc.), or an
+// accidentally overwritten ID of an existing question — either would otherwise
+// silently orphan (losing the player's progress). Better to fail fast than write
+// anything.
 const currentIds = new Set(LAW_QUESTIONS.map((q) => q.id));
 const unknown = allIds.filter((id) => !currentIds.has(id) && !/^q\d+$/.test(id));
 if (unknown.length > 0) {
   throw new Error('Neznámá ID (překlep nebo editace ID existující otázky?): ' + unknown.join(', '));
 }
 
-// Spočítat VŠECHNY tři výstupy před prvním zápisem — buď se zapíšou všechny
-// tři, nebo žádný (selhání na 2. souboru by jinak nechalo repo v nekonzistentním
-// stavu s questions.ts přepsaným, ale seed.ts/questions.test.ts starým).
+// Compute ALL three outputs before the first write — either all three get
+// written, or none do (a failure on the 2nd file would otherwise leave the repo in
+// an inconsistent state, with questions.ts overwritten but seed.ts/questions.test.ts stale).
 const questionsTsContent = formatQuestionsTs(questions);
 
 const arrBody = (ids: string[]) => ids.map((i) => `  '${i}',`).join('\n');

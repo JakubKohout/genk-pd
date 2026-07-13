@@ -127,7 +127,7 @@ test.describe('Law unified quiz — enumeration (LEA) flow', () => {
   });
 });
 
-// penal.scenario.A5 — "zápalná láhev → prázdná benzínová pumpa", single expected: §33 (žhářství)
+// penal.scenario.A5 — "zápalná láhev → prázdná benzínová pumpa", single expected: §33 (arson)
 const PENAL_SCENARIO_ID = 'penal.scenario.A5';
 
 test.describe('Law unified quiz — enumeration (Penal scenario / paragraph matcher) flow', () => {

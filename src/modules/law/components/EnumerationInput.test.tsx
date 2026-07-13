@@ -37,7 +37,7 @@ describe('EnumerationInput', () => {
       fireEvent.change(input, { target: { value: v } });
       fireEvent.click(screen.getByTestId('law-enum-add'));
     }
-    // behem answering jsou chipy neutralni
+    // during answering, chips are neutral
     expect(screen.getAllByTestId('chip-pending')).toHaveLength(2);
     expect(screen.queryByTestId('chip-correct')).toBeNull();
     fireEvent.click(screen.getByTestId('law-enum-submit'));
@@ -74,7 +74,7 @@ describe('EnumerationInput', () => {
     const input = screen.getByTestId('law-enum-input');
     fireEvent.change(input, { target: { value: 'Maják' } });
     fireEvent.keyDown(input, { key: 'Enter' });
-    // hodnota se commitla jako chip, input je prázdný
+    // the value was committed as a chip, the input is empty
     expect(screen.getByTestId('chip-correct')).toBeInTheDocument();
     expect((input as HTMLInputElement).value).toBe('');
   });
@@ -95,7 +95,7 @@ describe('EnumerationInput', () => {
   });
 });
 
-describe('EnumerationInput — feedback paragraph matcheru', () => {
+describe('EnumerationInput — paragraph matcher feedback', () => {
   const PARA: LawEnumeration = {
     id: 'pq', theme: 'scenky', prompt: 'p',
     kind: 'enumeration', matcher: 'paragraph',

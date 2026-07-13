@@ -1,7 +1,7 @@
 import type { LawQuestion } from './types';
 
-// Jediný zdroj pravdy pro Teorie kvíz. Strukturu validuje questions.test.ts.
-// Soubor lze přegenerovat z review markdownu: npm run questions:import (viz CLAUDE.md).
+// Single source of truth for the Teorie quiz. Structure is validated by questions.test.ts.
+// The file can be regenerated from the review markdown: npm run questions:import (see CLAUDE.md).
 export const LAW_QUESTIONS: readonly LawQuestion[] = [
   {
     id: 'lea.7',

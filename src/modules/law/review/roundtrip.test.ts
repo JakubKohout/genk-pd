@@ -4,7 +4,7 @@ import { serializeQuestions } from './serializeQuestions';
 import { parseQuestionsMd } from './parseQuestionsMd';
 import type { LawQuestion } from '../data/types';
 
-/** Prázdné volitelné arrays (aliases/keywords) srovná s "chybí" — sémanticky totéž. */
+/** Treats empty optional arrays (aliases/keywords) as "absent" — semantically the same. */
 function strip(qs: readonly LawQuestion[]): unknown {
   return JSON.parse(
     JSON.stringify(qs, (key, value) =>

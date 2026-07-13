@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { pinNextQuestion, seed } from '../fixtures/seed';
 
-test.describe('Mode 2 — výběr významu', () => {
+test.describe('Mode 2 — meaning selection', () => {
   test('shows the code and 5 options', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 7 });
     await page.goto('/#/codes/choose');

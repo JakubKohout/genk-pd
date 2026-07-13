@@ -31,10 +31,10 @@ function splitList(raw: string): string[] {
 
 const FIELD_LABELS = ['Zadání', 'Scénka', 'Vysvětlivka', 'Odpověď', 'Aliasy'];
 
-// Uzavřená gramatika: cokoliv, co serializer uvnitř sekce vypisuje, musí sem
-// mít odpovídající tvar. Nerozpoznaný řádek = pravděpodobný překlep
-// recenzenta (ztracená hvězdička, chybějící mezera) — radši nahlásit chybu
-// než tiše zahodit data.
+// Closed grammar: anything the serializer emits inside a section must have a
+// matching shape here. An unrecognized line = a likely reviewer typo (a lost
+// asterisk, a missing space) — better to report an error than to silently
+// drop data.
 function isRecognizedLine(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed === '') return true;
@@ -55,7 +55,7 @@ export function parseQuestionsMd(md: string): ParsedReview {
   const errors: string[] = [];
   const err = (no: number, msg: string) => errors.push(`řádek ${no}: ${msg}`);
 
-  // 1) rozřezat na sekce podle "### "
+  // 1) split into sections by "### "
   const sections: Section[] = [];
   let current: Section | null = null;
   lines.forEach((text, idx) => {
@@ -115,7 +115,7 @@ export function parseQuestionsMd(md: string): ParsedReview {
 
     if (s.title.length > 40) err(s.headingLine, `titulek delší než 40 znaků: "${s.title}"`);
 
-    // 2) meta řádek
+    // 2) meta line
     const metaEntry = s.lines.find((l) => l.text.startsWith('- type: '));
     if (!metaEntry) {
       err(s.headingLine, `otázce ${label} chybí řádek "- type: …"`);
@@ -145,8 +145,8 @@ export function parseQuestionsMd(md: string): ParsedReview {
     const ref = meta.get('ref');
     const ordered = meta.get('ordered') === 'true';
 
-    // 3) jednořádková pole
-    // prefix `**<label>:** ` má délku label.length + 6 (2+1+2+1 znaků navíc)
+    // 3) single-line fields
+    // the prefix `**<label>:** ` has length label.length + 6 (2+1+2+1 extra chars)
     const field = (fieldLabel: string): string | undefined =>
       s.lines.find((l) => l.text.startsWith(`**${fieldLabel}:** `))?.text.slice(fieldLabel.length + 6);
     const prompt = field('Zadání');
@@ -167,7 +167,7 @@ export function parseQuestionsMd(md: string): ParsedReview {
       ...(scenario ? { scenario } : {}),
     };
 
-    // 4) kind-specifické tělo
+    // 4) kind-specific body
     if (kindInfo.kind === 'choice') {
       const options: string[] = [];
       const correctIndices: number[] = [];

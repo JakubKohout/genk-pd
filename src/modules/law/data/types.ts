@@ -6,7 +6,7 @@ interface LawBase {
   id: string;
   theme: LawTheme;
   prompt: string;
-  /** Krátký titulek pro chip v LawSidePanel (fallback na prompt). */
+  /** Short title for the chip in LawSidePanel (falls back to prompt). */
   title?: string;
   ref?: string;
   note?: string;
@@ -27,7 +27,7 @@ export interface LawExpected {
   key: string;
   label: string;
   aliases?: string[];
-  /** Kmenová klíčová slova pro tolerantní match parafrází (prefix-run po normalize). */
+  /** Stem keywords for tolerant paraphrase matching (prefix-run after normalize). */
   keywords?: string[];
   subId?: string;
 }

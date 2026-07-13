@@ -38,9 +38,9 @@ describe('ChoiceInput', () => {
   it('renders options in the given order and maps clicks back to original indices', () => {
     const onSubmit = vi.fn();
     render(<ChoiceInput question={Q} order={[4, 3, 2, 1, 0]} onSubmit={onSubmit} />);
-    // pozice 0 zobrazuje původní option 4 ("E")
+    // position 0 displays the original option 4 ("E")
     expect(screen.getByTestId('law-choice-option-0')).toHaveTextContent('E');
-    // klik na pozice 4 a 2 → původní indexy 0 a 2 (correctIndices)
+    // clicking positions 4 and 2 → original indices 0 and 2 (correctIndices)
     fireEvent.click(screen.getByTestId('law-choice-option-4'));
     fireEvent.click(screen.getByTestId('law-choice-option-2'));
     fireEvent.click(screen.getByTestId('law-choice-submit'));
@@ -50,8 +50,8 @@ describe('ChoiceInput', () => {
   it('digit keys toggle by displayed position', () => {
     const onSubmit = vi.fn();
     render(<ChoiceInput question={Q} order={[4, 3, 2, 1, 0]} onSubmit={onSubmit} />);
-    fireEvent.keyDown(window, { key: '5' }); // pozice 5 → původní index 0
-    fireEvent.keyDown(window, { key: '3' }); // pozice 3 → původní index 2
+    fireEvent.keyDown(window, { key: '5' }); // position 5 → original index 0
+    fireEvent.keyDown(window, { key: '3' }); // position 3 → original index 2
     fireEvent.click(screen.getByTestId('law-choice-submit'));
     expect(onSubmit).toHaveBeenCalledWith([0, 2], true);
   });

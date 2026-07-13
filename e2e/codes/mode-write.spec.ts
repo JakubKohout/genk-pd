@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { pinNextQuestion, seed } from '../fixtures/seed';
 
-test.describe('Mode 1 — psaní kódu', () => {
+test.describe('Mode 1 — writing the code', () => {
   test('correct answer shows green feedback', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
     await page.goto('/#/codes/write');
@@ -32,7 +32,7 @@ test.describe('Mode 1 — psaní kódu', () => {
     await expect(fb).toContainText('Osoba zemřela');
   });
 
-  test('nonexistent code shows neexistující kód feedback', async ({ page }) => {
+  test('nonexistent code shows nonexistent-code feedback', async ({ page }) => {
     await seed(page, { progress: pinNextQuestion('10-0'), randomSeed: 1 });
     await page.goto('/#/codes/write');
 

@@ -27,7 +27,7 @@ export interface PenalParagraph {
 }
 
 export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
-  // === HLAVA I. — ZÁKLADNÍ DEFINICE ===
+  // === CHAPTER I. — BASIC DEFINITIONS ===
   {
     id: 'penal.1',
     number: '§1',
@@ -95,7 +95,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     ],
   },
 
-  // === HLAVA I. (část 2) — ČINY PROTI ŽIVOTU A ZDRAVÍ ===
+  // === CHAPTER I. (part 2) — CRIMES AGAINST LIFE AND HEALTH ===
   {
     id: 'penal.7',
     number: '§7',
@@ -164,7 +164,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     ],
   },
 
-  // === HLAVA II. — ČINY PROTI SVOBODĚ A SOUKROMÍ ===
+  // === CHAPTER II. — CRIMES AGAINST FREEDOM AND PRIVACY ===
   {
     id: 'penal.13',
     number: '§13',
@@ -276,7 +276,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     subs: [],
   },
 
-  // === HLAVA III. — ČINY PROTI LIDSKÉ DŮSTOJNOSTI V SEXUÁLNÍ OBLASTI ===
+  // === CHAPTER III. — CRIMES AGAINST HUMAN DIGNITY IN SEXUAL MATTERS ===
   {
     id: 'penal.23',
     number: '§23',
@@ -304,7 +304,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     ],
   },
 
-  // === HLAVA IV. — ČINY PROTI MAJETKU ===
+  // === CHAPTER IV. — CRIMES AGAINST PROPERTY ===
   {
     id: 'penal.25',
     number: '§25',
@@ -414,7 +414,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     subs: [],
   },
 
-  // === HLAVA V. — ČINY PROTI BEZPEČNOSTI SILNIČNÍHO PROVOZU ===
+  // === CHAPTER V. — CRIMES AGAINST ROAD TRAFFIC SAFETY ===
   {
     id: 'penal.34',
     number: '§34',
@@ -521,7 +521,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     subs: [],
   },
 
-  // === HLAVA VI. — ČINY OBECNĚ NEBEZPEČNÉ ===
+  // === CHAPTER VI. — GENERALLY DANGEROUS CRIMES ===
   {
     id: 'penal.44',
     number: '§44',
@@ -634,7 +634,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     ],
   },
 
-  // === HLAVA VII. — TRESTNÉ ČINY PROTI SPRAVEDLNOSTI A STÁTU ===
+  // === CHAPTER VII. — CRIMES AGAINST JUSTICE AND THE STATE ===
   {
     id: 'penal.53',
     number: '§53',
@@ -737,7 +737,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     subs: [],
   },
 
-  // === HLAVA IX. — ČINY PROTI OCHRANĚ ŽIVOTNÍHO PROSTŘEDÍ ===
+  // === CHAPTER IX. — CRIMES AGAINST ENVIRONMENTAL PROTECTION ===
   {
     id: 'penal.68',
     number: '§68',
@@ -781,7 +781,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     ],
   },
 
-  // === HLAVA X. — ČINY PROTI BEZPEČNOSTI NÁMOŘNÍHO PROVOZU ===
+  // === CHAPTER X. — CRIMES AGAINST MARITIME SAFETY ===
   {
     id: 'penal.71',
     number: '§71',
@@ -857,7 +857,7 @@ export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
     subs: [],
   },
 
-  // === HLAVA XXII. — OSTATNÍ ČINY ===
+  // === CHAPTER XXII. — OTHER CRIMES ===
   {
     id: 'penal.100',
     number: '§100',
