@@ -94,3 +94,37 @@ describe('EnumerationInput', () => {
     expect(screen.getByTestId('law-enum-hint').textContent).toContain('pořadí');
   });
 });
+
+describe('EnumerationInput — feedback paragraph matcheru', () => {
+  const PARA: LawEnumeration = {
+    id: 'pq', theme: 'scenky', prompt: 'p',
+    kind: 'enumeration', matcher: 'paragraph',
+    expected: [{ key: '8c', label: '§8 c', subId: 'c' }],
+  };
+
+  const commit = (value: string) => {
+    fireEvent.change(screen.getByTestId('law-enum-input'), { target: { value } });
+    fireEvent.click(screen.getByTestId('law-enum-add'));
+  };
+
+  it('valid but inapplicable paragraph shows its title and "nevztahuje se"', () => {
+    render(<EnumerationInput question={PARA} onSubmit={vi.fn()} />);
+    commit('26a');
+    const chip = screen.getByTestId('chip-wrong');
+    expect(chip.textContent).toContain('§26 a — Loupež');
+    expect(chip.textContent).toContain('nevztahuje se');
+    expect(chip.textContent).not.toContain('žádná shoda');
+  });
+
+  it('parseable but non-existent paragraph shows "neexistující paragraf"', () => {
+    render(<EnumerationInput question={PARA} onSubmit={vi.fn()} />);
+    commit('99');
+    expect(screen.getByTestId('chip-wrong').textContent).toContain('neexistující paragraf');
+  });
+
+  it('unparseable input keeps "žádná shoda"', () => {
+    render(<EnumerationInput question={PARA} onSubmit={vi.fn()} />);
+    commit('blabla');
+    expect(screen.getByTestId('chip-wrong').textContent).toContain('žádná shoda');
+  });
+});

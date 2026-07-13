@@ -91,7 +91,7 @@ npm run questions:export   # dataset -> docs/questions-review.md (review pro net
 npm run questions:import   # docs/questions-review.md (nebo argv cesta) -> questions.ts + seed.ts + counts
 ```
 
-`npm run test:all` musí být zelené: **399 unit/component + 60 E2E = 459 testů**.
+`npm run test:all` musí být zelené: **407 unit/component + 60 E2E = 467 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -773,7 +773,10 @@ související):
    (forwardRef). Pole pro vedlejší text vpravo (typicky §ref nebo "duplikát" /
    "žádná shoda" / "zapomenuto") je v interface `AnswerEntry` jako `meta` a v
    `AnswerRow` propu taky `meta`. Nepřidávat prop `ref` ani jinde v `law/`
-   komponentách.
+   komponentách. U paragraph matcheru se špatné odpovědi rozlišují přes
+   `lookupParagraph` (`law/logic/lookupParagraph.ts`): validní-ale-neaplikovatelný
+   paragraf ukáže název + meta "nevztahuje se", parseovatelné neexistující číslo
+   "neexistující paragraf", nesrozumitelný vstup "žádná shoda".
 
 9. **`data-testid="chiplist"` (no hyphen)** na `<ul>` `AnswerList`u. Test regex
    `/chip-/` (matchuje řádky `chip-correct/duplicate/wrong/missed`) by jinak

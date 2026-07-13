@@ -5,6 +5,7 @@ import { suggestEnumeration } from '../logic/suggest';
 import { AnswerList, type AnswerEntry } from './AnswerList';
 import { PENAL_PARAGRAPHS } from '../data/paragraphs';
 import { suggestParagraphs } from '../logic/suggestParagraph';
+import { lookupParagraph } from '../logic/lookupParagraph';
 
 interface Props {
   question: LawEnumeration;
@@ -144,6 +145,15 @@ function StackedInput({
       };
     }
     if (e.matchedKey === null) {
+      if (question.matcher === 'paragraph') {
+        const lookedUp = lookupParagraph(e.raw, PENAL_PARAGRAPHS);
+        if (lookedUp.kind === 'valid') {
+          return { key: e.key, status: 'wrong', text: lookedUp.display, meta: 'nevztahuje se' };
+        }
+        if (lookedUp.kind === 'unknown') {
+          return { key: e.key, status: 'wrong', text: e.raw, meta: 'neexistující paragraf' };
+        }
+      }
       return { key: e.key, status: 'wrong', text: e.raw, meta: 'žádná shoda' };
     }
     const expected = question.expected.find((ex) => ex.key === e.matchedKey)!;
