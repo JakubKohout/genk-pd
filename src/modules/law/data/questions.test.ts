@@ -3,6 +3,7 @@ import { LAW_QUESTIONS } from './questions';
 import { LAW_SOURCES, LAW_THEMES } from './types';
 import { normalize } from '@/shared/text/normalize';
 import { canonicalAnswerId } from '../logic/canonicalAnswerId';
+import { keywordMatches } from '../logic/matchEnumeration';
 import { PENAL_PARAGRAPHS } from './paragraphs';
 
 const bySource = (s: string) => LAW_QUESTIONS.filter((q) => q.source === s);
@@ -11,8 +12,8 @@ describe('LAW_QUESTIONS dataset', () => {
   it('has expected per-source counts', () => {
     expect(bySource('lea')).toHaveLength(17);
     expect(bySource('penal')).toHaveLength(28);
-    expect(bySource('sasp')).toHaveLength(94);
-    expect(LAW_QUESTIONS).toHaveLength(139);
+    expect(bySource('sasp')).toHaveLength(92);
+    expect(LAW_QUESTIONS).toHaveLength(137);
   });
 
   it('has unique IDs', () => {
@@ -76,6 +77,39 @@ describe('LAW_QUESTIONS dataset', () => {
         if (q.kind !== 'enumeration') continue;
         expect(q.expected.length, q.id).toBeGreaterThan(0);
         expect(['alias', 'paragraph'], q.id).toContain(q.matcher);
+      }
+    });
+
+    it('keywords have tokens of at least 3 chars after normalize', () => {
+      for (const q of LAW_QUESTIONS) {
+        if (q.kind !== 'enumeration') continue;
+        for (const e of q.expected) {
+          for (const kw of e.keywords ?? []) {
+            for (const token of normalize(kw).split(' ').filter(Boolean)) {
+              expect(token.length, `${q.id}/${e.key}: keyword "${kw}"`).toBeGreaterThanOrEqual(3);
+            }
+          }
+        }
+      }
+    });
+
+    it('keywords do not collide with other items in the same question', () => {
+      for (const q of LAW_QUESTIONS) {
+        if (q.kind !== 'enumeration' || q.matcher !== 'alias') continue;
+        for (const a of q.expected) {
+          for (const kw of a.keywords ?? []) {
+            for (const b of q.expected) {
+              if (b.key === a.key) continue;
+              const targets = [b.label, ...(b.aliases ?? []), ...(b.keywords ?? [])];
+              for (const t of targets) {
+                expect(
+                  keywordMatches(normalize(t), kw),
+                  `${q.id}: keyword "${kw}" (${a.key}) matchuje "${t}" (${b.key})`,
+                ).toBe(false);
+              }
+            }
+          }
+        }
       }
     });
 

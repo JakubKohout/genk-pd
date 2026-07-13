@@ -9,8 +9,8 @@ funkční moduly:
 
 > **Stav po refaktoru (branch `quiz-refactor`):** Moduly LEA, Penal scénky a stará SASP
 > příručka jsou sloučeny do sjednoceného modulu **Teorie** (`src/modules/law/`, route `/law`,
-> nav odkaz "Teorie") jako **jeden datový soubor** `law/data/questions.ts` (139 otázek:
-> 17 LEA + 28 Penal + 94 SASP) — žádné adaptéry, žádný `src/modules/laws/` (smazán celý
+> nav odkaz "Teorie") jako **jeden datový soubor** `law/data/questions.ts` (137 otázek:
+> 17 LEA + 28 Penal + 92 SASP) — žádné adaptéry, žádný `src/modules/laws/` (smazán celý
 > strom). Staré routy `/laws/*` a `/sasp` redirectují na `/law`. **Penal Recall byl
 > zrušen** — `/penal/recall` (i legacy `/laws/penal/recall`) redirectuje na `/law`, Penal
 > scénky žijí jen jako `enumeration/paragraph` otázky v Teorii. `law/data/paragraphs.ts`
@@ -21,9 +21,9 @@ funkční moduly:
    výběr významu (`/codes/choose`).
 2. **Teorie** (`/law`) — sjednocený kvíz: LEA (enumerace paragrafů) + Penal scénky
    (paragraph matcher) + nativní SASP obsah. Jeden dataset `LAW_QUESTIONS`
-   (`law/data/questions.ts`, 139 otázek — 17 LEA + 28 Penal + 94 SASP, žádné adaptéry),
+   (`law/data/questions.ts`, 137 otázek — 17 LEA + 28 Penal + 92 SASP, žádné adaptéry),
    dvouúrovňový filtr (source: lea/penal/sasp + 9 témat). 4 formáty dle `kind`:
-   - `choice` — multi-select MC (≥5 možností, ≥1 správná), klávesy 1–N.
+   - `choice` — multi-select MC (≥5 možností, ≥1 správná), možnosti se míchají, klávesy 1–N.
    - `text` — free-text recall s autocomplete + Hard mode.
    - `enumeration` — výčet (LEA paragrafy nebo Penal paragraph matcher), ordered volitelně.
    - `match` — click-pairing (levý sloupec ↔ pravý sloupec).
@@ -85,7 +85,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **342 unit/component + 60 E2E = 402 testů**.
+`npm run test:all` musí být zelené: **360 unit/component + 60 E2E = 420 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -172,8 +172,8 @@ src/
                                     # LAW_SOURCES=['lea','penal','sasp'],
                                     # LAW_THEMES (9 témat: pojmy/hodnosti/jednani/rto/vybava/
                                     # zasah/zadrzeni/kriminalistika/paragrafy)
-        questions.ts                 # LAW_QUESTIONS — jediný zdroj pravdy, 139 otázek jako
-                                    # jeden TS literál (17 LEA + 28 Penal scénky + 94 SASP),
+        questions.ts                 # LAW_QUESTIONS — jediný zdroj pravdy, 137 otázek jako
+                                    # jeden TS literál (17 LEA + 28 Penal scénky + 92 SASP),
                                     # žádné adaptéry/mergování za běhu
         questions.test.ts            # Validace: per-source counts, unikátní IDs, ID prefix
                                     # (`lea.`/`penal.scenario.`/`sasp.`), title ≤40 znaků,
@@ -362,12 +362,18 @@ Tlačítka `data-testid="geo-blind-skip"` / `data-testid="geo-name-skip"`.
 
 ### SASP data (v Teorie modulu)
 
-Nativní SASP obsah je 94 otázek přímo v `src/modules/law/data/questions.ts`
+Nativní SASP obsah je 92 otázek přímo v `src/modules/law/data/questions.ts`
 (`source: 'sasp'`, součást stejného `LAW_QUESTIONS` literálu jako LEA a Penal):
-86 choice (≥5 options, ≥1 correctIndex), 2 text (s aliasy), 2 enumeration,
-4 match (pairs). Validace v `questions.test.ts` (counts, unique IDs, options ≥5,
-alias non-collision, theme enum, match pairs). Anti-leak: NESMÍ přebírat
-konkrétní formulace z reálného testu.
+85 choice (≥5 options, ≥1 correctIndex — včetně převedeného rádiového překladu
+z původního text formátu), 1 text (s aliasy), 2 enumeration, 4 match (pairs).
+Validace v `questions.test.ts` (counts, unique IDs, options ≥5, alias non-collision,
+theme enum, match pairs). Anti-leak: NESMÍ přebírat konkrétní formulace z reálného testu.
+
+Distraktory prošly revizí (dávky A–D): pravidla = věrohodné, uvěřitelné záměny
+(žádné absurdity ani samozřejmě špatné možnosti), a multi-correct tam, kde manuál
+dává vícedílné pravidlo a 2–3 možnosti jsou nezávisle správné (≥15 otázek). Nikdy
+neoznačovat možnost za správnou, pokud ji manuál nepodporuje — chybná multi-correct
+sada je nejhorší defekt (UI vyžaduje vybrat VŠECHNY správné).
 
 ID prefix: `sasp.<kind>.<theme>.<n>`. 9 témat (pojmy/hodnosti/jednani/rto/vybava/zasah/
 zadrzeni/kriminalistika/paragrafy). Zdroj surovin: `docs/sasp-manual.md` (gitignored/důvěrný).
@@ -407,10 +413,18 @@ všemi matchers.
 
 **`matchText`** (`src/modules/law/logic/matchText.ts`): strict full-string equality po
 `normalize`. **`suggestText`** (`suggest.ts`): substring autocomplete, min 2, max 5.
-**`matchEnumeration`** (`matchEnumeration.ts`): deleguje na alias matching (LEA) nebo
-paragraph matching (Penal) dle `matcher` field na otázce. Používá `suggestParagraphs`
-z `law/logic/suggestParagraph.ts` pro paragraph autocomplete.
-**`matchChoice`** (`matchChoice.ts`): porovnání zvoleného indexu vs `correctIndices[]`.
+**`matchEnumeration`** (`matchEnumeration.ts`, fn `matchEnumerationEntry`): deleguje na
+alias matching (LEA) nebo paragraph matching (Penal) dle `matcher` field na otázce.
+Používá `suggestParagraphs` z `law/logic/suggestParagraph.ts` pro paragraph autocomplete.
+**Keyword matching** (alias matcher): kromě přesné shody `label`/`aliases` (po `normalize`)
+lze u LEA `expected[].keywords` uvést kmeny — každý keyword je posloupnost tokenů-kmenů
+(min 3 znaky), které musí ve vstupu tvořit souvislý prefix-run (`keywordMatches`: každý
+token vstupu musí `startsWith` odpovídající kmen keywordu). Priorita: exact `label`/`alias`
+> keyword. Kolizní validace v `questions.test.ts` (keyword nesmí matchovat jiný `expected`
+téže otázky). Umožňuje uznat parafráze bez výčtu všech tvarů.
+**`matchChoice`** (`matchChoice.ts`): porovnání zvolených indexů vs `correctIndices[]`
+(multi-select — musí sedět celá množina). Indexy odkazují na PŮVODNÍ pořadí options,
+ne na zobrazené (míchané) pořadí.
 **`checkMatch`** (`checkMatch.ts`): evaluace match pairs po kliknutí.
 **`pickNextQuestion(state, settings, all)`** = `pickNextFromPool(eligibleQuestions(...), ...)`,
 kde `eligibleQuestions` filtruje score < 2 + source/theme filtr.
@@ -583,10 +597,20 @@ Sjednocený kvíz LEA + Penal scénky + SASP, render dle `current.kind`:
    jen když `current === null && phase === 'answering'` (LEA Gotcha 7 pattern).
 3. `phase`: `'answering'` → `'revealed'`. Reveal state dle kind.
 4. **Render dle `kind`** (TS narrowing přes `current.kind === …`):
-   - `choice`: `<ChoiceInput>` — ≥5 options, klávesy `1`–`N`. `trackLawAnswered({kind:'choice'})`.
+   - `choice`: `<ChoiceInput>` — ≥5 options, klávesy `1`–`N`. **Možnosti se míchají**:
+     `LawPage` drží `choiceOrder` (`useMemo` nad `current`, permutace indexů přes
+     `shuffle` z `@/shared/rng`), předá ho jako `order` prop; ChoiceInput renderuje/čísluje
+     možnosti dle `order[pozice]` a při
+     submitu vrací PŮVODNÍ indexy (testid číslo = zobrazená pozice, ne původní index).
+     `trackLawAnswered({kind:'choice'})`.
    - `text`: `<TextInput>` — input + autocomplete + Hard mode toggle. `trackLawAnswered({kind:'text'})`.
    - `enumeration`: `<EnumerationInput>` — multi-chip input (aliases nebo paragraph matcher
-     dle `matcher`). `<ScenarioBox>` zobrazí scénku nad inputem. `trackLawAnswered({kind:'enumeration'})`.
+     dle `matcher`). `<ScenarioBox>` zobrazí scénku nad inputem. Statická instrukce
+     `law-enum-hint` (text dle `matcher` — alias vs paragraf). **Ordered enumerace** (`ordered:true`)
+     používají stejný chip input (dřívější textarea + `law-enum-order-*` testidy zanikly);
+     během `answering` mají committnuté chipy neutrální stav `pending` (5. hodnota
+     `AnswerStatus` v `AnswerRow`, ikona `·`, třída `answer-row--pending`), pořadí se
+     vyhodnotí až v revealed přes `matchOrdered`. `trackLawAnswered({kind:'enumeration'})`.
    - `match`: `<MatchInput>` — click-pairing levý↔pravý sloupec. `trackLawAnswered({kind:'match'})`.
 5. Skip (`law-skip`), Reset (`LawResetButton`), Congrats, testidy `law-*`.
 6. Klik na chip v `LawSidePanel` → `handleSelect(id)` přepne na danou otázku.
@@ -618,7 +642,7 @@ související):
 
 **Vlna 2 — jeden dataset + zrušení Penal Recall** (`2026-07-12-law-single-dataset.md`):
 - `LAW_QUESTIONS` materializován jako jeden TS literál v `law/data/questions.ts`
-  (139 otázek — 17 LEA + 28 Penal + 94 SASP), adaptéry (`adaptLea.ts`, `adaptPenal.ts`)
+  (137 otázek — 17 LEA + 28 Penal + 92 SASP), adaptéry (`adaptLea.ts`, `adaptPenal.ts`)
   a `law/data/sasp/` smazány.
 - Penal Recall zrušen jako feature: `/penal/recall` i legacy `/laws/penal/recall`
   redirectují na `/law`; `e2e/penal/` smazán.
@@ -723,6 +747,11 @@ související):
     napsání aliasu nebo přesného quote (např. "maják") commitne jedním Enterem;
     napsání zkratky ("varo") naplní vybranou suggestion (druhý Enter commitne).
     Šipky ↑↓ jen mění highlight (žádný `hasNavigated` state už neexistuje).
+    **Platí i pro `EnumerationInput` (Teorie):** Enter nejdřív zkusí přímou shodu
+    (`matchEnumerationEntry` — alias/keyword nebo paragraf) a commitne ji jedním
+    stiskem; jinak fillne z highlightu, pokud je nabídka; jinak commitne raw.
+    Tj. přesný alias / paragraf commitne jedním Enterem, i když je otevřený
+    autocomplete.
 
 18. **Mixpanel projekt je EU-resident** — `api_host: 'https://api-eu.mixpanel.com'`
     MUSÍ zůstat v `mixpanel.init()` configu. Bez toho SDK posílá na default
@@ -781,7 +810,12 @@ související):
     schema až bude poptávka. Pokud má persist, přidat do `law.settings.hardMode`
     a bumpnout schema (v9 → v10).
 
-28. _(rezervováno)_
+28. **Choice testy vybírají možnost podle TEXTU, ne podle indexu** — protože
+    `LawPage` míchá pořadí options (`choiceOrder`), nesmí unit ani E2E test klikat
+    na pevnou pozici/index. Specy i `LawPage.test.tsx` importují `LAW_QUESTIONS`
+    přímo a možnost dohledávají podle jejího textu (`options[correctIndices[i]]`),
+    takže se přizpůsobí zamíchanému pořadí i změně textu options. Při psaní nového
+    choice testu nikdy nehardcoduj „klikni na 1. možnost" jako správnou.
 
 29. **Schema je v9** — bumpnuto z v8 odstraněním `penal` slice celého (Penal Recall
     zrušen jako feature; v8 = odstraněny `lea`, `sasp`, `penal.scenarios` slices,
@@ -955,7 +989,7 @@ související):
   pixelově přesné. Když user zaregistruje konkrétní špatnou pozici, otevřít
   `/geo/calibrate` (Drag&drop editor), drag-tune, export TS → paste do `pois.ts`.
   Ulice (polyline) mají per-node draggable handles.
-- **Teorie modul — SASP obsah rozšíření** — aktuálně 94 SASP otázek (text/enum/match
+- **Teorie modul — SASP obsah rozšíření** — aktuálně 92 SASP otázek (text/enum/match
   formáty podreprezentovány). Přidávat přímo do `src/modules/law/data/questions.ts`
   (`source: 'sasp'`). `docs/sasp-manual.md` zůstává v `.gitignore` (důvěrný zdroj).
   Anti-leak: NESMÍ přebírat konkrétní formulace z reálného testu.

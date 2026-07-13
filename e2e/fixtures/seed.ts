@@ -216,15 +216,13 @@ export const SASP_QUESTION_IDS = [
   'sasp.choice.hodnosti.1',
   'sasp.scenario.hodnosti.1',
   'sasp.choice.jednani.1',
-  'sasp.choice.jednani.2',
   'sasp.scenario.jednani.1',
+  'sasp.scenario.jednani.2',
   'sasp.choice.jednani.3',
-  'sasp.choice.jednani.4',
   'sasp.choice.rto.1',
   'sasp.choice.rto.2',
   'sasp.choice.rto.3',
   'sasp.scenario.rto.1',
-  'sasp.choice.jednani.5',
   'sasp.choice.vybava.1',
   'sasp.choice.vybava.2',
   'sasp.choice.vybava.3',
@@ -293,7 +291,7 @@ export const SASP_QUESTION_IDS = [
   'sasp.choice.kriminalistika.8',
   'sasp.choice.kriminalistika.9',
   'sasp.choice.kriminalistika.10',
-  'sasp.text.rto.1',
+  'sasp.choice.rto.4',
   'sasp.text.zasah.felony-code',
   'sasp.enum.hodnosti.ladder',
   'sasp.enum.zasah.felony-order',
@@ -313,7 +311,7 @@ export const LAW_QUESTION_IDS: readonly string[] = [
   ...LEA_QUESTION_IDS,
   // Penal scenarios (28)
   ...PENAL_SCENARIO_IDS,
-  // SASP (94)
+  // SASP (92)
   ...SASP_QUESTION_IDS,
 ];
 

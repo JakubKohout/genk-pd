@@ -18,12 +18,32 @@ export function matchEnumerationEntry(question: LawQuestion, raw: string): strin
       if (normalize(alias) === norm) return e.key;
     }
   }
+  for (const e of question.expected) {
+    for (const kw of e.keywords ?? []) {
+      if (keywordMatches(norm, kw)) return e.key;
+    }
+  }
   return null;
 }
 
-export function matchOrdered(question: LawQuestion, rawLines: string[]): boolean {
+export function keywordMatches(normInput: string, keyword: string): boolean {
+  const kwTokens = normalize(keyword).split(' ').filter(Boolean);
+  if (kwTokens.length === 0) return false;
+  const inTokens = normInput.split(' ').filter(Boolean);
+  outer: for (let i = 0; i + kwTokens.length <= inTokens.length; i++) {
+    for (let j = 0; j < kwTokens.length; j++) {
+      if (!inTokens[i + j]!.startsWith(kwTokens[j]!)) continue outer;
+    }
+    return true;
+  }
+  return false;
+}
+
+export function matchOrdered(
+  question: LawQuestion,
+  matchedKeys: readonly (string | null)[],
+): boolean {
   if (question.kind !== 'enumeration' || !question.ordered) return false;
-  const got = rawLines.map((s) => normalize(s)).filter((s) => s.length > 0);
-  if (got.length !== question.expected.length) return false;
-  return question.expected.every((e, i) => normalize(e.label) === got[i]);
+  if (matchedKeys.length !== question.expected.length) return false;
+  return question.expected.every((e, i) => matchedKeys[i] === e.key);
 }

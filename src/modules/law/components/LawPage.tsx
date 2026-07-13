@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMediaQuery } from '@/shared/useMediaQuery';
+import { shuffle } from '@/shared/rng';
 import { trackLawAnswered, trackQuestionSkipped } from '@/shared/analytics';
 import { LAW_QUESTIONS } from '../data/questions';
 import type { LawChoice, LawQuestion } from '../data/types';
@@ -47,6 +48,11 @@ export function LawPage() {
   const [simpleResult, setSimpleResult] = useState<SimpleResult | null>(null);
 
   const items = useMemo(() => panelItems(LAW_QUESTIONS), []);
+
+  const choiceOrder = useMemo(() => {
+    if (!current || current.kind !== 'choice') return null;
+    return shuffle(current.options.map((_, i) => i));
+  }, [current]);
 
   useEffect(() => {
     if (current !== null) return;
@@ -188,6 +194,7 @@ export function LawPage() {
             <ChoiceInput
               key={current.id}
               question={current as LawChoice}
+              order={choiceOrder!}
               onSubmit={handleChoiceSubmit}
             />
           )}
@@ -196,11 +203,12 @@ export function LawPage() {
           {current.kind === 'choice' && revealed && choiceResult && (
             <div className="space-y-3">
               <ul className="grid gap-2">
-                {(current as LawChoice).options.map((opt, idx) => {
-                  const isCorrectOpt = (current as LawChoice).correctIndices.includes(idx);
-                  const isChosen = choiceResult.selected.includes(idx);
+                {(choiceOrder ?? []).map((origIdx, pos) => {
+                  const opt = (current as LawChoice).options[origIdx]!;
+                  const isCorrectOpt = (current as LawChoice).correctIndices.includes(origIdx);
+                  const isChosen = choiceResult.selected.includes(origIdx);
                   return (
-                    <li key={idx}>
+                    <li key={origIdx}>
                       <div
                         className={[
                           'flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left',
@@ -215,7 +223,7 @@ export function LawPage() {
                       >
                         <span className="flex items-center gap-3">
                           <kbd className="rounded border border-sasp-navy-light bg-sasp-bg px-1.5 py-0.5 font-mono text-xs text-sasp-ink-dim">
-                            {idx + 1}
+                            {pos + 1}
                           </kbd>
                           <span>{opt}</span>
                         </span>

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { saveState, type PersistedState } from '@/shared/storage';
 import { LAW_QUESTIONS } from '../data/questions';
+import type { LawChoice } from '../data/types';
 import { LawPage } from './LawPage';
 
 type Progress = Record<string, { score: number; lastAskedAtTurn: number }>;
@@ -62,6 +63,17 @@ function renderPage() {
 // A SASP choice question from the native pool
 const CHOICE_ID = 'sasp.choice.pojmy.1'; // "Co odlišuje loupež od krádeže?" correctIndices:[0]
 
+function choiceQuestion(id: string): LawChoice {
+  return LAW_QUESTIONS.find((q) => q.id === id) as LawChoice;
+}
+
+function optionButtonByText(text: string): HTMLElement {
+  const buttons = screen.getAllByTestId(/law-choice-option-/);
+  const hit = buttons.find((b) => (b.textContent ?? '').includes(text));
+  if (!hit) throw new Error(`option not found: ${text}`);
+  return hit;
+}
+
 describe('<LawPage /> — choice questions', () => {
   it('renders the prompt for a pinned choice question', async () => {
     pin(CHOICE_ID);
@@ -76,8 +88,11 @@ describe('<LawPage /> — choice questions', () => {
     pin(CHOICE_ID);
     renderPage();
     await waitFor(() => screen.getByTestId('law-prompt'));
-    // Select option index 0 (correctIndices: [0])
-    await user.click(screen.getByTestId('law-choice-option-0'));
+    // Select all correct options (multi-correct safe)
+    const q = choiceQuestion(CHOICE_ID);
+    for (const i of q.correctIndices) {
+      await user.click(optionButtonByText(q.options[i]!));
+    }
     await user.click(screen.getByTestId('law-choice-submit'));
     expect(screen.getByTestId('law-reveal-correct')).toBeInTheDocument();
     expect(screen.getByTestId('law-next')).toBeInTheDocument();
@@ -88,8 +103,10 @@ describe('<LawPage /> — choice questions', () => {
     pin(CHOICE_ID);
     renderPage();
     await waitFor(() => screen.getByTestId('law-prompt'));
-    // Select a wrong option (index 1)
-    await user.click(screen.getByTestId('law-choice-option-1'));
+    // Select the first wrong option
+    const q = choiceQuestion(CHOICE_ID);
+    const wrongText = q.options.find((_, i) => !q.correctIndices.includes(i))!;
+    await user.click(optionButtonByText(wrongText));
     await user.click(screen.getByTestId('law-choice-submit'));
     expect(screen.getByTestId('law-reveal-wrong')).toBeInTheDocument();
     expect(screen.getByTestId('law-next')).toBeInTheDocument();

@@ -18,67 +18,6 @@ interface CommittedEntry {
   duplicate: boolean;
 }
 
-// ─── Ordered (textarea) ────────────────────────────────────────────────────
-
-function OrderedInput({
-  question,
-  onSubmit,
-}: {
-  question: LawEnumeration;
-  onSubmit: (result: { perfect: boolean }) => void;
-}) {
-  const [value, setValue] = useState('');
-  const ref = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    ref.current?.focus();
-  }, []);
-
-  const canCommit = value.trim().length > 0;
-
-  const handleSubmit = () => {
-    if (!canCommit) return;
-    const lines = value.split(/[\n,]+/);
-    const perfect = matchOrdered(question, lines);
-    onSubmit({ perfect });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      if (canCommit) handleSubmit();
-    }
-  };
-
-  return (
-    <div className="answer-input">
-      <textarea
-        ref={ref}
-        className="answer-input__field min-h-[8rem] resize-y"
-        placeholder={'Každou položku na samostatný řádek…'}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        data-testid="law-enum-order-input"
-      />
-      <div className="mt-2 flex justify-end">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={handleSubmit}
-          disabled={!canCommit}
-          data-testid="law-enum-order-submit"
-        >
-          Vyhodnotit
-        </button>
-      </div>
-      <p className="answer-input__hint">
-        Každou položku napiš na samostatný řádek ve správném pořadí. Ctrl/Cmd+Enter vyhodnotí.
-      </p>
-    </div>
-  );
-}
-
 // ─── Stacked entry input (alias + paragraph) ──────────────────────────────
 
 function StackedInput({
@@ -94,6 +33,7 @@ function StackedInput({
   const [entries, setEntries] = useState<CommittedEntry[]>([]);
   const [phase, setPhase] = useState<'answering' | 'revealed'>('answering');
   const inputRef = useRef<HTMLInputElement>(null);
+  const isOrdered = question.ordered === true;
 
   useEffect(() => {
     if (phase === 'answering') inputRef.current?.focus();
@@ -141,6 +81,10 @@ function StackedInput({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      if (matchEnumerationEntry(question, value.trim()) !== null) {
+        commit(value);
+        return;
+      }
       if (suggestionsOpen && suggestions.length > 0) {
         const filled = fillFromHighlight();
         if (filled) return;
@@ -177,14 +121,28 @@ function StackedInput({
     const wrongCount = entries.filter((e) => e.matchedKey === null).length;
     const dupCount = entries.filter((e) => e.duplicate).length;
     const correctCount = entries.filter((e) => e.matchedKey !== null && !e.duplicate).length;
-    const perfect =
-      wrongCount === 0 && dupCount === 0 && correctCount === question.expected.length;
+    const perfect = isOrdered
+      ? matchOrdered(question, entries.map((e) => e.matchedKey))
+      : wrongCount === 0 && dupCount === 0 && correctCount === question.expected.length;
     setPhase('revealed');
     onSubmit({ perfect });
   };
 
   // Build AnswerEntry list for AnswerList
-  const answerEntries: AnswerEntry[] = entries.map((e) => {
+  const answerEntries: AnswerEntry[] = entries.map((e, idx) => {
+    if (isOrdered) {
+      if (phase === 'answering') return { key: e.key, status: 'pending', text: e.raw };
+      const expectedAt = question.expected[idx];
+      if (expectedAt !== undefined && e.matchedKey === expectedAt.key) {
+        return { key: e.key, status: 'correct', text: expectedAt.label };
+      }
+      return {
+        key: e.key,
+        status: 'wrong',
+        text: e.raw,
+        meta: expectedAt ? `správně: ${expectedAt.label}` : 'navíc',
+      };
+    }
     if (e.matchedKey === null) {
       return { key: e.key, status: 'wrong', text: e.raw, meta: 'žádná shoda' };
     }
@@ -196,13 +154,20 @@ function StackedInput({
   });
 
   if (phase === 'revealed') {
-    for (const ex of question.expected) {
-      if (!foundKeys.has(ex.key)) {
-        answerEntries.push({
-          key: `missed-${ex.key}`,
-          status: 'missed',
-          text: ex.label,
-        });
+    if (isOrdered) {
+      for (let i = entries.length; i < question.expected.length; i++) {
+        const ex = question.expected[i]!;
+        answerEntries.push({ key: `missed-${ex.key}`, status: 'missed', text: ex.label });
+      }
+    } else {
+      for (const ex of question.expected) {
+        if (!foundKeys.has(ex.key)) {
+          answerEntries.push({
+            key: `missed-${ex.key}`,
+            status: 'missed',
+            text: ex.label,
+          });
+        }
       }
     }
   }
@@ -282,9 +247,19 @@ function StackedInput({
           </button>
         </div>
       )}
-      <p className="answer-input__hint">
-        Napiš jednu položku, stiskni Enter nebo Přidat. Po dokončení klikni Vyhodnotit otázku.
-      </p>
+      {(() => {
+        const hint =
+          question.matcher === 'paragraph'
+            ? 'Zadávej paragrafy ve formátu §25b — na písmenu subu záleží. Uveď všechny, které se na situaci vztahují. Enter potvrdí položku, Vyhodnotit otázku uzavře odpověď.'
+            : isOrdered
+              ? 'Zadávej položky postupně ve správném pořadí — každou potvrď Enterem. Po dokončení klikni Vyhodnotit otázku.'
+              : 'Piš vlastními slovy — každou položku potvrď Enterem. Po vyjmenování všeho klikni Vyhodnotit otázku.';
+        return (
+          <p className="answer-input__hint" data-testid="law-enum-hint">
+            {hint}
+          </p>
+        );
+      })()}
     </div>
   );
 }
@@ -292,8 +267,5 @@ function StackedInput({
 // ─── Public component ──────────────────────────────────────────────────────
 
 export function EnumerationInput({ question, onSubmit }: Props) {
-  if (question.ordered) {
-    return <OrderedInput question={question} onSubmit={onSubmit} />;
-  }
   return <StackedInput question={question} onSubmit={onSubmit} />;
 }

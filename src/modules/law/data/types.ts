@@ -29,6 +29,8 @@ export interface LawExpected {
   key: string;
   label: string;
   aliases?: string[];
+  /** Kmenová klíčová slova pro tolerantní match parafrází (prefix-run po normalize). */
+  keywords?: string[];
   subId?: string;
 }
 export interface LawEnumeration extends LawBase {

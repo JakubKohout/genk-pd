@@ -1,10 +1,11 @@
-export type AnswerStatus = 'correct' | 'duplicate' | 'wrong' | 'missed';
+export type AnswerStatus = 'correct' | 'duplicate' | 'wrong' | 'missed' | 'pending';
 
 const ICON: Record<AnswerStatus, string> = {
   correct: '✓',
   duplicate: '⊘',
   wrong: '✗',
   missed: '○',
+  pending: '·',
 };
 
 const ROW_CLASS: Record<AnswerStatus, string> = {
@@ -12,6 +13,7 @@ const ROW_CLASS: Record<AnswerStatus, string> = {
   duplicate: 'answer-row--duplicate',
   wrong: 'answer-row--wrong',
   missed: 'answer-row--missed',
+  pending: 'answer-row--pending',
 };
 
 interface Props {

@@ -119,6 +119,9 @@
   .answer-row--missed {
     @apply border-slate-500 text-sasp-ink-dim;
   }
+  .answer-row--pending {
+    @apply border-sasp-navy-light bg-sasp-bg/40 text-sasp-ink;
+  }
 
   .reveal-perfect {
     @apply rounded-md border border-emerald-400/60 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100;

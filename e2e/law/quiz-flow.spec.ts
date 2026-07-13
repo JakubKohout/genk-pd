@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { pinNextLawQuestion, seed } from '../fixtures/seed';
+import { LAW_QUESTIONS } from '../../src/modules/law/data/questions';
+import type { LawChoice } from '../../src/modules/law/data/types';
 
 // sasp.choice.pojmy.1 — "Co odlišuje loupež od krádeže?" correctIndices:[0]
 const CHOICE_ID = 'sasp.choice.pojmy.1';
+const choiceQ = LAW_QUESTIONS.find((q) => q.id === CHOICE_ID) as LawChoice;
 // lea.16.B — §16 B, 5 items: ústně, písemně, maják, varovný výstřel, gestem
 const ENUM_ID = 'lea.16.B';
 // sasp.text.zasah.felony-code — text question, answer "Code 5"
@@ -26,7 +29,10 @@ test.describe('Law unified quiz — choice flow', () => {
       randomSeed: 2,
     });
     await page.goto('/#/law');
-    await page.getByTestId('law-choice-option-0').click();
+    const options = page.getByTestId('law-choice-options').locator('button');
+    for (const i of choiceQ.correctIndices) {
+      await options.filter({ hasText: choiceQ.options[i]! }).click();
+    }
     await page.getByTestId('law-choice-submit').click();
     await expect(page.getByTestId('law-reveal-correct')).toBeVisible();
     const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
@@ -39,8 +45,9 @@ test.describe('Law unified quiz — choice flow', () => {
       randomSeed: 3,
     });
     await page.goto('/#/law');
-    // Pick option index 1 (wrong — correct is index 0)
-    await page.getByTestId('law-choice-option-1').click();
+    const options = page.getByTestId('law-choice-options').locator('button');
+    const wrongText = choiceQ.options.find((_, i) => !choiceQ.correctIndices.includes(i))!;
+    await options.filter({ hasText: wrongText }).click();
     await page.getByTestId('law-choice-submit').click();
     await expect(page.getByTestId('law-reveal-wrong')).toBeVisible();
   });
@@ -51,7 +58,10 @@ test.describe('Law unified quiz — choice flow', () => {
       randomSeed: 4,
     });
     await page.goto('/#/law');
-    await page.getByTestId('law-choice-option-0').click();
+    const options = page.getByTestId('law-choice-options').locator('button');
+    for (const i of choiceQ.correctIndices) {
+      await options.filter({ hasText: choiceQ.options[i]! }).click();
+    }
     await page.getByTestId('law-choice-submit').click();
     await expect(page.getByTestId('law-reveal-correct')).toBeVisible();
     // The "Další otázka" button (law-next) should appear in revealed state

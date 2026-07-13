@@ -33,4 +33,9 @@ describe('AnswerRow', () => {
     fireEvent.click(screen.getByRole('button', { name: /odebrat/i }));
     expect(onRemove).toHaveBeenCalledOnce();
   });
+
+  it('renders pending status with neutral icon', () => {
+    render(<ul><AnswerRow status="pending" text="Captain" /></ul>);
+    expect(screen.getByTestId('chip-pending')).toHaveTextContent('Captain');
+  });
 });
