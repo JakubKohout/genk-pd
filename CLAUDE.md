@@ -7,25 +7,34 @@ Pracovní paměť pro budoucí seance. Stručně a věcně.
 Edukativní webová aplikace pro PD (Police Department) na serveru `genk.cz`. Aktuálně
 funkční moduly:
 
+> **Stav po refaktoru (branch `quiz-refactor`):** Moduly LEA, Penal scénky a stará SASP
+> příručka jsou sloučeny do sjednoceného modulu **Teorie** (`src/modules/law/`, route `/law`,
+> nav odkaz "Teorie"). Staré routy `/laws/*` a `/sasp` redirectují na `/law`.
+> **Penal Recall** zůstává standalone na `/penal/recall`. Staré UI/state kódy byly smazány;
+> zůstaly jen sdílené primitivy (`laws/lea/` data + AnswerList/AnswerRow) a Penal
+> data/logic/recall (`laws/penal/`). Schema je v8.
+
 1. **Desítkové kódy** (`/codes`) — dva režimy: psaní kódu (`/codes/write`),
    výběr významu (`/codes/choose`).
-2. **Law Enforcement Act quiz** (`/laws/lea`) — free-text recall paragrafů.
-   Stackovaný seznam odpovědí (correct / wrong / duplicate / missed) s
-   barevným okrajem + autocomplete s šipkovou navigací + sjednocený reveal,
-   kde se po Vyhodnotit otázku přebarví existující řádky a doplní zapomenuté
-   pod divider "Zapomněl jsi:".
-3. **Penal Code** (`/laws/penal`) — Trestní zákoník, dva režimy přepínané
-   tabs nahoře (analog `/codes`):
-   - **Scénky** (`/laws/penal/scenarios`, default index) — krátké policejní
-     popisy situace, uživatel doplňuje paragrafy včetně sub-paragrafu (`25b`,
-     `§14a`, `27`). Strict ID matching, autocomplete navrhuje paragrafy po ID
-     i názvu, "Hard mode" checkbox v submit-footeru autocomplete vypíná.
-   - **Recall** (`/laws/penal/recall`) — aplikace se ptá „Co je §X?",
-     uživatel doplní název paragrafu (alias matching jako LEA). Pool je
-     omezený jen na paragrafy, které se objeví v některé scénce (27 položek).
-   Side panel na recall obsahuje jen čísla paragrafů, na scénkách jejich `ref`
-   + zkrácený prompt.
-4. **Geografie** (`/geo`) — interaktivní mapa Los Santos a Blaine County
+2. **[RETIRED → Teorie] Law Enforcement Act quiz** (`/laws/lea`) — routuje na `/law`.
+   Data (`LEA_QUESTIONS`) + sdílené UI primitivy (AnswerList/AnswerRow) zůstávají
+   v `src/modules/laws/lea/`; vlastní kvízové komponenty smazány.
+3. **Penal Code Recall** (`/penal/recall`) — standalone stránka, aplikace se ptá
+   „Co je §X?", uživatel doplní název paragrafu (alias matching). Pool = paragrafy
+   z `RECALL_PARAGRAPHS` (27 položek). Side panel jen čísla paragrafů.
+   Penal scénky (mode A) jsou nyní v Teorie jako `enumeration/paragraph` formát.
+   Scénková UI (`PenalScenarioPage`, `PenalLayout`) smazána; data a logic zůstávají
+   v `src/modules/laws/penal/`.
+4. **Teorie** (`/law`) — sjednocený kvíz: LEA (enumerace paragrafů) + Penal scénky
+   (paragraph matcher) + nativní SASP obsah (viz níže). Jeden pool `LAW_QUESTIONS`,
+   dvouúrovňový filtr (source: lea/penal/sasp + 9 témat). 4 formáty dle `kind`:
+   - `choice` — multi-select MC (≥5 možností, ≥1 správná), klávesy 1–N.
+   - `text` — free-text recall s autocomplete + Hard mode.
+   - `enumeration` — výčet (LEA paragrafy nebo Penal paragraph matcher), ordered volitelně.
+   - `match` — click-pairing (levý sloupec ↔ pravý sloupec).
+   Nativní SASP obsah v `src/modules/law/data/sasp/` je anti-leak exam-prep
+   (nesmí přebírat konkrétní formulace z reálného testu). 94 SASP otázek ve 4 formátech.
+5. **Geografie** (`/geo`) — interaktivní mapa Los Santos a Blaine County
    (Leaflet + CRS.Simple + tile pyramid 0..3 nad `clean-map.jpg` 8192×12288),
    2 herní režimy + interní editor pozic:
    - **Slepá mapa** (`/geo/blind`, default index) — uživatel dostane prompt
@@ -50,13 +59,15 @@ funkční moduly:
    `street.vespucci-blvd`, `highway.del-perro-fwy`). Pozice vizuálně ověřené
    proti artu (Gotcha 40), ulice hand-traced.
 
-Rozcestník `/laws` (komponenta `LawsIndex`) má LEA i Penal Code aktivní,
-**Firearm Act** je disabled (`aria-disabled`, čeká na implementaci).
-**SASP příručka** (`/sasp`) je ještě jako `<ComingSoonPage>`. Geografie je
-samostatný top-level modul, ne pod `/laws`.
+5. **[RETIRED → Teorie] SASP příručka** (`/sasp`) — routuje na `/law`. Starý
+   `src/modules/sasp/` smazán. Nativní SASP obsah je v `src/modules/law/data/sasp/`
+   jako součást sjednoceného Teorie modulu. Zdroj `docs/sasp-manual.md` je
+   gitignored/důvěrný; parsovaná data a kód jsou veřejné.
+
+Geografie je standalone top-level modul. Nav má 4 položky: Codes / Teorie / Geo / Penal Recall.
 
 Pure-frontend, žádný backend. Veškerý stav v `localStorage` (klíč `genk-pd:v1`,
-schemaVersion 4).
+schemaVersion 8).
 
 ## Stack
 
@@ -64,7 +75,7 @@ schemaVersion 4).
 - Tailwind CSS 3.4 (SASP paleta v `tailwind.config.js`: `sasp-bg`, `sasp-navy`,
   `sasp-navy-light`, `sasp-tan`, `sasp-gold`, `sasp-red`, `sasp-ink`, `sasp-ink-dim`)
 - React Router 6 (`createHashRouter` — pozor, ne Browser router; URL používá
-  `#/laws/lea` formát)
+  `#/law`, `#/penal/recall`, `#/geo/blind` formát)
 - Vitest 2 (unit + component, jsdom)
 - Playwright 1 (E2E, chromium-desktop + chromium-mobile)
 - Mixpanel browser 2.78 (analytics, frontend-only, EU-resident)
@@ -82,7 +93,7 @@ npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
 ```
 
-`npm run test:all` musí být zelené: **406 unit/component + 67 E2E = 473 testů**.
+`npm run test:all` musí být zelené: **413 unit/component + 64 E2E = 477 testů** (+ 1 todo).
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -115,44 +126,32 @@ src/
         distractors.ts              # buildOptions pro mód 2
       components/                   # CodesPage, ModeWrite, ModeChoose, SidePanel,
                                     # ImportanceFilter, ResetButton, CongratsBanner
-    laws/                           # Modul zákonů
-      components/LawsIndex.tsx      # /laws rozcestník (LEA + Penal aktivní, Firearm disabled)
-      lea/                          # LEA quiz sub-modul
+    laws/                           # Sdílené primitivy (data + UI) používané Teorie a Penal Recall
+      lea/                          # Pouze data + sdílené UI primitivy (vlastní quiz UI smazán)
         data/
           types.ts                  # AnswerItem, Question rozhraní
-                                    # (Question má description: krátký popis pro SidePanel)
           questions.ts              # LEA_QUESTIONS — 17 otázek, 95 položek, ~505 aliasů
-        logic/
-          match.ts                  # matchAnswer — exact equality po normalize
-          suggest.ts                # suggestItems — autocomplete, min 4 znaky, max 5 návrhů
-        state/
-          selection.ts              # pickNextQuestion + isLeaComplete
-          useLeaProgress.ts         # Skóre/turn pro lea slice (delta ±2)
-        components/                 # LeaQuizPage, AnswerInput, AnswerList, AnswerRow,
-                                    # SubmitFooter, SidePanel, LeaResetButton
-      penal/                        # Penal Code sub-modul (002-19), 2 sub-režimy
+                                    # (používá adaptLea.ts v law/data/)
+        components/
+          AnswerList.tsx            # Sdílený vizuální primitiv — vertikální <ul> s answer rows
+          AnswerRow.tsx             # Sdílený vizuální primitiv — jeden řádek (correct/wrong/missed/dup)
+      penal/                        # Penal data + logic (scénková UI smazána, Recall UI zůstává)
         data/
           types.ts                  # PenalParagraph, PenalScenario, ExpectedAnswer
           paragraphs.ts             # PENAL_PARAGRAPHS — 75 paragrafů (§1–§77, §100–§102)
-          scenarios.ts              # PENAL_SCENARIOS — 28 scénář A1–E9
+          scenarios.ts              # PENAL_SCENARIOS — 28 scénář A1–E9 (používá adaptPenal.ts)
           recallPool.ts             # RECALL_PARAGRAPHS — derivované, jen ty co jsou
                                     # v některé scénce (27 paragrafů, vyloučeno §1–§6 atd.)
         logic/
           canonicalAnswerId.ts      # '§25 b' / '25B' / '25b' → '25b' (null pokud neparseable)
-          matchScenario.ts          # parse user inputu → ExpectedAnswer; strict, žádný
-                                    # partial credit. + expectedEquals pro porovnání.
-          matchParagraph.ts         # mode B alias matching, sdílí normalize s LEA
-          suggestParagraph.ts       # mode A autocomplete (ID prefix nebo name substring),
-                                    # expanduje paragraph na všechny sub-varianty
+          matchParagraph.ts         # Recall alias matching (používá PenalRecallPage)
+          suggestParagraph.ts       # Autocomplete (ID prefix nebo name substring),
+                                    # expanduje paragraph na všechny sub-varianty (používá EnumerationInput)
         state/
-          selection.ts              # pickNextScenario, pickNextRecallParagraph,
-                                    # isScenariosComplete, isRecallComplete
-          usePenalProgress.ts       # Generický hook usePenalSliceProgress(key) →
-                                    # 2 veřejné: usePenalScenarioProgress, usePenalRecallProgress
-        components/                 # PenalLayout (tabs + Outlet, jako CodesPage),
-                                    # PenalScenarioPage, PenalRecallPage, PenalAnswerInput,
-                                    # PenalSidePanel (generický pro obě módy s {label, sublabel?,
-                                    # hoverTitle}), PenalSubmitFooter, PenalResetButton
+          selection.ts              # pickNextRecallParagraph, isRecallComplete
+          usePenalProgress.ts       # usePenalSliceProgress('recall') → usePenalRecallProgress
+        components/                 # PenalRecallPage (standalone /penal/recall),
+                                    # PenalSidePanel, PenalSubmitFooter, PenalResetButton
     geo/                            # Modul geografie (interaktivní mapa + 2 sub-režimy + editor pozic)
       data/
         types.ts                    # POIBase, POIPoint, POIPolyline, POI union,
@@ -197,10 +196,51 @@ src/
                                     #   draggable, export TS přes formatPoisTs. Vybraný point
                                     #   POI dostane prsten tolerance (toleranceRing → Polygon,
                                     #   non-interactive, elipsa kvůli portrait mapě)
+    law/                            # Sjednocený Teorie modul (route /law, nav "Teorie")
+      data/
+        types.ts                    # LawQuestion = discriminated union (LawChoice/LawText/
+                                    # LawEnumeration/LawMatch přes `kind`); LawExpected;
+                                    # LAW_SOURCES=['lea','penal','sasp'],
+                                    # LAW_THEMES (9 témat: pojmy/hodnosti/jednani/rto/vybava/
+                                    # zasah/zadrzeni/kriminalistika/paragrafy)
+        index.ts                    # LAW_QUESTIONS — sjednocený pool:
+                                    # adaptLeaQuestions() + adaptPenalScenarios() + SASP_LAW_QUESTIONS
+        adaptLea.ts                 # Konvertuje LEA_QUESTIONS → kind:'enumeration' (matcher:'alias')
+        adaptPenal.ts               # Konvertuje PENAL_SCENARIOS → kind:'enumeration' (matcher:'paragraph')
+        index.test.ts               # Validace merge (unikátní IDs, valid source/theme)
+        sasp/
+          choice.ts                 # SASP_CHOICE — 86 choice otázek, ≥5 možností, ≥1 správná
+          text.ts                   # SASP_TEXT — 2 text otázky
+          enumeration.ts            # SASP_ENUM — 2 enumeration otázky
+          match.ts                  # SASP_MATCH — 4 match otázky
+          index.ts                  # SASP_LAW_QUESTIONS — concat všech SASP kinds (94 otázek)
+          sasp.test.ts              # Validace: source='sasp', valid theme, ID prefix, choice≥5
+                                    # options, text alias non-collision, match pairs, enum fields.
+                                    # Nativní SASP obsah je anti-leak exam-prep —
+                                    # NESMÍ přebírat konkrétní formulace z reálného testu.
+      logic/
+        matchChoice.ts              # matchChoice — porovnání zvolených indexů vs correctIndices
+        matchText.ts                # matchText — strict equality po normalize
+        matchEnumeration.ts         # matchEnumeration — alias nebo paragraph matching
+        checkMatch.ts               # checkMatch — evaluace match pairs kliknutím
+        suggest.ts                  # suggestText — substring autocomplete (kind text)
+        *.test.ts                   # Testy pro každou logiku
+      state/
+        useLawProgress.ts           # useLawQuizProgress nad `law` slice (delta ±2)
+        useLawSettings.ts           # sourceFilter + themeFilter, persistuje
+        selection.ts                # pickNextQuestion / isLawComplete (filtrování +
+                                    # score<2 přes pickNextFromPool) nad LAW_QUESTIONS
+        selection.test.ts           # Testy selekce
+      components/                   # LawPage (jediná stránka, větví render dle current.kind),
+                                    # LawSidePanel (source+theme filtry, chips → onSelect),
+                                    # LawMobilePanel (<details>), LawResetButton,
+                                    # ChoiceInput, TextInput, EnumerationInput, MatchInput,
+                                    # ScenarioBox (pro enumeration s scenario polem)
+                                    # LawPage.test.tsx, LawSidePanel.test.tsx, *Input.test.tsx
   shared/
-    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 4,
-                                    # chained migrate v1→…→v4 při readu, lenient v4 read
-                                    # (dopočítá chybějící geo/penal sub-slices)
+    storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 8,
+                                    # chained migrate v1→…→v8 při readu, lenient v8 read
+                                    # (dopočítá chybějící geo/penal/law sub-slices)
     rng.ts                          # Pluggable RNG (mulberry32, seed přes localStorage)
     useMediaQuery.ts                # SSR-safe matchMedia hook
     text/normalize.ts               # NFD strip diakritiky + lowercase + whitespace collapse
@@ -234,31 +274,33 @@ docs/poi-mapping.md                 # Mapování uživatelova POI seznamu → CZ
                                     # human reference pro generování pois.ts.
 
 e2e/
-  fixtures/seed.ts                  # `seed(page, { codes-flat-fields, lea?, penal?, geo?, randomSeed? })`
-                                    # Píše schemaVersion 4, exportuje LEA_QUESTION_IDS,
-                                    # PENAL_SCENARIO_IDS, PENAL_PARAGRAPH_IDS, GEO_POI_IDS,
-                                    # pinNext{Question, LeaQuestion, PenalScenario,
-                                    # PenalParagraph, GeoPoi}
+  fixtures/seed.ts                  # `seed(page, { codes-flat-fields, penal?, geo?, law?, randomSeed? })`
+                                    # Píše schemaVersion 8, exportuje GEO_POI_IDS,
+                                    # pinNext{PenalParagraph, GeoPoi, LawQuestion}
   codes/*.spec.ts                   # 7 spec souborů, 20 testů
-  laws/lea/*.spec.ts                # 6 spec souborů (quiz-flow, matching, autocomplete,
-                                    # submit-reveal, persistence, responsive), 16 testů
-  laws/penal/*.spec.ts              # 3 spec soubory (scenario-flow, recall-flow, persistence),
-                                    # 12 testů
+  law/*.spec.ts                     # 4 spec soubory (quiz-flow 12, filter 5, redirects 6,
+                                    # persistence 2), 25 testů
+  penal/*.spec.ts                   # 1 spec soubor (recall-flow), 4 testů
   geo/*.spec.ts                     # 3 spec soubory (blind-flow, name-flow, persistence),
                                     # 12 testů
 ```
 
-Nový modul (Firearm Act) → kopíruj strukturu `modules/laws/penal/` (která už ukazuje
-2-režim pattern s tabs), přidej route v `src/app/routes.tsx`, přidej do `LawsIndex.tsx`.
-Sdílené utility (`normalize`, `pickNextFromPool`) jsou generické. AnswerList/AnswerRow
-se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
+Nový obsah do Teorie → přidej otázky do `src/modules/law/data/sasp/` (nebo nový
+adapter pro nový zdroj), zaregistruj v `LAW_QUESTIONS`. Sdílené utility (`normalize`,
+`pickNextFromPool`) jsou generické. Pro nový zdroj přidej hodnotu do `LAW_SOURCE_KEYS`
+v `storage.ts`, bump schema (v7 → v8) a doplň migraci.
+
+Firearm Act (budoucnost): přidat jako nový zdroj `'firearm'` do `LAW_SOURCE_KEYS` +
+adapter z `modules/laws/firearm/data/` + otázky v `law/data/firearm/`. Starý pattern
+"nový `modules/laws/firearm/` s vlastním routou" je obsolete — vše jde do sjednoceného
+`/law` poolu.
 
 ## Datový model
 
 ```ts
 // localStorage["genk-pd:v1"]
 {
-  schemaVersion: 4,
+  schemaVersion: 8,
   codes: {
     progress: { [codeId]: { score: -2..+2, lastAskedAtTurn: number } },
     turn: number,
@@ -266,13 +308,8 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
       importanceFilter: { mandatory: bool, rare: bool, unnecessary: bool }
     }
   },
-  lea: {
-    progress: { [questionId]: { score: -2..+2, lastAskedAtTurn: number } },
-    turn: number
-  },
   penal: {
-    scenarios: { progress: { [scenarioId]: ProgressEntry }, turn: number },
-    recall:    { progress: { [paragraphId]: ProgressEntry }, turn: number }
+    recall: { progress: { [paragraphId]: ProgressEntry }, turn: number }
   },
   geo: {
     blind: { progress: { [poiId]: ProgressEntry }, turn: number },
@@ -282,19 +319,29 @@ se importují z LEA jako visual primitivy — viz Gotcha o YAGNI.
         street: bool, highway: bool, city: bool, state: bool
       }
     }
+  },
+  law: {                             // sjednocený Teorie kvíz (LEA + Penal scénky + SASP)
+    progress: { [questionId]: ProgressEntry },
+    turn: number,
+    settings: {
+      sourceFilter: { lea: bool, penal: bool, sasp: bool },
+      themeFilter: {
+        pojmy: bool, hodnosti: bool, jednani: bool, rto: bool,
+        vybava: bool, zasah: bool, zadrzeni: bool, kriminalistika: bool, paragrafy: bool
+      }
+    }
   }
 }
 ```
 
-**Migrace v1 → … → v4** (`src/shared/storage.ts`): při readu se starší payload
-chained-migruje v paměti. v1: jen codes. v2: +lea (prázdný progress, turn 0).
-v3: +penal (prázdné scenarios + recall slices). v4: +geo (prázdný blind/name
-progress, categoryFilter 4 kategorie vše true). `saveState` vždy zapisuje v4.
+**Migrace v1 → … → v8** (`src/shared/storage.ts`): při readu se starší payload
+chained-migruje v paměti. v1: jen codes. v2: +lea. v3: +penal. v4: +geo. v5: +sasp.
+v6: sasp quiz sloučen. v7: +law slice (additivní). v8: odstraněny `lea`, `sasp`,
+`penal.scenarios` slices; `saveState` je vždy zapisuje bez. `saveState` vždy zapisuje v8.
 
-**Lenient v4 read**: pokud v4 payload chybí `geo` nebo některá sub-slice
-(`blind` / `name` / `settings`), dopočítáme prázdné defaults. categoryFilter
-doplní missing kategorie z initialState (každá true). Stejně lenient pro
-`penal`. (Test `storage.test.ts`.)
+**Lenient v8 read**: pokud payload chybí `geo`/`law`/`penal.recall` nebo sub-slice,
+dopočítáme prázdné defaults. sourceFilter/themeFilter/categoryFilter doplní missing
+klíče z initialState (každý true). (Test `storage.test.ts`.)
 
 `STORAGE_KEY = 'genk-pd:v1'` se NEMĚNÍ při schema bumpu — jen JSON value uvnitř.
 "v1" v key je legacy; verzování je v `schemaVersion` field.
@@ -311,21 +358,14 @@ text „Přeskočit otázku", styl `btn-secondary`. Dostupné v ModeWrite i Mode
 v obou fázích (před odpovědí i v feedback bloku — v druhém případě override-uje
 skóre nastavené `recordAnswer`).
 
-### LEA scoring
+### Law (Teorie) scoring
 
-Skóre `-2..+2` per otázka. Delta **±2** (NE ±1 jako u codes). Mastered na `+2`
-(= 1 perfect submit z 0). `recordSubmit({ perfect: bool })` mění skóre.
-Reset maže jen `lea` slice, codes zůstávají. Reset je vystaven přes
-`LeaResetButton` (pod kvízem vpravo, confirm dialog) a přes „Začít znovu"
-na completion screen.
+Skóre `-2..+2` per otázka v jedné `law` slice. Delta **±2** (NE ±1 jako u codes).
+Mastered na `+2` (= 1 správná odpověď z 0). `recordSubmit({ perfect: bool })` mění skóre.
+Reset maže jen `law` slice, codes zůstávají. Reset je vystaven přes `LawResetButton`
+(confirm dialog, testid `law-reset-*`).
 
-**Skip** (`recordSkip(questionId)`): stejná sémantika jako u codes — score=MAX
-(+2) absolutně, override-uje `recordSubmit`. Tlačítko v `SubmitFooter`
-(`data-testid="lea-skip"`) v obou fázích `answering` i `revealed`. Skip v
-revealed přepíše právě nastavené skóre z `handleSubmit` na +2.
-
-Default `importanceFilter` v `initialState` je **všechno true**. E2E `seed()` má
-fallback `mandatory:true, rest:false` — záměrně, ať jsou spec soubory deterministické.
+**Skip** (`recordSkip(questionId)`): score=MAX (+2) absolutně, override. Testid `law-skip`.
 
 ### Codes data
 
@@ -345,39 +385,20 @@ zůstává jako faded marker (point) / polyline (street) na mapě s názvem v To
 **Skip** stejná sémantika jako Codes / LEA — score=MAX (+2) absolutně, override.
 Tlačítka `data-testid="geo-blind-skip"` / `data-testid="geo-name-skip"`.
 
-### LEA data
+### SASP data (v Teorie modulu)
 
-`LEA_QUESTIONS` (17 otázek, 95 položek) v `src/modules/laws/lea/data/questions.ts`.
-Každá otázka má `{ id, prompt, description, ref, items[] }`, každá položka má
-`{ id, quote, aliases[], ref }`. `description` je krátký popis (~20–35 znaků,
-nominalizace) zobrazený v SidePanelu vedle §ref.
+Nativní SASP obsah v `src/modules/law/data/sasp/`:
+- `choice.ts` — 86 choice otázek (≥5 options, ≥1 correctIndex)
+- `text.ts` — 2 text otázky (s aliasy)
+- `enumeration.ts` — 2 enumeration otázky
+- `match.ts` — 4 match otázky (pairs)
+- `index.ts` — `SASP_LAW_QUESTIONS` concat všech (94 otázek), `source: 'sasp'`
+- `sasp.test.ts` — validace (counts, unique IDs, options ≥5, alias non-collision,
+  theme enum, match pairs). Anti-leak: NESMÍ přebírat konkrétní formulace z reálného testu.
 
-Pokrytá paragrafy LEA: §7, §9 A/B, §10, §11, §12 A/C, §15, §16 B, §17 A, §18 A,
-§19 A, §21 A, §23 B, §37. Question IDs jsou `lea.<paragraph>[.<section>]`,
-item IDs `lea.<paragraph>.<section>.<sub>` (např. `lea.16.B.3b`).
+ID prefix: `sasp.<kind>.<theme>.<n>`. 9 témat (pojmy/hodnosti/jednani/rto/vybava/zasah/
+zadrzeni/kriminalistika/paragrafy). Zdroj surovin: `docs/sasp-manual.md` (gitignored/důvěrný).
 
-**Křížové otázky z jiných zákonů** (sedí v LEA modulu z UX důvodů, i když paragrafy
-nejsou LEA): `lea.zbrojni-prukaz` (Firearm Act §4) a `lea.ridicsky-prukaz`
-(Penal Code §34/§36/§37/§58). Question ID je slug místo paragrafu, skutečná
-reference je v poli `ref` (např. `§4 FA`, `§34 c) PC`). Při přidávání další
-takové otázky držet stejný pattern — pokud bys chtěl/a paragrafový ID, narazíš
-na test `unique question IDs` který by sice prošel, ale rozbil by se sémantický
-předpoklad „ID prefix `lea.<n>` mapuje na §n LEA".
-
-Zdroj surovin: `docs/lea-quiz-questions-draft.md` (kompletní seznam s aliasy,
-udržovat sync s TS literálem).
-
-`questions.test.ts` ověřuje: počet 15+89, unikátnost question/item IDs, neprázdné
-quote+ref, neprázdné description per question, unikátnost aliasů uvnitř položky
-(po normalize), **non-collision aliasů napříč položkami uvnitř jedné otázky**
-(cross-question collision je OK — `výjimečný stav` se vyskytuje v několika
-otázkách bez problému).
-
-Pokrytí aliasů je nerovnoměrné — některé položky mají 18 aliasů (`lea.16.B.3b` =
-maják), jiné jen 4–5 (např. `lea.15.A.5a` "evidentiary purpose"). Když se objeví
-false-negative, lze rozšířit alias seznam ručně. **Strict legal correctness:** některé
-parafráze, které se zdají správné, neodpovídají právnímu významu (např. "spáchal trestný
-čin" ≠ "zbraň jako důkaz" v §15 5a) — nepřidávat aliasy, které posunou význam.
 
 ## Algoritmy
 
@@ -396,7 +417,7 @@ filtruje codes přes `eligibleCodes` (importance filter + score < 2).
 aktivní otázky (efekt s deps `[current, choice, options, recordAnswer]`), ignoruje
 modifikátory a `INPUT/TEXTAREA/contenteditable` cíle.
 
-### Shared (codes + LEA)
+### Shared
 
 **`pickNextFromPool<T extends { id: string }>(pool, progress, turn): T | null`**
 (`src/shared/quiz/pickNextFromPool.ts`):
@@ -406,71 +427,55 @@ modifikátory a `INPUT/TEXTAREA/contenteditable` cíle.
    `weightedRandom` z `@/shared/rng`.
 
 **`normalize(s: string)`** (`src/shared/text/normalize.ts`): `lowercase` + `NFD` decompose
-+ strip combining marks `[̀-ͯ]` + `\s+ → ' '` + trim. Pure function, používaná
-LEA matching i suggest.
++ strip combining marks `[̀-ͯ]` + `\s+ → ' '` + trim. Pure function, sdílená
+všemi matchers.
 
-### LEA
+### Law (Teorie) logika
 
-**`matchAnswer(input, items): AnswerItem | null`** (`src/modules/laws/lea/logic/match.ts`):
-strict full-string equality po `normalize` proti `quote` NEBO kterémukoliv `alias`.
-**Žádný substring, žádná Levenshtein, žádná morfologie** — uživatel musí napsat něco,
-co je v alias seznamu. Když chip turne červeně, alias chyběl.
+**`matchText`** (`src/modules/law/logic/matchText.ts`): strict full-string equality po
+`normalize`. **`suggestText`** (`suggest.ts`): substring autocomplete, min 2, max 5.
+**`matchEnumeration`** (`matchEnumeration.ts`): deleguje na alias matching (LEA) nebo
+paragraph matching (Penal) dle `matcher` field na otázce. Používá `suggestParagraphs`
+z `laws/penal/logic/suggestParagraph.ts` pro paragraph autocomplete.
+**`matchChoice`** (`matchChoice.ts`): porovnání zvoleného indexu vs `correctIndices[]`.
+**`checkMatch`** (`checkMatch.ts`): evaluace match pairs po kliknutí.
+**`pickNextQuestion(state, settings, all)`** = `pickNextFromPool(eligibleQuestions(...), ...)`,
+kde `eligibleQuestions` filtruje score < 2 + source/theme filtr.
 
-**`suggestItems(input, items, excludeIds): AnswerItem[]`** (`src/modules/laws/lea/logic/suggest.ts`):
-substring match (`indexOf` po normalize) přes quote + aliasy. Min length 4 (`AUTOCOMPLETE_MIN_LENGTH`),
-max 5 výsledků (`AUTOCOMPLETE_MAX_RESULTS`), filter `excludeIds` (skryje už found items),
-sort by earliest match position then quote length.
+### LEA data matching (sdíleno přes Teorie)
 
-**Enter v `AnswerInput`** používá obojí: nejdřív zkusí `matchAnswer(value, items)`.
-Pokud najde přesnou shodu (typed text je sám platný quote nebo alias) → commit.
-Jinak když je nabídka otevřená a nějaká je → naplní input vybranou suggestion z
-`highlight` (uživatel pak druhým Enterem commitne). Bez nabídky → commit jako
-"wrong". Šipky ↑↓ jen mění `highlight`, Tab vždy fillne, Esc zavře nabídku.
-
-**`pickNextQuestion(state, all)`** = `pickNextFromPool(eligibleQuestions(state, all), ...)`,
-kde `eligibleQuestions` filtruje `score < 2`. (LEA nemá importance filter.)
+**`AnswerRow`/`AnswerList`** (`src/modules/laws/lea/components/`) jsou sdílené vizuální
+primitivy pro enumeration chips (correct/duplicate/wrong/missed). Enter algoritmus
+v `EnumerationInput`: matchAnswer first → commit přímý hit, jinak fill z highlight
+pokud je nabídka, jinak commit raw. Šipky ↑↓ mění highlight, Tab fillne, Esc zavře.
 
 ### Penal Code
 
-**Mode A — scénka → paragrafy.** Každá scénka v `PENAL_SCENARIOS` má
-`expected: ExpectedAnswer[]` (1–3 položky), kde `ExpectedAnswer = { paragraphId,
-subId? }`. Sub-paragraf je povinný, pokud paragraf má `subs.length > 0`,
-a NESMÍ být zadaný, pokud `subs.length === 0`.
+**Scénky (Teorie/enumeration formát):** `adaptPenal.ts` konvertuje `PENAL_SCENARIOS` na
+`LawQuestion[]` s `kind:'enumeration'`, `matcher:'paragraph'`, `expected: ExpectedAnswer[]`.
+`EnumerationInput` (Teorie) vyhodnocuje chips přes `matchEnumeration` → `canonicalAnswerId`
++ paragraf lookup + sub validace. Strict — žádný partial credit (Gotcha 23).
 
 **`canonicalAnswerId(input): string | null`** normalizuje vstupy `'§25 b'`,
 `'25B'`, `'25b'`, `'§25'`, `'27'` → `'25b'` / `'25'` / `'27'`. Strip `§`,
 lowercase, collapse whitespace, regex `^(\d+)([a-e]?)$`. Null pro neparseable.
 
-**`matchScenarioAnswer(input, paragraphs): ExpectedAnswer | null`**: parse přes
-canonicalAnswerId, najde paragraf podle ID, validuje sub. **Strict** — žádný
-partial credit. Špatný sub = wrong. Vrací null = page treats jako wrong chip.
-
-**`expectedEquals(a, b)`**: porovnání ExpectedAnswer. Used by page-level
-matching loop, který každý chip zkontroluje proti `scenario.expected[]`.
-
-**`suggestParagraphs(input, paragraphs, excludeKeys): ParagraphSuggestion[]`**:
-2 cesty matche.
-1. Numeric prefix (`25`, `25b`): rozšíří paragraf na všechny sub-varianty,
-   nebo když user napsal sub, jen tu jednu. Rank: kratší ID = výš.
-2. Text substring: substring přes title + aliasy po normalize. Rank: pozice
-   matche, pak délka title.
+**`suggestParagraphs(input, paragraphs, excludeKeys): ParagraphSuggestion[]`**
+(`laws/penal/logic/suggestParagraph.ts`):
+1. Numeric prefix (`25`, `25b`): rozšíří paragraf na všechny sub-varianty.
+2. Text substring: substring přes title + aliasy po normalize.
 `excludeKeys` (Set canonical IDs `'25b'`, `'27'`) skrývá už commitnuté chips.
-Min length 1, max 8 výsledků.
+Min length 1, max 8 výsledků. Používá `EnumerationInput` přes `matchEnumeration`.
 
-**Hard mode** (`PenalScenarioPage` interní `useState`): checkbox v `submit-footer`
-vlevo, prop `disableSuggestions` na `PenalAnswerInput` zablokuje autocomplete
-úplně. Per-session, nepersistuje.
-
-**Mode B — recall.** Otázka „Co je §X?" pickne paragraf z **`RECALL_PARAGRAPHS`**
+**Recall.** Otázka „Co je §X?" pickne paragraf z **`RECALL_PARAGRAPHS`**
 (derivovaný subset z `PENAL_PARAGRAPHS` — jen ty co jsou v `PENAL_SCENARIOS.expected`,
-27 položek). Mode A pool je pořád celých 75 (uživatel může napsat libovolný §).
+27 položek).
 
-**`matchParagraph(input, paragraphs): PenalParagraph | null`** = LEA-style alias
-match po normalize. V `PenalRecallPage` se volá s `[current]` (jen aktuální paragraf),
-ne s celým poolem — tj. korektní odpověď je jen jméno právě testovaného paragrafu.
+**`matchParagraph(input, paragraphs): PenalParagraph | null`** = alias match
+po normalize. V `PenalRecallPage` se volá s `[current]` — korektní odpověď je jen
+jméno aktuálně testovaného paragrafu.
 
-**`pickNextScenario`** / **`pickNextRecallParagraph`**: oba delegují na
-`pickNextFromPool` se score < 2 filterem.
+**`pickNextRecallParagraph`** deleguje na `pickNextFromPool` se score < 2 filterem.
 
 ### Progress bar (všechny moduly)
 
@@ -481,10 +486,8 @@ Storage uchovává nově `-2..+2`, selection filtruje `score < 2`.
 
 - **Codes desktop SidePanel**: testid `progress-percent`
 - **Codes mobile summary**: testid `mobile-progress-percent`
-- **LEA desktop SidePanel**: testid `lea-progress-percent`
-- **LEA mobile summary**: testid `lea-mobile-progress-percent`
-- **Penal Scenarios desktop**: testid `penal-scenarios-progress-percent`
-- **Penal Scenarios mobile**: testid `penal-scenarios-mobile-progress-percent`
+- **Law (Teorie) desktop SidePanel**: testid `law-progress-percent`
+- **Law (Teorie) mobile summary**: testid `law-mobile-progress-percent`
 - **Penal Recall desktop**: testid `penal-recall-progress-percent`
 - **Penal Recall mobile**: testid `penal-recall-mobile-progress-percent`
 - **Geo Blind desktop**: testid `geo-blind-progress-percent`
@@ -494,22 +497,21 @@ Storage uchovává nově `-2..+2`, selection filtruje `score < 2`.
 
 `isComplete` ⟺ všechny filtrované items na +2.
 
-### SidePanel layout (codes / LEA / Penal sjednoceno)
+### SidePanel layout (codes / law / penal)
 
 Všechny boční panely sdílí vizuální jazyk: `card flex flex-col gap-3 p-4` wrapper +
 `ProgressHeader` (uppercase tracking-wider "Splněno" vlevo, percent vpravo, bar
 pod) + score-based barva pozadí podle stejné `SCORE_CLASS` mapy (`-3..+3`).
 Mapa zůstává s rozsahem `-3..+3` pro zpětnou kompatibilitu s legacy daty;
-nové skóre používá jen `-2..+2`. Duplikovaná ve 3 souborech (codes
-`SidePanel.tsx` + LEA `SidePanel.tsx` + penal `PenalSidePanel.tsx`); když se
-přidá Firearm Act, půjde refaktorovat do `src/shared/quiz/SidePanel.tsx`.
+nové skóre používá jen `-2..+2`. Duplikovaná v `codes/SidePanel.tsx`,
+`law/LawSidePanel.tsx`, `laws/penal/PenalSidePanel.tsx`; až bude 3. modul,
+půjde refaktorovat do `src/shared/quiz/SidePanel.tsx`.
 
 Codes panel: dense grid `grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4`
-chips s ID kódu. LEA panel: vertikální `<ul>` s `§ref` (`w-14`) + description.
-Penal panel: generický (item: `{ id, label, sublabel?, hoverTitle }`):
-scénky mají label=ref + sublabel=zkrácený prompt; recall má jen label=`§N` (sublabel
-záměrně vynechán per uživatelova požadavku — jen čísla, ne názvy). Když chybí
-sublabel, label dostává `flex-1` místo `w-14`. Každý řádek `data-testid="chip-<id>"`,
+chips s ID kódu. Law panel: filtry (source + theme) + chips s source zkratkou +
+promptem, klikatelné (přepnutí otázky). Penal Recall panel: generický
+(item: `{ id, label, sublabel?, hoverTitle }`), recall má jen label=`§N` (sublabel
+záměrně vynechán — jen čísla, ne názvy). Každý řádek `data-testid="chip-<id>"`,
 `data-score`, `data-done`.
 
 ## Analytika (Mixpanel)
@@ -523,15 +525,18 @@ konstanta (Mixpanel FE tokeny jsou public-by-design).
 | Funkce | Event name | Properties | Trigger |
 |---|---|---|---|
 | `trackCodeAnswered` | `code_answered` | `mode: 'write'\|'choose'`, `success`, `code_id` | ModeWrite/ModeChoose po vyhodnocení |
-| `trackLawAnswered` | `law_answered` | `success` (= perfect), `question_id` | LeaQuizPage `handleSubmit` |
-| `trackPenalAnswered` | `penal_answered` | `mode: 'scenario'\|'recall'`, `success`, `question_id` | PenalScenarioPage / PenalRecallPage `handleSubmit` |
-| `trackPenalCompleted` | `penal_completed` | `mode: 'scenario'\|'recall'` | Mount completion screen po posledním correct submitu |
-| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'\|'geo-blind'\|'geo-name'` | ResetButton/LeaResetButton/PenalResetButton/GeoResetButton confirm |
+| `trackLawAnswered` | `law_answered` | `source: 'lea'\|'penal'\|'sasp'`, `kind: 'choice'\|'text'\|'enumeration'\|'match'`, `success`, `question_id` | LawPage `handleSubmit` |
+| `trackPenalAnswered` | `penal_answered` | `mode: 'recall'`, `success`, `question_id` | PenalRecallPage `handleSubmit` |
+| `trackPenalCompleted` | `penal_completed` | `mode: 'recall'` | Mount completion screen po posledním correct submitu |
+| `trackProgressReset` | `progress_reset` | `module: 'codes'\|'law'\|'penal-recall'\|'geo-blind'\|'geo-name'` | ResetButton/LawResetButton/PenalResetButton/GeoResetButton confirm |
 | `trackCodesCompleted` | `codes_completed` | `scope: 'all'\|'partial'` | CongratsBanner mount |
-| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'lea'\|'penal-scenario'\|'penal-recall'\|'geo-blind'\|'geo-name'`, `question_id` | handleSkip ve všech kvízových stránkách |
+| `trackQuestionSkipped` | `question_skipped` | `module: 'codes'\|'law'\|'penal-recall'\|'geo-blind'\|'geo-name'`, `question_id` | handleSkip ve všech kvízových stránkách |
 | `trackGeoAnswered` | `geo_answered` | `mode: 'blind'\|'name'`, `success`, `poi_id` | GeoBlindPage / GeoNamePage po vyhodnocení |
 | `trackGeoCompleted` | `geo_completed` | `mode: 'blind'\|'name'` | Mount completion screen po posledním masteru |
 | `trackPageview` | _(Mixpanel pageview)_ | `url` (origin + `#` + path) | AppLayout useEffect na route change |
+
+Poznámka: `trackSaspAnswered` a `trackSaspCompleted` jsou v `analytics.ts` definovány,
+ale aktuálně nevolány (starý modul smazán, v7→v8 migrace je nevymazala z kódu).
 
 **Init pipeline** (po `mixpanel.init`):
 1. `mixpanel.identify(mixpanel.get_distinct_id())` — self-identify s anonymním
@@ -558,79 +563,31 @@ takže testy nevolající init si dál fungují.
 flagu vrátí no-op před `mixpanel.init`. Plus belt-and-suspenders route blocks
 na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 
-## LEA UI flow
+## LEA data & primitives
 
-`LeaQuizPage` (`src/modules/laws/lea/components/LeaQuizPage.tsx`):
+`LEA_QUESTIONS` (17 otázek, 95 položek) v `src/modules/laws/lea/data/questions.ts`.
+Každá otázka má `{ id, prompt, description, ref, items[] }`, každá položka má
+`{ id, quote, aliases[], ref }`. `description` je krátký popis (~20–35 znaků,
+nominalizace) — používá ho `adaptLea.ts` při konverzi do Teorie formátu.
 
-1. `useLeaProgress` poskytuje `{ progress, turn, recordSubmit, recordSkip, reset }`.
-2. `current: Question | null` v `useState`. Picker běží v `useEffect` jen když
-   `current === null && phase === 'answering'` (NE v `useMemo` — to byl bug, viz Gotchas).
-3. Phase = `'answering'` | `'revealed'`. Submit změní phase, NEvyresetuje `current`.
-4. `handleNext` clears chips + setCurrent(null) → useEffect pickne novou.
-5. Interní state stále `chips: AnsweredChip[]` ({ key, raw, itemId, duplicate }) —
-   název přežil, ale UI je teď stackovaný `AnswerList` (vertikální `<ul>`),
-   nikoliv chips. `itemId === null` = wrong, `duplicate=true` = duplicate, jinak
-   correct.
-6. **Sjednocený reveal:** v `phase === 'revealed'` se `chips` přemapují na
-   `AnswerEntry[]` (correct/duplicate/wrong) a navíc se přidají `missed` entries
-   pro itemy které nebyly nalezeny. `AnswerList` má prop `showMissedHeading`,
-   která vykreslí divider "Zapomněl jsi:" před první missed entry. Žádné
-   oddělené sekce Nalezeno/Chybělo/Špatně. "Perfekt!" banner (testid
-   `reveal-perfect`) se ukáže jen když nejsou ani wrong ani missed ani duplicate.
-7. `AnswerInput` má input + tlačítko "Přidat" (vpravo, `data-testid="answer-add"`,
-   disabled při prázdném inputu) + jednořádkový hint pod inputem. SubmitFooter
-   používá `submit-footer--end` v obou fázích — vlevo „Přeskočit otázku"
-   (`btn-secondary`, `data-testid="lea-skip"`), vpravo hlavní CTA
-   ("Vyhodnotit otázku" v answering, "Další otázka" v revealed). Skip volá
-   `handleSkip` (override score na +2, advance).
-8. `LeaResetButton` (`flex justify-end` wrapper pod `<main>` v levém sloupci
-   gridu) je dostupný v obou fázích. Confirm dialog s `role="alertdialog"`,
-   testidy `lea-reset-button`/`lea-reset-confirm`/`lea-reset-cancel`/
-   `lea-reset-confirm-yes`. Maže jen `lea` slice, codes zůstávají.
-9. `useMediaQuery('(min-width: 1024px)')` switch mezi desktop SidePanel inline
-   vs `LeaMobilePanel` (`<details>` se summary).
+`AnswerList` a `AnswerRow` v `src/modules/laws/lea/components/` jsou **sdílené UI
+primitivy** — importuje je `EnumerationInput` (Teorie) i `PenalRecallPage`.
+Neukazují se pod `/laws/lea` (route neexistuje), ale jsou stále živé kódem.
 
-## Penal UI flow
+Pokrytá paragrafy LEA: §7, §9 A/B, §10, §11, §12 A/C, §15, §16 B, §17 A, §18 A,
+§19 A, §21 A, §23 B, §37. Question IDs jsou `lea.<paragraph>[.<section>]`,
+item IDs `lea.<paragraph>.<section>.<sub>` (např. `lea.16.B.3b`).
 
-`PenalLayout` (`src/modules/laws/penal/components/PenalLayout.tsx`) je parent
-route s `<Outlet />`:
+**Křížové otázky z jiných zákonů**: `lea.zbrojni-prukaz` (Firearm Act §4) a
+`lea.ridicsky-prukaz` (Penal Code §34/§36/§37/§58). Question ID je slug místo
+paragrafu, skutečná reference je v poli `ref`.
 
-1. Header: h1 "Penal Code (002-19)" + popis + `NavLink` tabs (`Scénky`/`Recall`)
-   se stejným stylem jako `CodesPage` (aktivní tab `bg-sasp-tan text-sasp-bg`,
-   neaktivní `border border-sasp-navy-light`).
-2. Index route (`/laws/penal`) renderuje `<PenalScenarioPage />` defaultně.
-3. Tabs navigují na `/laws/penal/scenarios` a `/laws/penal/recall`.
+## Penal Recall UI flow
 
-`PenalScenarioPage` (mode A) — kopíruje LeaQuizPage strukturu:
-
-1. `usePenalScenarioProgress` poskytuje `{ progress, turn, recordSubmit, recordSkip, reset }`
-   nad `penal.scenarios` slice.
-2. `current: PenalScenario | null` v `useState`. Picker v `useEffect` jen když
-   `current === null && phase === 'answering'` (stejný pattern jako LEA, viz Gotcha 7).
-3. `chips: AnsweredChip[]` ({ key, raw, parsed: ExpectedAnswer | null, duplicate }).
-4. `handleCommit(raw)`: parse přes `matchScenarioAnswer`. Null parsed = wrong.
-   Duplicate = key je už v `foundKeys` set.
-5. Při submitu projde `chips` proti `current.expected[]`:
-   - parsed null → wrong
-   - parsed.key v expectedKeys + ne duplicate → correct
-   - parsed.key NENÍ v expectedKeys → wrong („neaplikovatelný")
-   - duplicate → duplicate
-   - perfect = wrong=0 ∧ duplicate=0 ∧ correct=expected.length
-6. Reveal přidá `missed` entries pro každý chybějící expected.
-7. `educationalNote` z scénky se renderuje v reveal pod „Pozor:" boxem
-   (testid `penal-scenario-note`), když ji scénka definuje.
-8. SubmitFooter v `submit-footer--end` (default LEA pattern) NEBO když `leftSlot`
-   je passed (Hard mode checkbox), přepne na `flex justify-between`.
-9. PenalAnswerInput používá `suggestParagraphs` místo `suggestItems`. Suggestions
-   pole `{ canonicalId, display, paragraphId, subId, title, description }`.
-   Při kliknutí/Enteru se commit hodnota = `canonicalId`. `disableSuggestions`
-   prop (= hard mode) blokuje generování suggestions.
-10. Skip volá `recordSkip` + `trackQuestionSkipped({ module: 'penal-scenario' })`.
-
-`PenalRecallPage` (mode B) — single-answer flow, jednodušší:
+`PenalRecallPage` (`src/modules/laws/penal/components/PenalRecallPage.tsx`) — standalone `/penal/recall`:
 
 1. `usePenalRecallProgress` nad `penal.recall` slice.
-2. Pool = `RECALL_PARAGRAPHS` (27 paragrafů). Picker přes `pickNextRecallParagraph`.
+2. Pool = `RECALL_PARAGRAPHS` (27 paragrafů z `data/recallPool.ts`). Picker přes `pickNextRecallParagraph`.
 3. Otázka „Co je §X?" + plain `<input>` (žádné chips, žádné autocomplete).
    testid `penal-recall-input`. Enter triggers handleSubmit.
 4. `handleSubmit`: `matchParagraph(value, [current])` — jediný paragraf v poolu
@@ -684,6 +641,46 @@ route s `<Outlet />`:
 - POI seznam — chips s 3-znakovou kategorií (ULI/LMK/PD), name, ✓ pro mastered.
 - Mobile přes `<details>` v `GeoMobilePanel`.
 
+## Law (Teorie) UI flow
+
+`LawPage` (`src/modules/law/components/LawPage.tsx`) je **jediná stránka** na routě `/law`.
+Sjednocený kvíz LEA + Penal scénky + SASP, render dle `current.kind`:
+
+1. `useLawQuizProgress` nad `law` slice + `useLawSettings` (sourceFilter + themeFilter).
+2. `current: LawQuestion | null` v `useState`. Picker `pickNextQuestion` v `useEffect`
+   jen když `current === null && phase === 'answering'` (LEA Gotcha 7 pattern).
+3. `phase`: `'answering'` → `'revealed'`. Reveal state dle kind.
+4. **Render dle `kind`** (TS narrowing přes `current.kind === …`):
+   - `choice`: `<ChoiceInput>` — ≥5 options, klávesy `1`–`N`. `trackLawAnswered({kind:'choice'})`.
+   - `text`: `<TextInput>` — input + autocomplete + Hard mode toggle. `trackLawAnswered({kind:'text'})`.
+   - `enumeration`: `<EnumerationInput>` — multi-chip input (aliases nebo paragraph matcher
+     dle `matcher`). `<ScenarioBox>` zobrazí scénku nad inputem. `trackLawAnswered({kind:'enumeration'})`.
+   - `match`: `<MatchInput>` — click-pairing levý↔pravý sloupec. `trackLawAnswered({kind:'match'})`.
+5. Skip (`law-skip`), Reset (`LawResetButton`), Congrats, testidy `law-*`.
+6. Klik na chip v `LawSidePanel` → `handleSelect(id)` přepne na danou otázku.
+
+`LawSidePanel`:
+- ProgressHeader s testid `law-progress-percent` / `-bar`.
+- 3 source checkboxy (lea/penal/sasp) + 9 theme checkboxy.
+- Chips — source zkratka + prompt, ✓ pro mastered, klik přepne otázku.
+- Mobile přes `<details>` v `LawMobilePanel`.
+
+## Refaktor: sjednocený modul Teorie (HOTOVO)
+
+Branch `quiz-refactor`. Plán + spec v `docs/superpowers/plans/` a `docs/superpowers/specs/`.
+
+- Nový `src/modules/law/` s `LAW_QUESTIONS` pool (LEA + Penal scénky + nativní SASP).
+- 4 `kind` formáty: `choice` (multi-select ≥5 opts), `text`, `enumeration`, `match`.
+- `LawPage`, `LawSidePanel` (source: lea/penal/sasp + 9 témat), `LawResetButton`.
+- Adaptéry: `adaptLea.ts` (LEA → enumeration/alias), `adaptPenal.ts` (Penal scénky → enumeration/paragraph).
+- Nativní SASP obsah v `src/modules/law/data/sasp/` — 94 otázek (86 choice + 2 text + 2 enum + 4 match).
+  Anti-leak: obsah je exam-prep, NESMÍ přebírat konkrétní formulace z reálného testu.
+- Storage schema v8: odstraněny `lea`, `penal.scenarios`, `sasp` slices; migrace v7→v8 je stripuje.
+- E2E: `e2e/law/` (quiz-flow, filter, redirects, persistence) + `e2e/penal/` (recall-flow).
+- Staré routy `/laws/*`, `/sasp` → redirect na `/law`; Penal Recall na `/penal/recall`.
+- Staré UI kódy smazány: `src/modules/sasp/`, scénková UI v `laws/penal/`, vlastní kvízové
+  komponenty v `laws/lea/`. Zůstaly sdílené primitivy (AnswerList/AnswerRow) a data/logic.
+
 ## Gotchas (na co si dát pozor)
 
 1. **`useSyncExternalStore` snapshot stability** — `storage.ts` má `cachedSnapshot`,
@@ -699,13 +696,14 @@ route s `<Outlet />`:
 3. **Playwright seed přes `localStorage`, ne přes window hook**: `page.addInitScript`
    běží před app skripty, takže window hooky ještě nejsou připojené. Místo toho
    `e2e/fixtures/seed.ts` zapisuje rovnou `localStorage["genk-pd:v1"]` (ve formátu
-   `schemaVersion: 4` se všemi slices) a `localStorage["genk-pd:rng-seed"]`.
+   `schemaVersion: 8` se všemi aktuálními slices) a `localStorage["genk-pd:rng-seed"]`.
    Init script používá `sessionStorage` flag `genk-pd:seeded`, aby se
    **nepřeseedoval po reloadu** (jinak by persistence testy byly k ničemu).
 
-4. **SidePanel se renderuje jen jednou**, ne dvakrát. `CodesPage` i `LeaQuizPage`
-   přepínají mezi inline desktop a collapsible mobile podle `useMediaQuery('(min-width: 1024px)')`.
-   Bez toho by `data-testid` byly duplicitní → strict mode collision.
+4. **SidePanel se renderuje jen jednou**, ne dvakrát. `CodesPage`, `LawPage`,
+   `PenalRecallPage` i `GeoLayout` přepínají mezi inline desktop a collapsible mobile
+   podle `useMediaQuery('(min-width: 1024px)')`. Bez toho by `data-testid` byly
+   duplicitní → strict mode collision.
 
 5. **`progress` a `turn` MUSÍ být v deps `useEffect`** v `ModeWrite`/`ModeChoose`,
    které pickují další otázku — bez nich se po `reset()` (z congrats banneru) nevyzvedne
@@ -715,19 +713,16 @@ route s `<Outlet />`:
    ne `queueMicrotask` ve výběrovém efektu. Důvod: když efekt nastaví `current`, input
    ještě není v DOMu (renderuje se `<QuestionSkeleton />`), takže microtask focusne `null`.
 
-7. **LeaQuizPage: `current` v `useState`, NE `useMemo`.** Critical bug fix:
-   `useMemo(() => pickNextQuestion({progress, turn}, …), [progress, turn])` po submitu
-   (který bumpne `progress` + `turn`) okamžitě re-pickl JINOU otázku, a `useEffect`
-   na `[current?.id]` resetnul phase z `revealed` zpátky na `answering` →
-   reveal zmizel dřív, než ho user viděl. Fix: `current` v `useState`,
-   `useEffect` pickne jen když `current === null && phase === 'answering'`.
-   `handleSubmit` necheche `current` netknuté, jen mění phase. Test masking: existující
-   E2E používaly `pinNextLeaQuestion` (saturoval 16/17 otázek na +2), takže pool po
-   cooldownu měl jen 1 kandidáta a re-pick vrátil tu samou otázku → bug se zamaskoval.
-   **Při přidání nové otázky do `LEA_QUESTIONS` MUSÍŠ rozšířit i seznam ID v
-   `e2e/fixtures/seed.ts` (`LEA_QUESTION_IDS`) a v `LeaQuizPage.test.tsx`
-   `beforeEach` saturation listu**, jinak `pinNextLeaQuestion` přestane být
-   deterministický a testy padnou.
+7. **`current` v `useState`, NE `useMemo`.** Critical bug fix platí pro všechny kvízové
+   stránky (LawPage, PenalRecallPage, GeoBlindPage, GeoNamePage):
+   `useMemo(() => pickNextQuestion(...), [progress, turn])` po submitu okamžitě re-pickl
+   JINOU otázku → `useEffect` na `[current?.id]` resetnul phase z `revealed` zpátky na
+   `answering` → reveal zmizel. Fix: `current` v `useState`, `useEffect` pickne jen
+   když `current === null && phase === 'answering'`. `handleSubmit` nechá `current`
+   netknuté, jen mění phase.
+   **Při přidání nové otázky do `LAW_QUESTIONS` (přes data soubory nebo adaptery)
+   MUSÍŠ rozšířit i `LawPage.test.tsx` saturation listu**, jinak `pinNextLawQuestion`
+   přestane být deterministický a testy padnou.
 
 8. **`AnswerRow` neuvádí prop `ref`** — `ref` je React reserved prop name
    (forwardRef). Pole pro vedlejší text vpravo (typicky §ref nebo "duplikát" /
@@ -745,12 +740,13 @@ route s `<Outlet />`:
     `<details>`). RTL `getByTestId` najde i hidden elementy uvnitř collapsed details,
     takže existující testy fungují.
 
-11. **`schemaVersion` v test seedech musí být `4` se všemi slices**.
+11. **`schemaVersion` v test seedech musí být `8` se správnými slices**.
     Hardcoded literály ve všech `*.test.tsx` které volají `saveState({...})` musí mít
-    `schemaVersion: 4`, `lea: { progress: {}, turn: 0 }`,
-    `penal: { scenarios: { progress: {}, turn: 0 }, recall: { progress: {}, turn: 0 } }`
-    a `geo` slice s `settings.categoryFilter` (4 kategorie street/highway/city/state).
-    Pokud přidáš další slice, bumpni schema (v4 → v5) a doplň migraci v `storage.ts`.
+    `schemaVersion: 8`, `penal: { recall: { progress: {}, turn: 0 } }`,
+    `geo` slice s `settings.categoryFilter` (4 kategorie) a `law` slice s
+    `progress: {}`, `turn: 0`, `settings.sourceFilter` (3 zdroje) a `settings.themeFilter` (9 témat).
+    BEZ `lea`, `sasp` nebo `penal.scenarios` — migrace v8 je stripuje.
+    Pokud přidáš další slice, bumpni schema (v8 → v9) a doplň migraci v `storage.ts`.
 
 12. **Vite dev server je default lockdown na `localhost`.** Pro ngrok/cloudflared
     tunel je v `vite.config.ts` `server.allowedHosts: ['.ngrok-free.app', '.ngrok.app',
@@ -762,8 +758,8 @@ route s `<Outlet />`:
 14. **Žádná emoji v kódu / dokumentaci**, pokud uživatel výslovně nepožádá.
 
 15. **`.card` třída NEMÁ padding.** Padding (`p-6 sm:p-8` typicky) se přidává
-    per použití. Codes panely, HomePage karty, LawsIndex i `<main>` v LEA
-    quizu si ho přidávají samy. Bez něj vypadá karta nalepená na okrajích —
+    per použití. Codes panely, HomePage karty, `<main>` v LawPage i PenalRecallPage
+    si ho přidávají samy. Bez něj vypadá karta nalepená na okrajích —
     typický symptom "designově horší" reportu. Při kopírování layoutu nového
     modulu nezapomenout.
 
@@ -810,10 +806,9 @@ route s `<Outlet />`:
 22. **UI clamp earnedScore na MAX_SCORE (2)** — progress-bar pct počítá
     `Σ min(2, max(0, score))` namísto `Σ max(0, score)`. Bez horního clampu
     by legacy `score=3` (z rozsahu `-3..+3`) dával pct > 100 % (test viděl
-    150 %). Šest míst: codes `SidePanel.tsx`, codes `CodesPage.tsx` MobilePanel,
-    LEA `SidePanel.tsx`, LEA `LeaQuizPage.tsx` LeaMobilePanel, penal
-    `PenalSidePanel.tsx`, penal `PenalScenarioPage.tsx`/`PenalRecallPage.tsx`
-    MobilePanel. Při bumpu range nezapomenout všech šest.
+    150 %). Místa: codes `SidePanel.tsx` + MobilePanel, law `LawSidePanel.tsx`
+    + MobilePanel, penal `PenalSidePanel.tsx` + `PenalRecallPage.tsx` MobilePanel,
+    geo `GeoSidePanel.tsx`. Při bumpu range nezapomenout všechna místa.
 
 23. **Penal mode A: strict ID matching, žádný partial credit** —
     `matchScenarioAnswer` vrací null, pokud paragraf má subs ale uživatel
@@ -829,34 +824,29 @@ route s `<Outlet />`:
     spadne z recall poolu — uživatelé už ho nikdy v mode B neuvidí. Test
     `recallPool.test.ts` validuje, že pool match union scénár expected.
 
-25. **Penal scénář IDs v E2E seed musí být sync s daty** — `e2e/fixtures/seed.ts`
-    má hardcoded `PENAL_SCENARIO_IDS` (28) a `PENAL_PARAGRAPH_IDS` (75, hard-coded
-    pro full catalog). Když přidáš novou scénku do `scenarios.ts` nebo paragraf do
-    `paragraphs.ts`, **musíš rozšířit i hardcoded list v seed.ts**, jinak
-    `pinNextPenalScenario` přestane saturovat 27/28 a picker pustí jiný target.
+25. **Penal paragraph IDs v E2E seed musí být sync s daty** — `e2e/fixtures/seed.ts`
+    má hardcoded `PENAL_PARAGRAPH_IDS` pro Recall saturation. Když přidáš nový paragraf do
+    `paragraphs.ts`, **rozšiř i list v seed.ts**, jinak `pinNextPenalParagraph` přestane
+    saturovat N-1 a picker pustí jiný target. `PENAL_SCENARIO_IDS` ze seedu byl
+    odebrán (scénky jsou nyní v Teorie, ne v standalone E2E).
 
-26. **PenalAnswerInput používá canonical ID jako match key, ne quote** — chip
-    excludeKeys obsahuje `'25b'`, `'27'`, ne `paragraphId`. Pokud bys přesunul
-    AnswerList přes shared a fillnul `meta = paragraphId` místo `display`, exclude
-    by přestal fungovat. Drž canonical ID v `chip.parsed → canonicalId` mapování.
+26. **`EnumerationInput` (paragraf matcher) používá canonical ID jako match key, ne quote** —
+    chip excludeKeys obsahuje `'25b'`, `'27'`, ne `paragraphId`. Pokud bys měnil
+    AnswerList nebo chip strukturu, drž canonical ID jako exclude klíč.
 
-27. **PenalLayout je parent route s `<Outlet />`**, analogicky `CodesPage`.
-    Index route (`/laws/penal`) defaultuje na `PenalScenarioPage`. Přepínání
-    režimu jde přes `NavLink` tabs (`penal-tab-scenarios`, `penal-tab-recall`).
-    Žádná redundantní rozcestníková stránka — proklik z `/laws` rovnou jede do
-    režimu, na který tabs ukazují (default scénky).
+27. **Hard mode toggle v `EnumerationInput` (paragraf matcher) je per-session state**
+    (`useState(false)` v `LawPage`). Stav nepřežije refresh. Záměrně — bumpnout
+    schema až bude poptávka. Pokud má persist, přidat do `law.settings.hardMode`
+    a bumpnout schema (v8 → v9).
 
-28. **Hard mode toggle je per-session state** v `PenalScenarioPage`
-    (`useState(false)`). Stav nepřežije refresh ani přepnutí tabu. Záměrně
-    — nechtěl jsem komplikovat storage schema o UI preference. Pokud má persist,
-    přidat do `penal.scenarios.settings.hardMode` a bumpnout schema.
+28. _(rezervováno)_
 
-29. **Schema je v4** — bumpnuto z v3 přidáním geo slice. **Všechny test seedy
-    s hardcoded `saveState({...})` literálem musí mít `schemaVersion: 4` +
-    `geo.settings.categoryFilter` se všemi 4 kategoriemi** (`street, highway,
-    city, state` — všechny true defaultně). Stejně tak `e2e/fixtures/seed.ts`.
-    Pokud přidáš další modul nebo přepíšeš POI dataset/kategorie, bumpni
-    v4 → v5 a doplň migraci.
+29. **Schema je v8** — bumpnuto z v7 odstraněním `lea`, `sasp`, `penal.scenarios` slices
+    (v7 = +law slice additivně, v6 = sasp quiz sloučen, v5 = sasp split, v4 = geo).
+    **Test seedy s hardcoded `saveState({...})` nesmí obsahovat `lea`, `sasp` ani
+    `penal.scenarios`** — migrace v8 je stripuje, takže v unit testech jsou zbytečné
+    a v E2E seed jsou schválně vynechány. Pokud přidáš nový modul, bumpni v8 → v9
+    a doplň migraci v `storage.ts`.
 
 30. **Tile pipeline NEní v `npm run build`** — `scripts/generate-tiles.mjs` je
     jednorázový skript spouštěný ručně (`node scripts/generate-tiles.mjs`).
@@ -899,7 +889,7 @@ route s `<Outlet />`:
     dialog testidy `geo-{mode}-reset-{button|confirm|cancel|confirm-yes}`.
 
 36. **GeoLayout je top-level modul, ne pod /laws** — `/geo/blind` a `/geo/name`
-    žijí na top-level routě. AppLayout nav má 4 odkazy (Codes/Laws/Geo/SASP),
+    žijí na top-level routě. AppLayout nav má 4 odkazy (Codes/Teorie/Geo/Penal Recall),
     HomePage 4 karty. Při testování home navigace přes `getByRole('link',
     { name: 'Geografie', exact: true })` se shoduje na **navbar link**
     (jednoduchý text), ne na home kartu (link + h2 + p + span = složitý
@@ -961,6 +951,26 @@ route s `<Outlet />`:
     `SIZE_THRESHOLDS` (globálně) nebo per-POI `size` v `pois.ts`. Tier `tiny`
     je zatím nepoužitý (k dispozici pro budoucí pinpoint POI).
 
+43. **Law question IDs v E2E seed musí být sync s daty** — `e2e/fixtures/seed.ts`
+    má pro saturation v `LawPage.test.tsx` interně seznam ID. Při přidání nové
+    otázky do `law/data/sasp/`, `laws/lea/data/questions.ts` nebo `laws/penal/data/scenarios.ts`
+    rozšiř i saturation list v `LawPage.test.tsx`, jinak `pinNextLawQuestion` přestane
+    být deterministický a testy padnou (stejný pattern jako Penal Gotcha 25, Geo Gotcha 34).
+    Nový SASP obsah: přidej do příslušného souboru v `law/data/sasp/`, ID prefix
+    `sasp.<kind>.<theme>.<n>`, pak updatuj test counts v `sasp.test.ts`.
+
+44. **Text aliasy v Law otázkách nesmí po normalize kolidovat s `answer`** —
+    `sasp.test.ts` to validuje pro SASP text otázky (analog Geo Gotcha 38).
+    Diakritika-free varianta aliasu je redundantní (normalize stripuje diakritiku),
+    takže `answer: "Státní zástupce"` + alias `"statni zastupce"` = fail.
+    Přidávej aliasy jako skutečné parafráze, ne diakritické varianty.
+
+45. **`LawQuestion` je discriminated union přes `kind`** — `choice | text | enumeration | match`.
+    `LawPage` větví render přes `current.kind === …` (TS narrowing). **Nepoužívej
+    boolean const k zúžení typu** — nenarrowuje. Nová interakce = nový `kind` +
+    větev v `LawPage` + příslušný Input komponent + (volitelně) matcher v
+    `law/logic/`.
+
 ## Konvence
 
 - Cesta s aliasem `@/...` mapuje na `src/...` (TS path + Vite/Vitest resolve.alias).
@@ -978,14 +988,14 @@ route s `<Outlet />`:
 
 ## Mimo MVP / nápady do budoucna
 
-- **Firearm Act** modul (`/laws/firearm`): kopíruj strukturu `modules/laws/penal/`
-  (která už ukazuje 2-režim pattern s tabs + parent layout), přidej do `LawsIndex`
-  (změň `aria-disabled` na aktivní `<Link>`), přidej route. Zdroj: `docs/firearm-act.md`.
-- **Sdílený "law quiz engine"**: až bude 3. modul (Firearm Act), refaktorovat
-  AnswerList/AnswerRow/SidePanel ProgressHeader/SCORE_CLASS do `src/shared/quiz/`.
-  Aktuálně AnswerList/AnswerRow se importují z LEA (penal je závislý na LEA),
-  SidePanel je duplikovaný do 4 souborů (codes/lea/penal/geo). YAGNI dokud se to
-  nezačne lišit nebo nezačne bolet při změnách.
+- **Firearm Act** obsah: přidat jako nový `source: 'firearm'` do `LAW_SOURCE_KEYS`
+  v `storage.ts`, bump schema (v8 → v9) a doplň migraci. Data adapter v
+  `src/modules/law/data/adaptFirearm.ts` + otázky v `law/data/firearm/`.
+  Zdroj: `docs/firearm-act.md`. Staré doporučení "nový modul pod /laws/firearm"
+  je obsolete — vše jde do sjednoceného `/law` poolu.
+- **Sdílený SidePanel ProgressHeader/SCORE_CLASS**: aktuálně duplikovaný v
+  `codes/SidePanel.tsx`, `law/LawSidePanel.tsx`, `laws/penal/PenalSidePanel.tsx`.
+  YAGNI dokud se nezačne lišit nebo bolet při změnách.
 - **Geo polygon regiony / čtvrti** (`/geo`): MVP nemá kategorii `district` —
   Vinewood, Del Perro atd. Polygon podpora byla z kódbáze odstraněna (typ
   POIPolygon, polygon hit-test přes @turf/* — viz git historie). Pokud bude
@@ -1000,13 +1010,13 @@ route s `<Outlet />`:
   pixelově přesné. Když user zaregistruje konkrétní špatnou pozici, otevřít
   `/geo/calibrate` (Drag&drop editor), drag-tune, export TS → paste do `pois.ts`.
   Ulice (polyline) mají per-node draggable handles.
-- **SASP příručka** (`/sasp`) — zatím `<ComingSoonPage>`, `docs/sasp-manual.md`
-  je v `.gitignore` (důvěrný zdroj).
-- **Penal scénky další** — některé reálné situace (korupce §53, vraždy §12,
-  obchod s lidmi §13) nejsou pokryté. Pool nejsou edukačně critical, ale dají
-  se přidat. Při každé nové scénce se automaticky rozšíří i `RECALL_PARAGRAPHS`.
-- **False-negative aliasy** v LEA / Penal — pokud user narazí na často chybějící
-  parafráze, rozšířit alias seznam v `questions.ts` / `paragraphs.ts` ručně.
-  Pozor na strict legal correctness (některé parafráze posunou právní význam,
-  viz Gotcha o LEA §15 5a; v Penal podobně §50 ≠ §51 přes „drogy").
-- **Persist Hard mode** v Penal scenarios (Gotcha 28) — pokud se uživatel ozve.
+- **Teorie modul — SASP obsah rozšíření** — aktuálně 94 SASP otázek (text/enum/match
+  formáty podreprezentovány). Přidávat do `src/modules/law/data/sasp/`.
+  `docs/sasp-manual.md` zůstává v `.gitignore` (důvěrný zdroj).
+  Anti-leak: NESMÍ přebírat konkrétní formulace z reálného testu.
+- **Penal scénky další** — přidat do `modules/laws/penal/data/scenarios.ts`;
+  `adaptPenal.ts` je automaticky zahrne do `LAW_QUESTIONS`. Rozšíří i `RECALL_PARAGRAPHS`.
+- **False-negative aliasy** v LEA / Penal — rozšířit alias seznam v `questions.ts` /
+  `paragraphs.ts` ručně. Pozor na strict legal correctness (viz Gotcha o LEA §15 5a).
+- **`ComingSoonPage`** (`src/app/ComingSoonPage.tsx`) je bez použití — ponechán
+  pro budoucí placeholdery, není importován v `routes.tsx`.

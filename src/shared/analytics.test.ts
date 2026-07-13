@@ -12,6 +12,8 @@ import {
   trackProgressReset,
   trackQuestionSkipped,
 } from './analytics';
+// Type-level check: 'law' must be accepted by the union-typed module params
+// (These are compile-time assertions; runtime tests follow below.)
 
 const mp = vi.mocked(mixpanel);
 
@@ -92,11 +94,39 @@ describe('analytics', () => {
 
   it('trackLawAnswered forwards props to mixpanel.track', () => {
     initAnalytics();
-    trackLawAnswered({ success: false, question_id: 'lea.16.B' });
+    trackLawAnswered({ source: 'lea', kind: 'choice', success: false, question_id: 'lea.16.B' });
     expect(mp.track).toHaveBeenCalledWith('law_answered', {
+      source: 'lea',
+      kind: 'choice',
       success: false,
       question_id: 'lea.16.B',
     });
+  });
+
+  it('trackLawAnswered accepts all source/kind combinations', () => {
+    initAnalytics();
+    trackLawAnswered({ source: 'sasp', kind: 'enumeration', success: true, question_id: 'sasp.x' });
+    expect(mp.track).toHaveBeenCalledWith('law_answered', {
+      source: 'sasp',
+      kind: 'enumeration',
+      success: true,
+      question_id: 'sasp.x',
+    });
+  });
+
+  it('trackQuestionSkipped accepts law module', () => {
+    initAnalytics();
+    trackQuestionSkipped({ module: 'law', question_id: 'law.q1' });
+    expect(mp.track).toHaveBeenCalledWith('question_skipped', {
+      module: 'law',
+      question_id: 'law.q1',
+    });
+  });
+
+  it('trackProgressReset accepts law module', () => {
+    initAnalytics();
+    trackProgressReset({ module: 'law' });
+    expect(mp.track).toHaveBeenCalledWith('progress_reset', { module: 'law' });
   });
 
   it('trackProgressReset forwards module to mixpanel.track', () => {
@@ -145,7 +175,7 @@ describe('analytics', () => {
   it('all track* are silent no-ops before initAnalytics', () => {
     expect(() => {
       trackCodeAnswered({ mode: 'choose', success: false, code_id: '10-99' });
-      trackLawAnswered({ success: true, question_id: 'lea.7' });
+      trackLawAnswered({ source: 'lea', kind: 'enumeration', success: true, question_id: 'lea.7' });
       trackProgressReset({ module: 'codes' });
       trackCodesCompleted({ scope: 'all' });
       trackGeoAnswered({ mode: 'blind', success: true, poi_id: 'x' });

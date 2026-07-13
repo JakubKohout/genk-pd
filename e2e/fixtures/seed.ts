@@ -11,9 +11,7 @@ export type SeedInput = {
   progress?: SeedProgress;
   turn?: number;
   importanceFilter?: { mandatory?: boolean; rare?: boolean; unnecessary?: boolean };
-  lea?: { progress?: SeedProgress; turn?: number };
   penal?: {
-    scenarios?: { progress?: SeedProgress; turn?: number };
     recall?: { progress?: SeedProgress; turn?: number };
   };
   geo?: {
@@ -26,6 +24,7 @@ export type SeedInput = {
       state?: boolean;
     };
   };
+  law?: { progress?: SeedProgress; turn?: number };
   randomSeed?: number;
 };
 
@@ -38,7 +37,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 4 as const,
+    schemaVersion: 8 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -50,15 +49,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
         },
       },
     },
-    lea: {
-      progress: input.lea?.progress ?? {},
-      turn: input.lea?.turn ?? 0,
-    },
     penal: {
-      scenarios: {
-        progress: input.penal?.scenarios?.progress ?? {},
-        turn: input.penal?.scenarios?.turn ?? 0,
-      },
       recall: {
         progress: input.penal?.recall?.progress ?? {},
         turn: input.penal?.recall?.turn ?? 0,
@@ -79,6 +70,17 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
           highway: input.geo?.categoryFilter?.highway ?? true,
           city: input.geo?.categoryFilter?.city ?? true,
           state: input.geo?.categoryFilter?.state ?? true,
+        },
+      },
+    },
+    law: {
+      progress: input.law?.progress ?? {},
+      turn: input.law?.turn ?? 0,
+      settings: {
+        sourceFilter: { lea: true, penal: true, sasp: true },
+        themeFilter: {
+          pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
+          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
         },
       },
     },
@@ -257,6 +259,147 @@ export { GEO_POI_IDS };
 export function pinNextGeoPoi(targetId: string, targetScore = 0): SeedProgress {
   const progress: SeedProgress = {};
   for (const id of GEO_POI_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+/**
+ * SASP law pool question IDs — native SASP content (choice/text/enum/match).
+ * Must match src/modules/law/data/sasp/ (SASP_LAW_QUESTIONS).
+ */
+export const SASP_QUESTION_IDS = [
+  'sasp.choice.pojmy.1',
+  'sasp.choice.pojmy.2',
+  'sasp.choice.pojmy.3',
+  'sasp.choice.pojmy.4',
+  'sasp.choice.pojmy.5',
+  'sasp.choice.pojmy.6',
+  'sasp.choice.hodnosti.1',
+  'sasp.scenario.hodnosti.1',
+  'sasp.choice.jednani.1',
+  'sasp.choice.jednani.2',
+  'sasp.scenario.jednani.1',
+  'sasp.choice.jednani.3',
+  'sasp.choice.jednani.4',
+  'sasp.choice.rto.1',
+  'sasp.choice.rto.2',
+  'sasp.choice.rto.3',
+  'sasp.scenario.rto.1',
+  'sasp.choice.jednani.5',
+  'sasp.choice.vybava.1',
+  'sasp.choice.vybava.2',
+  'sasp.choice.vybava.3',
+  'sasp.choice.vybava.4',
+  'sasp.choice.vybava.5',
+  'sasp.choice.vybava.6',
+  'sasp.choice.vybava.7',
+  'sasp.choice.vybava.8',
+  'sasp.choice.vybava.9',
+  'sasp.choice.vybava.10',
+  'sasp.choice.vybava.11',
+  'sasp.choice.vybava.12',
+  'sasp.choice.vybava.13',
+  'sasp.choice.vybava.14',
+  'sasp.scenario.zasah.1',
+  'sasp.scenario.zasah.2',
+  'sasp.scenario.zasah.3',
+  'sasp.scenario.zasah.4',
+  'sasp.scenario.zasah.5',
+  'sasp.scenario.zasah.6',
+  'sasp.choice.zasah.1',
+  'sasp.choice.zasah.2',
+  'sasp.choice.zasah.3',
+  'sasp.choice.zasah.4',
+  'sasp.choice.zasah.5',
+  'sasp.choice.zasah.6',
+  'sasp.choice.zasah.7',
+  'sasp.choice.zasah.8',
+  'sasp.choice.zasah.9',
+  'sasp.choice.zasah.10',
+  'sasp.choice.zasah.11',
+  'sasp.choice.zasah.12',
+  'sasp.choice.zasah.13',
+  'sasp.choice.zasah.14',
+  'sasp.choice.zasah.15',
+  'sasp.choice.zasah.16',
+  'sasp.choice.zasah.17',
+  'sasp.choice.zasah.18',
+  'sasp.choice.zasah.19',
+  'sasp.choice.zasah.20',
+  'sasp.choice.zasah.21',
+  'sasp.choice.zasah.22',
+  'sasp.choice.zasah.23',
+  'sasp.choice.zasah.24',
+  'sasp.choice.zasah.25',
+  'sasp.choice.zasah.26',
+  'sasp.choice.zadrzeni.1',
+  'sasp.choice.zadrzeni.2',
+  'sasp.choice.zadrzeni.3',
+  'sasp.choice.zadrzeni.4',
+  'sasp.choice.zadrzeni.5',
+  'sasp.choice.zadrzeni.6',
+  'sasp.choice.zadrzeni.7',
+  'sasp.choice.zadrzeni.8',
+  'sasp.choice.zadrzeni.9',
+  'sasp.choice.zadrzeni.10',
+  'sasp.choice.zadrzeni.11',
+  'sasp.choice.zadrzeni.12',
+  'sasp.choice.kriminalistika.1',
+  'sasp.choice.kriminalistika.2',
+  'sasp.choice.kriminalistika.3',
+  'sasp.choice.kriminalistika.4',
+  'sasp.choice.kriminalistika.5',
+  'sasp.choice.kriminalistika.6',
+  'sasp.choice.kriminalistika.7',
+  'sasp.choice.kriminalistika.8',
+  'sasp.choice.kriminalistika.9',
+  'sasp.choice.kriminalistika.10',
+  'sasp.text.rto.1',
+  'sasp.text.zasah.felony-code',
+  'sasp.enum.hodnosti.ladder',
+  'sasp.enum.zasah.felony-order',
+  'sasp.match.rto.channels',
+  'sasp.match.rto.priorities',
+  'sasp.match.hodnosti.callsigns',
+  'sasp.match.kriminalistika.traces',
+] as const;
+
+export function pinNextSaspQuestion(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of SASP_QUESTION_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+/**
+ * Unified law quiz question IDs — LEA (enumeration) + Penal scenarios (enumeration) +
+ * SASP (choice/text/order) adapted into the law pool.
+ * Must stay in sync with the respective source arrays.
+ */
+export const LAW_QUESTION_IDS: readonly string[] = [
+  // LEA (17)
+  ...LEA_QUESTION_IDS,
+  // Penal scenarios (28)
+  ...PENAL_SCENARIO_IDS,
+  // SASP (95)
+  ...SASP_QUESTION_IDS,
+];
+
+export function pinNextLawQuestion(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of LAW_QUESTION_IDS) {
     if (id !== targetId) {
       progress[id] = { score: 2, lastAskedAtTurn: -10 };
     }

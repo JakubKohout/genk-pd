@@ -5,25 +5,17 @@ const modules = [
     to: '/codes',
     title: 'Desítkové kódy',
     description: 'Trénink rádiových kódů 10-X ve dvou režimech: psaní kódu a výběr významu.',
-    enabled: true,
   },
   {
-    to: '/laws',
-    title: 'Zákony',
-    description: 'Penal Code, Law Enforcement Act, Firearm Act — vědomostní testy nad zákony.',
-    enabled: true,
+    to: '/law',
+    title: 'Teorie',
+    description:
+      'Zákony (Law Enforcement Act, Penal Code) i provozní příručka SASP v jednom poolu — filtrovatelné dle zdroje a tématu.',
   },
   {
     to: '/geo',
     title: 'Geografie',
     description: 'Slepá mapa Los Santos a Blaine County — zájmové body, ulice, PD stanice.',
-    enabled: true,
-  },
-  {
-    to: '/sasp',
-    title: 'SASP příručka',
-    description: 'Otázky nad provozní příručkou SASP — postupy, role, situace.',
-    enabled: false,
   },
 ];
 
@@ -39,34 +31,25 @@ export function HomePage() {
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {modules.map((m) =>
-          m.enabled ? (
-            <Link
-              key={m.to}
-              to={m.to}
-              className="card group p-6 transition hover:border-sasp-tan"
-            >
-              <h2 className="mb-2 text-2xl text-sasp-tan group-hover:text-sasp-gold">{m.title}</h2>
-              <p className="text-sm text-sasp-ink-dim">{m.description}</p>
-              <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wider text-sasp-tan">
-                Otevřít →
-              </span>
-            </Link>
-          ) : (
-            <div
-              key={m.to}
-              className="card p-6 opacity-60"
-              aria-disabled="true"
-              title="Připravujeme"
-            >
-              <h2 className="mb-2 text-2xl text-sasp-ink-dim">{m.title}</h2>
-              <p className="text-sm text-sasp-ink-dim">{m.description}</p>
-              <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wider text-sasp-ink-dim">
-                Připravujeme
-              </span>
-            </div>
-          ),
-        )}
+        {modules.map((m) => (
+          <Link key={m.to} to={m.to} className="card group p-6 transition hover:border-sasp-tan">
+            <h2 className="mb-2 text-2xl text-sasp-tan group-hover:text-sasp-gold">{m.title}</h2>
+            <p className="text-sm text-sasp-ink-dim">{m.description}</p>
+            <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wider text-sasp-tan">
+              Otevřít →
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      <div className="text-center">
+        <Link
+          to="/penal/recall"
+          data-testid="home-penal-recall-link"
+          className="text-sm text-sasp-ink-dim hover:text-sasp-tan"
+        >
+          Penal Code — recall paragrafů
+        </Link>
       </div>
     </section>
   );

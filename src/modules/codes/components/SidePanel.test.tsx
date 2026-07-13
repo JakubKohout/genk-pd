@@ -5,7 +5,7 @@ import { saveState, type PersistedState } from '@/shared/storage';
 
 function seed(state: Partial<PersistedState['codes']>): void {
   const full: PersistedState = {
-    schemaVersion: 4,
+    schemaVersion: 8,
     codes: {
       progress: state.progress ?? {},
       turn: state.turn ?? 0,
@@ -13,9 +13,7 @@ function seed(state: Partial<PersistedState['codes']>): void {
         importanceFilter: { mandatory: true, rare: false, unnecessary: false },
       },
     },
-    lea: { progress: {}, turn: 0 },
     penal: {
-      scenarios: { progress: {}, turn: 0 },
       recall: { progress: {}, turn: 0 },
     },
     geo: {
@@ -23,6 +21,17 @@ function seed(state: Partial<PersistedState['codes']>): void {
       name: { progress: {}, turn: 0 },
       settings: {
         categoryFilter: { street: true, highway: true, city: true, state: true },
+      },
+    },
+    law: {
+      progress: {},
+      turn: 0,
+      settings: {
+        sourceFilter: { lea: true, penal: true, sasp: true },
+        themeFilter: {
+          pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
+          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+        },
       },
     },
   };

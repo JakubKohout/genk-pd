@@ -1,21 +1,17 @@
-import { createHashRouter } from 'react-router-dom';
+import { createHashRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from './AppLayout';
 import { HomePage } from './HomePage';
 import { CodesPage } from '@/modules/codes/components/CodesPage';
 import { ModeWrite } from '@/modules/codes/components/ModeWrite';
 import { ModeChoose } from '@/modules/codes/components/ModeChoose';
-import { LawsIndex } from '@/modules/laws/components/LawsIndex';
-import { LeaQuizPage } from '@/modules/laws/lea/components/LeaQuizPage';
-import { PenalLayout } from '@/modules/laws/penal/components/PenalLayout';
-import { PenalScenarioPage } from '@/modules/laws/penal/components/PenalScenarioPage';
+import { LawPage } from '@/modules/law/components/LawPage';
 import { PenalRecallPage } from '@/modules/laws/penal/components/PenalRecallPage';
 import { GeoLayout } from '@/modules/geo/components/GeoLayout';
 import { GeoBlindPage } from '@/modules/geo/components/GeoBlindPage';
 import { GeoNamePage } from '@/modules/geo/components/GeoNamePage';
 import { GeoCalibratePage } from '@/modules/geo/components/GeoCalibratePage';
-import { ComingSoonPage } from './ComingSoonPage';
 
-export const router = createHashRouter([
+export const routes = [
   {
     path: '/',
     element: <AppLayout />,
@@ -30,17 +26,14 @@ export const router = createHashRouter([
           { path: 'choose', element: <ModeChoose /> },
         ],
       },
-      { path: 'laws', element: <LawsIndex /> },
-      { path: 'laws/lea', element: <LeaQuizPage /> },
-      {
-        path: 'laws/penal',
-        element: <PenalLayout />,
-        children: [
-          { index: true, element: <PenalScenarioPage /> },
-          { path: 'scenarios', element: <PenalScenarioPage /> },
-          { path: 'recall', element: <PenalRecallPage /> },
-        ],
-      },
+      { path: 'law', element: <LawPage /> },
+      { path: 'penal/recall', element: <PenalRecallPage /> },
+      { path: 'laws', element: <Navigate to="/law" replace /> },
+      { path: 'laws/lea', element: <Navigate to="/law" replace /> },
+      { path: 'laws/penal/recall', element: <Navigate to="/penal/recall" replace /> },
+      { path: 'laws/penal', element: <Navigate to="/law" replace /> },
+      { path: 'laws/penal/scenarios', element: <Navigate to="/law" replace /> },
+      { path: 'sasp', element: <Navigate to="/law" replace /> },
       {
         path: 'geo',
         element: <GeoLayout />,
@@ -51,7 +44,8 @@ export const router = createHashRouter([
         ],
       },
       { path: 'geo/calibrate', element: <GeoCalibratePage /> },
-      { path: 'sasp', element: <ComingSoonPage title="SASP příručka" /> },
     ],
   },
-]);
+];
+
+export const router = createHashRouter(routes);

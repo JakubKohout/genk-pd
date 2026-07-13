@@ -21,7 +21,7 @@ afterEach(() => {
 
 function seedGeo(): void {
   const state: PersistedState = {
-    schemaVersion: 4,
+    schemaVersion: 8,
     codes: {
       progress: {},
       turn: 0,
@@ -29,9 +29,7 @@ function seedGeo(): void {
         importanceFilter: { mandatory: true, rare: true, unnecessary: true },
       },
     },
-    lea: { progress: {}, turn: 0 },
     penal: {
-      scenarios: { progress: {}, turn: 0 },
       recall: { progress: {}, turn: 0 },
     },
     geo: {
@@ -44,6 +42,17 @@ function seedGeo(): void {
         turn: 3,
       },
       settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
+    },
+    law: {
+      progress: {},
+      turn: 0,
+      settings: {
+        sourceFilter: { lea: true, penal: true, sasp: true },
+        themeFilter: {
+          pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
+          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+        },
+      },
     },
   };
   saveState(state);

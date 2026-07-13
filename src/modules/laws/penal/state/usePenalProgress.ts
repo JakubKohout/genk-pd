@@ -98,10 +98,6 @@ function usePenalSliceProgress(key: SliceKey): PenalProgressApi {
   };
 }
 
-export function usePenalScenarioProgress(): PenalProgressApi {
-  return usePenalSliceProgress('scenarios');
-}
-
 export function usePenalRecallProgress(): PenalProgressApi {
   return usePenalSliceProgress('recall');
 }

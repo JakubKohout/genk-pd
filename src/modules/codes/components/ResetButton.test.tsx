@@ -6,7 +6,7 @@ import { saveState, loadState, type PersistedState } from '@/shared/storage';
 
 function seed(progress: PersistedState['codes']['progress']): void {
   saveState({
-    schemaVersion: 4,
+    schemaVersion: 8,
     codes: {
       progress,
       turn: 5,
@@ -14,15 +14,24 @@ function seed(progress: PersistedState['codes']['progress']): void {
         importanceFilter: { mandatory: true, rare: true, unnecessary: false },
       },
     },
-    lea: { progress: {}, turn: 0 },
     penal: {
-      scenarios: { progress: {}, turn: 0 },
       recall: { progress: {}, turn: 0 },
     },
     geo: {
       blind: { progress: {}, turn: 0 },
       name: { progress: {}, turn: 0 },
       settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
+    },
+    law: {
+      progress: {},
+      turn: 0,
+      settings: {
+        sourceFilter: { lea: true, penal: true, sasp: true },
+        themeFilter: {
+          pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
+          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+        },
+      },
     },
   });
 }
