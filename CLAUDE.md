@@ -233,8 +233,8 @@ src/
                                     # Volané z scripts/questions-export.ts / questions-import.ts.
   shared/
     storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 10,
-                                    # chained migrate v1→…→v10 při readu, lenient v10 read
-                                    # (dopočítá chybějící geo/law sub-slices)
+                                    # jediný lenient terminál normalizeToV10 pro všechny
+                                    # historické payloady (v1–v10; žádný chained řetěz)
     rng.ts                          # Pluggable RNG (mulberry32, seed přes localStorage)
     useMediaQuery.ts                # SSR-safe matchMedia hook
     text/normalize.ts               # NFD strip diakritiky + lowercase + whitespace collapse
@@ -349,19 +349,23 @@ do existujícího tématu (např. `paragrafy`), nebo přidat nové téma (rozš�
 }
 ```
 
-**Migrace v1 → … → v10** (`src/shared/storage.ts`): při readu se starší payload
-chained-migruje v paměti. v1: jen codes. v2: +lea. v3: +penal. v4: +geo. v5: +sasp.
-v6: sasp quiz sloučen. v7: +law slice (additivní). v8: odstraněny `lea`, `sasp`,
-`penal.scenarios` slices. v9: odstraněn `penal` slice celý (Penal Recall zrušen).
-v10: odstraněn `law.settings.sourceFilter` (otázky jsou ploché, bez `source`),
-přidáno téma `scenky` (10. theme, nahrazuje bývalý zdroj Penal); `normalizeToV10(s)`
-je terminální krok všech migračních řetězů (v1–v9 ústí sem) i lenient v10/v9/v8
-read. `saveState` vždy zapisuje v10.
+**Migrace = jediný lenient terminál `normalizeToV10(s)`** (`src/shared/storage.ts`):
+žádný chained řetěz migračních funkcí — libovolný historický payload (v1–v10) se
+při readu normalizuje jednou funkcí. Aditivní historie (`lea.progress`,
+`penal.scenarios.progress`, `sasp.test/recall/quiz.progress`) se spready sjednotí
+do `law.progress` (law vyhrává per-key; `law.turn` = vlastní hodnota, jinak součet
+legacy turnů); zrušené slices (`lea`, `sasp`, `penal`) a `law.settings.sourceFilter`
+zanikají tím, že se prostě nekopírují. Historie verzí: v1 jen codes, v2 +lea,
+v3 +penal, v4 +geo, v5 +sasp, v6 sasp merge, v7 +law, v8/v9 odstranění legacy
+slices, v10 bez sourceFilter + téma `scenky`. POZOR: reálně nasazené byly jen
+v1–v4 (main) a v10 — v5–v9 existovaly jen ve vývoji, proto nemají vlastní
+migrační kód, jen spready v terminálu. `saveState` vždy zapisuje v10.
 
 **Lenient v10 read** (`normalizeToV10`): pokud payload chybí `geo`/`law` nebo
 sub-slice, dopočítáme prázdné defaults. `themeFilter`/`categoryFilter` doplní
 missing klíče z initialState (každý true) — to zahrnuje i dopočtení chybějícího
-`scenky` klíče při čtení staršího v9 payloadu. (Test `storage.test.ts`.)
+`scenky` klíče při čtení staršího v9 payloadu. Vstupní tvary všech verzí pokrývá
+`storage.test.ts` (v1/v2/v3/v4/v5/v6/v7/v8/v9 payloady jako fixtures).
 
 `STORAGE_KEY = 'genk-pd:v1'` se NEMĚNÍ při schema bumpu — jen JSON value uvnitř.
 "v1" v key je legacy; verzování je v `schemaVersion` field.
@@ -709,8 +713,9 @@ související):
   zbylými 9 tématy. Existující ID si drží legacy tvar (`lea.*`/`penal.*`/`sasp.*`),
   nejsou to už ale vynucené prefixy — jsou to opaque klíče.
 - Storage schema v10: `law.settings.sourceFilter` zrušen, jediný filtr je
-  `themeFilter` (10 klíčů). `normalizeToV10` je terminál všech migračních
-  řetězů i lenient v10/v9/v8 read.
+  `themeFilter` (10 klíčů). `normalizeToV10` je od redukce migrací JEDINÁ
+  migrační funkce — lenient terminál pro všechny historické payloady
+  (chained řetěz v1→…→v7 smazán, viz sekce Migrace).
 - `LawSidePanel` ztratil 3 source checkboxy, zůstal jen theme filtr. Chip
   ztratil 1znakovou source značku (L/P/S), zůstal jen `title`.
   `trackLawAnswered` ztratil property `source`.

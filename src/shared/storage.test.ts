@@ -129,6 +129,8 @@ describe('storage migration', () => {
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
+    // law.turn = soucet turn legacy kvizu (lea 4 + penal.scenarios 1)
+    expect(state.law.turn).toBe(5);
   });
 
   it('round-trips v10 saves with geo slices', () => {
