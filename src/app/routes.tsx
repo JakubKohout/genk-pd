@@ -5,7 +5,6 @@ import { CodesPage } from '@/modules/codes/components/CodesPage';
 import { ModeWrite } from '@/modules/codes/components/ModeWrite';
 import { ModeChoose } from '@/modules/codes/components/ModeChoose';
 import { LawPage } from '@/modules/law/components/LawPage';
-import { PenalRecallPage } from '@/modules/laws/penal/components/PenalRecallPage';
 import { GeoLayout } from '@/modules/geo/components/GeoLayout';
 import { GeoBlindPage } from '@/modules/geo/components/GeoBlindPage';
 import { GeoNamePage } from '@/modules/geo/components/GeoNamePage';
@@ -27,10 +26,10 @@ export const routes = [
         ],
       },
       { path: 'law', element: <LawPage /> },
-      { path: 'penal/recall', element: <PenalRecallPage /> },
+      { path: 'penal/recall', element: <Navigate to="/law" replace /> },
       { path: 'laws', element: <Navigate to="/law" replace /> },
       { path: 'laws/lea', element: <Navigate to="/law" replace /> },
-      { path: 'laws/penal/recall', element: <Navigate to="/penal/recall" replace /> },
+      { path: 'laws/penal/recall', element: <Navigate to="/law" replace /> },
       { path: 'laws/penal', element: <Navigate to="/law" replace /> },
       { path: 'laws/penal/scenarios', element: <Navigate to="/law" replace /> },
       { path: 'sasp', element: <Navigate to="/law" replace /> },

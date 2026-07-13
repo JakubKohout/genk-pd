@@ -11,9 +11,6 @@ export type SeedInput = {
   progress?: SeedProgress;
   turn?: number;
   importanceFilter?: { mandatory?: boolean; rare?: boolean; unnecessary?: boolean };
-  penal?: {
-    recall?: { progress?: SeedProgress; turn?: number };
-  };
   geo?: {
     blind?: { progress?: SeedProgress; turn?: number };
     name?: { progress?: SeedProgress; turn?: number };
@@ -37,7 +34,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 8 as const,
+    schemaVersion: 9 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -47,12 +44,6 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
           rare: input.importanceFilter?.rare ?? false,
           unnecessary: input.importanceFilter?.unnecessary ?? false,
         },
-      },
-    },
-    penal: {
-      recall: {
-        progress: input.penal?.recall?.progress ?? {},
-        turn: input.penal?.recall?.turn ?? 0,
       },
     },
     geo: {
@@ -161,21 +152,8 @@ export const LEA_QUESTION_IDS = [
   'lea.ridicsky-prukaz',
 ] as const;
 
-export function pinNextLeaQuestion(targetQuestionId: string, targetScore = 0): SeedProgress {
-  const progress: SeedProgress = {};
-  for (const id of LEA_QUESTION_IDS) {
-    if (id !== targetQuestionId) {
-      progress[id] = { score: 2, lastAskedAtTurn: -10 };
-    }
-  }
-  if (targetScore !== 0) {
-    progress[targetQuestionId] = { score: targetScore, lastAskedAtTurn: -10 };
-  }
-  return progress;
-}
-
 /**
- * Penal scenario IDs hard-coded for E2E (must match src/modules/laws/penal/data/scenarios.ts).
+ * Penal scenario IDs hard-coded for E2E (must match src/modules/law/data/questions.ts).
  */
 export const PENAL_SCENARIO_IDS = [
   'penal.scenario.A1',
@@ -208,51 +186,6 @@ export const PENAL_SCENARIO_IDS = [
   'penal.scenario.E9',
 ] as const;
 
-/**
- * Penal main paragraf IDs (must match src/modules/laws/penal/data/paragraphs.ts).
- */
-export const PENAL_PARAGRAPH_IDS = [
-  'penal.1', 'penal.2', 'penal.3', 'penal.4', 'penal.5', 'penal.6',
-  'penal.7', 'penal.8', 'penal.9', 'penal.10', 'penal.11', 'penal.12',
-  'penal.13', 'penal.14', 'penal.15', 'penal.16', 'penal.17', 'penal.18',
-  'penal.19', 'penal.20', 'penal.21', 'penal.22', 'penal.23', 'penal.24',
-  'penal.25', 'penal.26', 'penal.27', 'penal.28', 'penal.29', 'penal.30',
-  'penal.31', 'penal.32', 'penal.33', 'penal.34', 'penal.35', 'penal.36',
-  'penal.37', 'penal.38', 'penal.39', 'penal.40', 'penal.41', 'penal.42',
-  'penal.43', 'penal.44', 'penal.45', 'penal.46', 'penal.47', 'penal.48',
-  'penal.49', 'penal.50', 'penal.51', 'penal.52', 'penal.53', 'penal.54',
-  'penal.55', 'penal.56', 'penal.57', 'penal.58', 'penal.59', 'penal.60',
-  'penal.61', 'penal.62', 'penal.68', 'penal.69', 'penal.70', 'penal.71',
-  'penal.72', 'penal.73', 'penal.74', 'penal.75', 'penal.76', 'penal.77',
-  'penal.100', 'penal.101', 'penal.102',
-] as const;
-
-export function pinNextPenalScenario(targetId: string, targetScore = 0): SeedProgress {
-  const progress: SeedProgress = {};
-  for (const id of PENAL_SCENARIO_IDS) {
-    if (id !== targetId) {
-      progress[id] = { score: 2, lastAskedAtTurn: -10 };
-    }
-  }
-  if (targetScore !== 0) {
-    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
-  }
-  return progress;
-}
-
-export function pinNextPenalParagraph(targetId: string, targetScore = 0): SeedProgress {
-  const progress: SeedProgress = {};
-  for (const id of PENAL_PARAGRAPH_IDS) {
-    if (id !== targetId) {
-      progress[id] = { score: 2, lastAskedAtTurn: -10 };
-    }
-  }
-  if (targetScore !== 0) {
-    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
-  }
-  return progress;
-}
-
 /** Re-exported from generated file (kept in sync with pois.ts via import script). */
 export { GEO_POI_IDS };
 
@@ -271,7 +204,7 @@ export function pinNextGeoPoi(targetId: string, targetScore = 0): SeedProgress {
 
 /**
  * SASP law pool question IDs — native SASP content (choice/text/enum/match).
- * Must match src/modules/law/data/sasp/ (SASP_LAW_QUESTIONS).
+ * Must match src/modules/law/data/questions.ts (LAW_QUESTIONS).
  */
 export const SASP_QUESTION_IDS = [
   'sasp.choice.pojmy.1',
@@ -369,19 +302,6 @@ export const SASP_QUESTION_IDS = [
   'sasp.match.hodnosti.callsigns',
   'sasp.match.kriminalistika.traces',
 ] as const;
-
-export function pinNextSaspQuestion(targetId: string, targetScore = 0): SeedProgress {
-  const progress: SeedProgress = {};
-  for (const id of SASP_QUESTION_IDS) {
-    if (id !== targetId) {
-      progress[id] = { score: 2, lastAskedAtTurn: -10 };
-    }
-  }
-  if (targetScore !== 0) {
-    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
-  }
-  return progress;
-}
 
 /**
  * Unified law quiz question IDs — LEA (enumeration) + Penal scenarios (enumeration) +

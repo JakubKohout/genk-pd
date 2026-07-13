@@ -21,16 +21,13 @@ afterEach(() => {
 
 function seedGeo(): void {
   const state: PersistedState = {
-    schemaVersion: 8,
+    schemaVersion: 9,
     codes: {
       progress: {},
       turn: 0,
       settings: {
         importanceFilter: { mandatory: true, rare: true, unnecessary: true },
       },
-    },
-    penal: {
-      recall: { progress: {}, turn: 0 },
     },
     geo: {
       blind: {

@@ -3,21 +3,18 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { saveState, type PersistedState } from '@/shared/storage';
-import { LAW_QUESTIONS } from '../data/index';
+import { LAW_QUESTIONS } from '../data/questions';
 import { LawPage } from './LawPage';
 
 type Progress = Record<string, { score: number; lastAskedAtTurn: number }>;
 
 function baseState(lawProgress: Progress): PersistedState {
   return {
-    schemaVersion: 8,
+    schemaVersion: 9,
     codes: {
       progress: {},
       turn: 0,
       settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } },
-    },
-    penal: {
-      recall: { progress: {}, turn: 0 },
     },
     geo: {
       blind: { progress: {}, turn: 0 },

@@ -1,5 +1,5 @@
 import { normalize } from '@/shared/text/normalize';
-import type { PenalParagraph, PenalSubParagraph } from '../data/types';
+import type { PenalParagraph, PenalSubParagraph } from '../data/paragraphs';
 
 export const SUGGEST_MIN_LENGTH = 1;
 export const SUGGEST_MAX_RESULTS = 8;

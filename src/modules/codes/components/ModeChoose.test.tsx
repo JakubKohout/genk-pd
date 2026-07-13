@@ -17,14 +17,11 @@ function seedSinglePool(codeId: string): void {
     }
   }
   saveState({
-    schemaVersion: 8,
+    schemaVersion: 9,
     codes: {
       progress,
       turn: 0,
       settings: { importanceFilter: { mandatory: true, rare: false, unnecessary: false } },
-    },
-    penal: {
-      recall: { progress: {}, turn: 0 },
     },
     geo: {
       blind: { progress: {}, turn: 0 },

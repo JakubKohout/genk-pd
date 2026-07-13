@@ -24,15 +24,6 @@ export type CodesSlice = {
   };
 };
 
-export type PenalQuizSlice = {
-  progress: Record<string, ProgressEntry>;
-  turn: number;
-};
-
-export type PenalSlice = {
-  recall: PenalQuizSlice;
-};
-
 export type GeoCategoryFilter = {
   street: boolean;
   highway: boolean;
@@ -79,9 +70,8 @@ export interface LawSlice {
 }
 
 export type PersistedState = {
-  schemaVersion: 8;
+  schemaVersion: 9;
   codes: CodesSlice;
-  penal: PenalSlice;
   geo: GeoSlice;
   law: LawSlice;
 };
@@ -98,7 +88,7 @@ function emptyLawSlice(): LawSlice {
 }
 
 export const initialState: PersistedState = {
-  schemaVersion: 8,
+  schemaVersion: 9,
   codes: {
     progress: {},
     turn: 0,
@@ -109,9 +99,6 @@ export const initialState: PersistedState = {
         unnecessary: true,
       },
     },
-  },
-  penal: {
-    recall: { progress: {}, turn: 0 },
   },
   geo: {
     blind: { progress: {}, turn: 0 },
@@ -474,10 +461,12 @@ function migrateV6toV7(s: any): StoredV7 {
   };
 }
 
-// v7 → v8: drop dead slices (lea, sasp, penal.scenarios). Only penal.recall survives.
-function migrateV7toV8(s: StoredV7 | any): PersistedState {
+// v8 → v9: drop penal slice (Penal Recall zrušen). Zároveň slouží jako lenient
+// v9/v8 read — dopočítá chybějící sub-slices z defaults. Starší migrace (v1–v7)
+// ústí sem, takže lea/sasp/penal.scenarios/penal.recall data zahazuje tady.
+function normalizeToV9(s: any): PersistedState {
   return {
-    schemaVersion: 8,
+    schemaVersion: 9,
     codes: {
       progress: s.codes?.progress ?? {},
       turn: s.codes?.turn ?? 0,
@@ -486,12 +475,6 @@ function migrateV7toV8(s: StoredV7 | any): PersistedState {
           ...initialState.codes.settings.importanceFilter,
           ...(s.codes?.settings?.importanceFilter ?? {}),
         },
-      },
-    },
-    penal: {
-      recall: {
-        progress: s.penal?.recall?.progress ?? {},
-        turn: s.penal?.recall?.turn ?? 0,
       },
     },
     geo: {
@@ -533,89 +516,35 @@ function readFromStorage(): PersistedState {
   if (!raw) return cloneInitial();
   try {
     const parsed = JSON.parse(raw) as any;
-    if (parsed?.schemaVersion === 8 && parsed.codes) {
-      // Lenient v8 read: backfill any missing sub-fields.
-      const v8 = parsed as Partial<PersistedState>;
-      const state: PersistedState = {
-        schemaVersion: 8,
-        codes: {
-          progress: v8.codes?.progress ?? {},
-          turn: v8.codes?.turn ?? 0,
-          settings: {
-            importanceFilter: {
-              ...initialState.codes.settings.importanceFilter,
-              ...(v8.codes?.settings?.importanceFilter ?? {}),
-            },
-          },
-        },
-        penal: {
-          recall: {
-            progress: v8.penal?.recall?.progress ?? {},
-            turn: v8.penal?.recall?.turn ?? 0,
-          },
-        },
-        geo: {
-          blind: {
-            progress: v8.geo?.blind?.progress ?? {},
-            turn: v8.geo?.blind?.turn ?? 0,
-          },
-          name: {
-            progress: v8.geo?.name?.progress ?? {},
-            turn: v8.geo?.name?.turn ?? 0,
-          },
-          settings: {
-            categoryFilter: {
-              ...initialState.geo.settings.categoryFilter,
-              ...(v8.geo?.settings?.categoryFilter ?? {}),
-            },
-          },
-        },
-        law: emptyLawSlice(),
-      };
-      if (v8.law) {
-        state.law = {
-          progress: v8.law.progress ?? {},
-          turn: v8.law.turn ?? 0,
-          settings: {
-            sourceFilter: {
-              ...defaultLawSettings().sourceFilter,
-              ...(v8.law.settings?.sourceFilter ?? {}),
-            },
-            themeFilter: {
-              ...defaultLawSettings().themeFilter,
-              ...(v8.law.settings?.themeFilter ?? {}),
-            },
-          },
-        };
-      }
-      return state;
+    if ((parsed?.schemaVersion === 9 || parsed?.schemaVersion === 8) && parsed.codes) {
+      return normalizeToV9(parsed);
     }
     if (parsed?.schemaVersion === 7 && parsed.codes) {
-      return migrateV7toV8(parsed as StoredV7);
+      return normalizeToV9(parsed);
     }
     if (parsed?.schemaVersion === 6 && parsed.codes) {
-      return migrateV7toV8(migrateV6toV7(parsed as StoredV6));
+      return normalizeToV9(migrateV6toV7(parsed as StoredV6));
     }
     if (parsed?.schemaVersion === 5 && parsed.codes) {
-      return migrateV7toV8(migrateV6toV7(migrateV5ToV6(parsed as StoredV5)));
+      return normalizeToV9(migrateV6toV7(migrateV5ToV6(parsed as StoredV5)));
     }
     if (parsed?.schemaVersion === 4 && parsed.codes) {
-      return migrateV7toV8(migrateV6toV7(migrateV5ToV6(migrateV4ToV5(parsed as StoredV4))));
+      return normalizeToV9(migrateV6toV7(migrateV5ToV6(migrateV4ToV5(parsed as StoredV4))));
     }
     if (parsed?.schemaVersion === 3 && parsed.codes) {
-      return migrateV7toV8(
+      return normalizeToV9(
         migrateV6toV7(migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(parsed as StoredV3)))),
       );
     }
     if (parsed?.schemaVersion === 2 && parsed.codes) {
-      return migrateV7toV8(
+      return normalizeToV9(
         migrateV6toV7(
           migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(parsed as StoredV2)))),
         ),
       );
     }
     if (parsed?.schemaVersion === 1 && parsed.codes) {
-      return migrateV7toV8(
+      return normalizeToV9(
         migrateV6toV7(
           migrateV5ToV6(
             migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(migrateV1ToV2(parsed as StoredV1)))),

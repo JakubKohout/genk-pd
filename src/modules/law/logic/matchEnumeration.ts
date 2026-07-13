@@ -1,5 +1,5 @@
 import { normalize } from '@/shared/text/normalize';
-import { canonicalAnswerId } from '@/modules/laws/penal/logic/canonicalAnswerId';
+import { canonicalAnswerId } from './canonicalAnswerId';
 import type { LawQuestion } from '../data/types';
 
 export function matchEnumerationEntry(question: LawQuestion, raw: string): string | null {

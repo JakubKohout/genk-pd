@@ -48,15 +48,7 @@ export function trackLawAnswered(props: {
 }
 
 export function trackProgressReset(props: {
-  module:
-    | 'codes'
-    | 'lea'
-    | 'law'
-    | 'penal-scenario'
-    | 'penal-recall'
-    | 'geo-blind'
-    | 'geo-name'
-    | 'sasp';
+  module: 'codes' | 'law' | 'geo-blind' | 'geo-name';
 }): void {
   if (!initialized) return;
   mixpanel.track('progress_reset', props);
@@ -68,33 +60,11 @@ export function trackCodesCompleted(props: { scope: 'all' | 'partial' }): void {
 }
 
 export function trackQuestionSkipped(props: {
-  module:
-    | 'codes'
-    | 'lea'
-    | 'law'
-    | 'penal-scenario'
-    | 'penal-recall'
-    | 'geo-blind'
-    | 'geo-name'
-    | 'sasp';
+  module: 'codes' | 'law' | 'geo-blind' | 'geo-name';
   question_id: string;
 }): void {
   if (!initialized) return;
   mixpanel.track('question_skipped', props);
-}
-
-export function trackPenalAnswered(props: {
-  mode: 'scenario' | 'recall';
-  success: boolean;
-  question_id: string;
-}): void {
-  if (!initialized) return;
-  mixpanel.track('penal_answered', props);
-}
-
-export function trackPenalCompleted(props: { mode: 'scenario' | 'recall' }): void {
-  if (!initialized) return;
-  mixpanel.track('penal_completed', props);
 }
 
 export function trackGeoAnswered(props: {
@@ -109,20 +79,6 @@ export function trackGeoAnswered(props: {
 export function trackGeoCompleted(props: { mode: 'blind' | 'name' }): void {
   if (!initialized) return;
   mixpanel.track('geo_completed', props);
-}
-
-export function trackSaspAnswered(props: {
-  kind: 'choice' | 'text' | 'order';
-  success: boolean;
-  question_id: string;
-}): void {
-  if (!initialized) return;
-  mixpanel.track('sasp_answered', props);
-}
-
-export function trackSaspCompleted(): void {
-  if (!initialized) return;
-  mixpanel.track('sasp_completed', {});
 }
 
 // Lets unit tests reset the module-level guard between tests so each test

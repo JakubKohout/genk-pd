@@ -30,11 +30,6 @@ describe('routes', () => {
     expect(screen.getByTestId('law-progress-percent')).toBeInTheDocument();
   });
 
-  it('keeps Penal recall standalone at /penal/recall', () => {
-    renderAt('/penal/recall');
-    expect(screen.getByTestId('penal-recall-input')).toBeInTheDocument();
-  });
-
   // Redirect routes: verify the route tree wires Navigate to the correct target.
   // Full render of redirects is not possible in jsdom (createMemoryRouter data router
   // uses undici Request which is incompatible with jsdom's AbortSignal).
@@ -72,11 +67,20 @@ describe('routes', () => {
     expect(el.props.to).toBe('/law');
   });
 
-  it('redirects /laws/penal/recall to /penal/recall', () => {
+  it('redirects /penal/recall to /law', () => {
+    const route = findRoute(routes, 'penal/recall');
+    expect(route).toBeDefined();
+    const el = route!.element as React.ReactElement;
+    expect(el.type).toBe(Navigate);
+    expect(el.props.to).toBe('/law');
+    expect(el.props.replace).toBe(true);
+  });
+
+  it('redirects /laws/penal/recall to /law', () => {
     const route = findRoute(routes, 'laws/penal/recall');
     expect(route).toBeDefined();
     const el = route!.element as React.ReactElement;
     expect(el.type).toBe(Navigate);
-    expect(el.props.to).toBe('/penal/recall');
+    expect(el.props.to).toBe('/law');
   });
 });

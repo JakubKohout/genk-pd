@@ -30,18 +30,17 @@ test.describe('Old route redirects', () => {
     await expect(page.getByTestId('law-progress-percent')).toBeVisible();
   });
 
-  test('/#/penal/recall shows penal recall page directly', async ({ page }) => {
+  test('/#/penal/recall redirects to /#/law and shows law quiz', async ({ page }) => {
     await seed(page, { randomSeed: 1 });
     await page.goto('/#/penal/recall');
-    await expect(page.getByTestId('penal-recall-input')).toBeVisible();
+    await expect(page).toHaveURL(/#\/law$/);
+    await expect(page.getByTestId('law-progress-percent')).toBeVisible();
   });
 
-  test('/#/laws/penal/recall redirects to /#/penal/recall and shows recall', async ({
-    page,
-  }) => {
+  test('/#/laws/penal/recall redirects to /#/law and shows law quiz', async ({ page }) => {
     await seed(page, { randomSeed: 1 });
     await page.goto('/#/laws/penal/recall');
-    await expect(page).toHaveURL(/#\/penal\/recall$/);
-    await expect(page.getByTestId('penal-recall-input')).toBeVisible();
+    await expect(page).toHaveURL(/#\/law$/);
+    await expect(page.getByTestId('law-progress-percent')).toBeVisible();
   });
 });

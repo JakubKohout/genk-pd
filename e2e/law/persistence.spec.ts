@@ -40,13 +40,11 @@ test('migrating a v1 storage payload still surfaces existing codes progress and 
 
   const stored = await page.evaluate(() => localStorage.getItem('genk-pd:v1'));
   const parsed = JSON.parse(stored!);
-  expect(parsed.schemaVersion).toBe(8);
+  expect(parsed.schemaVersion).toBe(9);
   expect(parsed.codes.progress['10-4'].score).toBe(2);
   expect(parsed.lea).toBeUndefined();
   expect(parsed.sasp).toBeUndefined();
-  expect(parsed.penal).toBeDefined();
-  expect(parsed.penal.scenarios).toBeUndefined();
-  expect(parsed.penal.recall).toEqual({ progress: {}, turn: 0 });
+  expect(parsed.penal).toBeUndefined();
   expect(parsed.geo).toBeDefined();
   expect(parsed.geo.blind).toEqual({ progress: {}, turn: 0 });
   expect(parsed.geo.name).toEqual({ progress: {}, turn: 0 });

@@ -41,16 +41,6 @@ export function HomePage() {
           </Link>
         ))}
       </div>
-
-      <div className="text-center">
-        <Link
-          to="/penal/recall"
-          data-testid="home-penal-recall-link"
-          className="text-sm text-sasp-ink-dim hover:text-sasp-tan"
-        >
-          Penal Code — recall paragrafů
-        </Link>
-      </div>
     </section>
   );
 }

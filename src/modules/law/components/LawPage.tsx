@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMediaQuery } from '@/shared/useMediaQuery';
 import { trackLawAnswered, trackQuestionSkipped } from '@/shared/analytics';
-import { LAW_QUESTIONS } from '../data/index';
+import { LAW_QUESTIONS } from '../data/questions';
 import type { LawChoice, LawQuestion } from '../data/types';
 import { isLawComplete, pickNextQuestion } from '../state/selection';
 import { useLawProgress } from '../state/useLawProgress';

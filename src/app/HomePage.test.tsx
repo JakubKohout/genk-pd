@@ -19,13 +19,6 @@ describe('HomePage', () => {
     expect(link.getAttribute('href')).toBe('/law');
   });
 
-  it('renders the home-penal-recall-link pointing to /penal/recall', () => {
-    renderHomePage();
-    const link = screen.getByTestId('home-penal-recall-link');
-    expect(link).toBeDefined();
-    expect(link.getAttribute('href')).toBe('/penal/recall');
-  });
-
   it('does NOT render a tile titled "SASP příručka"', () => {
     renderHomePage();
     expect(screen.queryByText('SASP příručka')).toBeNull();

@@ -1,4 +1,30 @@
-import type { PenalParagraph } from './types';
+export type PenalCategory =
+  | 'obecna'
+  | 'zivot-zdravi'
+  | 'svoboda'
+  | 'sexualni'
+  | 'majetek'
+  | 'doprava'
+  | 'verejna-bezpecnost'
+  | 'spravedlnost'
+  | 'environmental'
+  | 'morni'
+  | 'ostatni';
+
+export interface PenalSubParagraph {
+  id: string;
+  description: string;
+}
+
+export interface PenalParagraph {
+  id: string;
+  number: string;
+  title: string;
+  description: string;
+  aliases: string[];
+  category: PenalCategory;
+  subs: PenalSubParagraph[];
+}
 
 export const PENAL_PARAGRAPHS: readonly PenalParagraph[] = [
   // === HLAVA I. — ZÁKLADNÍ DEFINICE ===

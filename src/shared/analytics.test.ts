@@ -131,8 +131,8 @@ describe('analytics', () => {
 
   it('trackProgressReset forwards module to mixpanel.track', () => {
     initAnalytics();
-    trackProgressReset({ module: 'lea' });
-    expect(mp.track).toHaveBeenCalledWith('progress_reset', { module: 'lea' });
+    trackProgressReset({ module: 'codes' });
+    expect(mp.track).toHaveBeenCalledWith('progress_reset', { module: 'codes' });
   });
 
   it('trackCodesCompleted forwards scope to mixpanel.track', () => {

@@ -38,14 +38,11 @@ function seedPinningTo(targetId: string): void {
     if (p.id !== targetId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 8,
+    schemaVersion: 9,
     codes: {
       progress: {},
       turn: 0,
       settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } },
-    },
-    penal: {
-      recall: { progress: {}, turn: 0 },
     },
     geo: {
       blind: { progress: {}, turn: 0 },

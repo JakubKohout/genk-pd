@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { LawEnumeration } from '../data/types';
 import { matchEnumerationEntry, matchOrdered } from '../logic/matchEnumeration';
 import { suggestEnumeration } from '../logic/suggest';
-import { AnswerList, type AnswerEntry } from '@/modules/laws/lea/components/AnswerList';
-import { PENAL_PARAGRAPHS } from '@/modules/laws/penal/data/paragraphs';
-import { suggestParagraphs } from '@/modules/laws/penal/logic/suggestParagraph';
+import { AnswerList, type AnswerEntry } from './AnswerList';
+import { PENAL_PARAGRAPHS } from '../data/paragraphs';
+import { suggestParagraphs } from '../logic/suggestParagraph';
 
 interface Props {
   question: LawEnumeration;
