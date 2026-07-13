@@ -83,9 +83,11 @@ npm run preview    # serve built dist on :4173
 npm test           # vitest run (unit + component)
 npm run test:e2e   # playwright (spustí si dev server sám)
 npm run test:all   # vše
+npm run questions:export   # dataset -> docs/questions-review.md (review pro netechnickeho recenzenta)
+npm run questions:import   # docs/questions-review.md (nebo argv cesta) -> questions.ts + seed.ts + counts
 ```
 
-`npm run test:all` musí být zelené: **360 unit/component + 60 E2E = 420 testů**.
+`npm run test:all` musí být zelené: **395 unit/component + 60 E2E = 455 testů**.
 Žádná manuální verifikace — pokud něco rozbiju, opravím a prohnám testy.
 
 Tile pipeline (geo modul) se NEspouští v `npm run build` — je to one-time skript
@@ -211,6 +213,13 @@ src/
                                     # AnswerList/AnswerRow (sdílené vizuální primitivy pro
                                     # enumeration chips — correct/duplicate/wrong/missed)
                                     # LawPage.test.tsx, LawSidePanel.test.tsx, *Input.test.tsx
+      review/                        # Review round-trip pro netechnického recenzenta:
+                                    # serializeQuestions (LAW_QUESTIONS → markdown s legendou),
+                                    # parseQuestionsMd (markdown → { questions, deletedIds },
+                                    # české chyby s číslem řádku), formatQuestionsTs
+                                    # (questions → kanonický TS literál pro questions.ts).
+                                    # roundtrip.test.ts ověřuje bezztrátovost export→import.
+                                    # Volané z scripts/questions-export.ts / questions-import.ts.
   shared/
     storage.ts                      # Versionovaný localStorage wrapper, schemaVersion 9,
                                     # chained migrate v1→…→v9 při readu, lenient v9 read
@@ -238,6 +247,11 @@ scripts/
                                     # + tileMeta.ts. Spouští se ručně (`node scripts/...`)
   extract-minimap.py                # Stitch Rockstar minimap .ytd textur (docs/map-original/,
                                     # gitignored) → docs/clean-map.jpg (8192×12288)
+  questions-export.ts               # LAW_QUESTIONS → docs/questions-review.md (gitignored)
+                                    # přes serializeQuestions. `npm run questions:export`
+  questions-import.ts               # docs/questions-review.md (nebo argv cesta) → questions.ts
+                                    # (formatQuestionsTs) + LAW_QUESTION_IDS v e2e/fixtures/seed.ts
+                                    # + counts v questions.test.ts. `npm run questions:import`
 
 public/
   tiles/                            # Vygenerované Leaflet CRS.Simple tiles, z=0..3,
@@ -265,6 +279,14 @@ Sdílené utility (`normalize`, `pickNextFromPool`) jsou generické. Pro nový z
 přidej hodnotu do `LAW_SOURCE_KEYS` v `storage.ts`, bump schema (v9 → v10) a doplň
 migraci. Nezapomeň rozšířit E2E seed `LAW_QUESTION_IDS` (Gotcha 43); `LawPage.test.tsx`
 si saturaci odvozuje z importovaného `LAW_QUESTIONS` automaticky.
+
+Review workflow pro netechnického recenzenta: `npm run questions:export` vygeneruje
+`docs/questions-review.md` (gitignored, plná serializace datasetu s legendou);
+recenzent upraví texty / checkboxy správnosti / napíše `SMAZAT` do sekce otázky;
+`npm run questions:import <cesta>` markdown zparsuje (české chyby s číslem řádku)
+a přegeneruje `questions.ts` + `LAW_QUESTION_IDS` v `e2e/fixtures/seed.ts` +
+counts v `questions.test.ts` (Gotcha 43 strojově). Bezztrátovost hlídá
+round-trip test v `src/modules/law/review/`. Přidávání otázek jde dál jen v TS.
 
 Firearm Act (budoucnost): přidat jako nový zdroj `'firearm'` do `LAW_SOURCE_KEYS`
 (bump schema v9 → v10) + otázky přímo do `law/data/questions.ts` (žádný adapter —

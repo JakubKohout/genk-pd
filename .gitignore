@@ -31,3 +31,5 @@ coverage
 
 # Superpowers skill internal state (brainstorm transcripts, etc.)
 .superpowers/
+
+docs/questions-review.md
