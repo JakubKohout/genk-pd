@@ -1,34 +1,32 @@
-import type { LawExpected, LawQuestion, LawSource, LawTheme } from '../data/types';
+import type { LawExpected, LawQuestion, LawTheme } from '../data/types';
+import { normalize } from '../../../shared/text/normalize';
+import { LAW_THEME_KEYS } from '../../../shared/storage';
 
 export interface ParsedReview {
   questions: LawQuestion[];
   deletedIds: string[];
 }
 
+const NEW_ID_PLACEHOLDER = '__NEW__';
+
 const KIND_BY_LABEL: Record<string, { kind: LawQuestion['kind']; matcher?: 'alias' | 'paragraph' }> = {
-  'výběr': { kind: 'choice' },
+  'choice': { kind: 'choice' },
   'text': { kind: 'text' },
-  'výčet (aliasy)': { kind: 'enumeration', matcher: 'alias' },
-  'výčet (paragrafy)': { kind: 'enumeration', matcher: 'paragraph' },
-  'přiřazování': { kind: 'match' },
+  'enumeration-alias': { kind: 'enumeration', matcher: 'alias' },
+  'enumeration-paragraph': { kind: 'enumeration', matcher: 'paragraph' },
+  'match': { kind: 'match' },
 };
 
 interface Section {
   headingLine: number;
   title: string;
   id: string;
+  isNew: boolean;
   lines: { no: number; text: string }[];
 }
 
 function splitList(raw: string): string[] {
   return raw.split(';').map((s) => s.trim()).filter((s) => s.length > 0);
-}
-
-function sourceFromId(id: string): LawSource | null {
-  if (id.startsWith('lea.')) return 'lea';
-  if (id.startsWith('penal.')) return 'penal';
-  if (id.startsWith('sasp.')) return 'sasp';
-  return null;
 }
 
 const FIELD_LABELS = ['Zadání', 'Scénka', 'Vysvětlivka', 'Odpověď', 'Aliasy'];
@@ -40,14 +38,14 @@ const FIELD_LABELS = ['Zadání', 'Scénka', 'Vysvětlivka', 'Odpověď', 'Alias
 function isRecognizedLine(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed === '') return true;
-  if (/^- typ: /.test(text)) return true;
+  if (/^- type: /.test(text)) return true;
   if (FIELD_LABELS.some((label) => text.startsWith(`**${label}:** `))) return true;
   if (text === '**Možnosti:** (zaškrtnuté = správné)') return true;
   if (text === '**Položky:**') return true;
   if (text === '**Páry:**') return true;
   if (/^- \[[ x]\] /.test(text)) return true;
   if (/^\d+\. \*\*.*\*\*$/.test(text)) return true;
-  if (/^ {3}- (aliasy|keywords|klíč|sub): /.test(text)) return true;
+  if (/^ {3}- (aliases|keywords|key|sub): /.test(text)) return true;
   if (/^\|.*\|$/.test(trimmed)) return true;
   return false;
 }
@@ -63,13 +61,25 @@ export function parseQuestionsMd(md: string): ParsedReview {
   lines.forEach((text, idx) => {
     const no = idx + 1;
     if (text.startsWith('### ')) {
-      const m = /^### (.+) `([a-zA-Z0-9.-]+)`\s*$/.exec(text);
+      const m = /^### (.+) `(NEW|[a-zA-Z0-9.-]+)`\s*$/.exec(text);
       if (!m) {
         err(no, 'nadpis otázky musí končit ID v backticks: ### Titulek `id.otazky`');
         current = null;
         return;
       }
-      current = { headingLine: no, title: m[1]!, id: m[2]!, lines: [] };
+      const isNew = m[2] === 'NEW';
+      if (!isNew && /^new$/i.test(m[2]!)) {
+        err(no, `ID "${m[2]}" vypadá jako překlep sentinelu NEW — nová otázka se píše s přesně \`NEW\``);
+        current = null;
+        return;
+      }
+      current = {
+        headingLine: no,
+        title: m[1]!,
+        id: isNew ? NEW_ID_PLACEHOLDER : m[2]!,
+        isNew,
+        lines: [],
+      };
       sections.push(current);
       return;
     }
@@ -85,14 +95,17 @@ export function parseQuestionsMd(md: string): ParsedReview {
   const seenIds = new Set<string>();
 
   for (const s of sections) {
-    if (seenIds.has(s.id)) {
-      err(s.headingLine, `duplicitní ID ${s.id}`);
-      continue;
+    const label = s.isNew ? s.title : s.id;
+    if (!s.isNew) {
+      if (seenIds.has(s.id)) {
+        err(s.headingLine, `duplicitní ID ${s.id}`);
+        continue;
+      }
+      seenIds.add(s.id);
     }
-    seenIds.add(s.id);
 
     if (s.lines.some((l) => l.text.trim() === 'SMAZAT')) {
-      deletedIds.push(s.id);
+      if (!s.isNew) deletedIds.push(s.id);
       continue;
     }
 
@@ -100,17 +113,12 @@ export function parseQuestionsMd(md: string): ParsedReview {
       if (!isRecognizedLine(l.text)) err(l.no, 'nerozpoznaný řádek — zkontroluj překlepy');
     }
 
-    const source = sourceFromId(s.id);
-    if (!source) {
-      err(s.headingLine, `neznámý prefix ID ${s.id} (očekávám lea./penal./sasp.)`);
-      continue;
-    }
     if (s.title.length > 40) err(s.headingLine, `titulek delší než 40 znaků: "${s.title}"`);
 
     // 2) meta řádek
-    const metaEntry = s.lines.find((l) => l.text.startsWith('- typ: '));
+    const metaEntry = s.lines.find((l) => l.text.startsWith('- type: '));
     if (!metaEntry) {
-      err(s.headingLine, `otázce ${s.id} chybí řádek "- typ: …"`);
+      err(s.headingLine, `otázce ${label} chybí řádek "- type: …"`);
       continue;
     }
     const metaParts = metaEntry.text.slice(2).split(' | ').map((p) => p.trim());
@@ -119,26 +127,31 @@ export function parseQuestionsMd(md: string): ParsedReview {
       const ci = part.indexOf(': ');
       if (ci > 0) meta.set(part.slice(0, ci), part.slice(ci + 2));
     }
-    const kindInfo = KIND_BY_LABEL[meta.get('typ') ?? ''];
+    const kindInfo = KIND_BY_LABEL[meta.get('type') ?? ''];
     if (!kindInfo) {
-      err(metaEntry.no, `neznámý typ "${meta.get('typ')}"`);
+      err(metaEntry.no, `neznámý typ "${meta.get('type')}"`);
       continue;
     }
-    const theme = meta.get('téma') as LawTheme | undefined;
-    if (!theme) {
+    const themeRaw = meta.get('theme');
+    if (!themeRaw) {
       err(metaEntry.no, 'chybí téma');
       continue;
     }
+    if (!(LAW_THEME_KEYS as readonly string[]).includes(themeRaw)) {
+      err(metaEntry.no, `neznámé téma "${themeRaw}"`);
+      continue;
+    }
+    const theme = themeRaw as LawTheme;
     const ref = meta.get('ref');
-    const ordered = meta.get('pořadí závazné') === 'ano';
+    const ordered = meta.get('ordered') === 'true';
 
     // 3) jednořádková pole
     // prefix `**<label>:** ` má délku label.length + 6 (2+1+2+1 znaků navíc)
-    const field = (label: string): string | undefined =>
-      s.lines.find((l) => l.text.startsWith(`**${label}:** `))?.text.slice(label.length + 6);
+    const field = (fieldLabel: string): string | undefined =>
+      s.lines.find((l) => l.text.startsWith(`**${fieldLabel}:** `))?.text.slice(fieldLabel.length + 6);
     const prompt = field('Zadání');
     if (!prompt) {
-      err(s.headingLine, `otázce ${s.id} chybí "**Zadání:**"`);
+      err(s.headingLine, `otázce ${label} chybí "**Zadání:**"`);
       continue;
     }
     const scenario = field('Scénka');
@@ -146,7 +159,6 @@ export function parseQuestionsMd(md: string): ParsedReview {
 
     const base = {
       id: s.id,
-      source,
       theme,
       prompt,
       title: s.title,
@@ -168,39 +180,55 @@ export function parseQuestionsMd(md: string): ParsedReview {
           err(l.no, 'možnost musí začínat "- [x] " nebo "- [ ] "');
         }
       }
-      if (options.length < 5) { err(s.headingLine, `${s.id}: méně než 5 možností`); continue; }
-      if (correctIndices.length === 0) { err(s.headingLine, `${s.id}: žádná možnost není zaškrtnutá jako správná`); continue; }
+      if (options.length < 5) { err(s.headingLine, `${label}: méně než 5 možností`); continue; }
+      if (correctIndices.length === 0) { err(s.headingLine, `${label}: žádná možnost není zaškrtnutá jako správná`); continue; }
       questions.push({ ...base, kind: 'choice', options, correctIndices });
     } else if (kindInfo.kind === 'text') {
       const answer = field('Odpověď');
-      if (!answer) { err(s.headingLine, `${s.id}: chybí "**Odpověď:**"`); continue; }
+      if (!answer) { err(s.headingLine, `${label}: chybí "**Odpověď:**"`); continue; }
       const aliases = splitList(field('Aliasy') ?? '');
       questions.push({ ...base, kind: 'text', answer, aliases });
     } else if (kindInfo.kind === 'enumeration') {
       const expected: LawExpected[] = [];
+      const usedKeys = new Set<string>();
       let item: LawExpected | null = null;
-      const flush = (no: number) => {
+      let itemLine = s.headingLine;
+      const flush = () => {
         if (!item) return;
-        if (!item.key) { err(no, `${s.id}: položce "${item.label}" chybí "klíč:"`); return; }
+        if (!item.key) {
+          if (s.isNew && kindInfo.matcher === 'alias') {
+            const slug = normalize(item.label).replace(/ /g, '-');
+            if (usedKeys.has(slug)) {
+              err(itemLine, 'duplicitní vygenerovaný key — přejmenuj položku');
+              return;
+            }
+            item.key = slug;
+          } else {
+            err(itemLine, `${label}: položce "${item.label}" chybí "key:"`);
+            return;
+          }
+        }
+        usedKeys.add(item.key);
         expected.push(item);
       };
       for (const l of s.lines) {
         const head = /^\d+\. \*\*(.*)\*\*$/.exec(l.text);
         if (head) {
-          flush(l.no);
+          flush();
           item = { key: '', label: head[1]! };
+          itemLine = l.no;
           continue;
         }
-        const sub = /^ {3}- (aliasy|keywords|klíč|sub): (.*)$/.exec(l.text);
+        const sub = /^ {3}- (aliases|keywords|key|sub): (.*)$/.exec(l.text);
         if (sub && item) {
-          if (sub[1] === 'aliasy') item.aliases = splitList(sub[2]!);
+          if (sub[1] === 'aliases') item.aliases = splitList(sub[2]!);
           else if (sub[1] === 'keywords') item.keywords = splitList(sub[2]!);
-          else if (sub[1] === 'klíč') item.key = sub[2]!.trim();
+          else if (sub[1] === 'key') item.key = sub[2]!.trim();
           else item.subId = sub[2]!.trim();
         }
       }
-      flush(s.lines.at(-1)?.no ?? s.headingLine);
-      if (expected.length === 0) { err(s.headingLine, `${s.id}: výčet bez položek`); continue; }
+      flush();
+      if (expected.length === 0) { err(s.headingLine, `${label}: výčet bez položek`); continue; }
       questions.push({
         ...base,
         kind: 'enumeration',
@@ -212,11 +240,11 @@ export function parseQuestionsMd(md: string): ParsedReview {
       const rows = s.lines.filter(
         (l) => /^\|.*\|$/.test(l.text.trim()) && !/^\|[\s|-]+\|$/.test(l.text.trim()),
       );
-      if (rows.length < 4) { err(s.headingLine, `${s.id}: tabulka párů musí mít záhlaví a aspoň 3 páry`); continue; }
+      if (rows.length < 4) { err(s.headingLine, `${label}: tabulka párů musí mít záhlaví a aspoň 3 páry`); continue; }
       const cells = rows.map((l) => l.text.trim().slice(1, -1).split('|').map((c) => c.trim()));
       const badRow = rows[cells.findIndex((c) => c.length !== 2)];
       if (badRow && cells.some((c) => c.length !== 2)) {
-        err(badRow.no, `${s.id}: řádek tabulky nemá přesně 2 sloupce`);
+        err(badRow.no, `${label}: řádek tabulky nemá přesně 2 sloupce`);
         continue;
       }
       const [header, ...pairRows] = cells;
@@ -227,6 +255,24 @@ export function parseQuestionsMd(md: string): ParsedReview {
         rightLabel: header![1]!,
         pairs: pairRows.map((c) => ({ left: c[0]!, right: c[1]! })),
       });
+    }
+  }
+
+  let nextQ =
+    1 +
+    Math.max(
+      0,
+      ...sections
+        .filter((s) => !s.isNew)
+        .map((s) => {
+          const m = /^q(\d+)$/.exec(s.id);
+          return m ? Number(m[1]) : 0;
+        }),
+    );
+  for (const q of questions) {
+    if (q.id === NEW_ID_PLACEHOLDER) {
+      (q as { id: string }).id = `q${nextQ}`;
+      nextQ += 1;
     }
   }
 

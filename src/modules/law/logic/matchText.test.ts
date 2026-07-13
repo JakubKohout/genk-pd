@@ -3,7 +3,7 @@ import { matchText } from './matchText';
 import type { LawText } from '../data/types';
 
 const Q: LawText = {
-  id: 't', source: 'sasp', theme: 'rto', prompt: 'p',
+  id: 't', theme: 'rto', prompt: 'p',
   kind: 'text', answer: 'Frekvence 1', aliases: ['f1', 'kanál 1'],
 };
 

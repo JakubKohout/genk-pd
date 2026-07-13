@@ -27,9 +27,9 @@ afterEach(() => {
 });
 
 describe('storage migration', () => {
-  it('returns initialState (schemaVersion 9) when no data exists', () => {
+  it('returns initialState (schemaVersion 10) when no data exists', () => {
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({});
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
@@ -42,7 +42,7 @@ describe('storage migration', () => {
     expect((state as any).penal).toBeUndefined();
   });
 
-  it('migrates a stored v1 payload all the way to v9', () => {
+  it('migrates a stored v1 payload all the way to v10', () => {
     const v1 = {
       schemaVersion: 1,
       codes: {
@@ -54,7 +54,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v1));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     expect(state.codes.turn).toBe(7);
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
@@ -65,7 +65,7 @@ describe('storage migration', () => {
     expect((state as any).penal).toBeUndefined();
   });
 
-  it('migrates a stored v2 payload to v9, preserving codes (lea dropped)', () => {
+  it('migrates a stored v2 payload to v10, preserving codes (lea dropped)', () => {
     const v2 = {
       schemaVersion: 2,
       codes: {
@@ -81,7 +81,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v2));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     // lea progress migrated into law.progress
     expect(state.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 3 });
@@ -91,7 +91,7 @@ describe('storage migration', () => {
     expect(state.geo.name).toEqual({ progress: {}, turn: 0 });
   });
 
-  it('migrates a stored v3 payload to v9, dropping penal.recall', () => {
+  it('migrates a stored v3 payload to v10, dropping penal.recall', () => {
     const v3 = {
       schemaVersion: 3,
       codes: {
@@ -117,7 +117,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v3));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     // lea + penal.scenarios migrated into law.progress
     expect(state.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 3 });
@@ -131,7 +131,7 @@ describe('storage migration', () => {
     expect(state.geo.settings.categoryFilter).toEqual(DEFAULT_CATEGORY_FILTER);
   });
 
-  it('round-trips v9 saves with geo slices', () => {
+  it('round-trips v10 saves with geo slices', () => {
     const next = JSON.parse(JSON.stringify(initialState));
     next.geo.blind.progress = { 'city.vinewood-sign': { score: 2, lastAskedAtTurn: 0 } };
     next.geo.blind.turn = 2;
@@ -186,7 +186,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     // lea migrated into law
     expect(state.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 1 });
@@ -232,7 +232,7 @@ describe('storage migration', () => {
     });
   });
 
-  it('reads a v3 payload with missing penal slice and migrates to v9', () => {
+  it('reads a v3 payload with missing penal slice and migrates to v10', () => {
     const partial = {
       schemaVersion: 3,
       codes: {
@@ -246,7 +246,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     // lea migrated into law
     expect(state.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 1 });
@@ -254,7 +254,7 @@ describe('storage migration', () => {
     expect(state.geo.blind).toEqual({ progress: {}, turn: 0 });
   });
 
-  it('migrates a stored v4 payload to v9, preserving remaining slices', () => {
+  it('migrates a stored v4 payload to v10, preserving remaining slices', () => {
     const v4 = {
       schemaVersion: 4,
       codes: {
@@ -276,7 +276,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v4));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     expect(state.codes.progress).toEqual({ '10-4': { score: 2, lastAskedAtTurn: 5 } });
     // lea + penal.scenarios migrated into law.progress
     expect(state.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 3 });
@@ -288,7 +288,7 @@ describe('storage migration', () => {
     expect((state as any).penal).toBeUndefined();
   });
 
-  it('migrates a stored v5 payload to v9, merging sasp test+recall into law.progress', () => {
+  it('migrates a stored v5 payload to v10, merging sasp test+recall into law.progress', () => {
     const v5 = {
       schemaVersion: 5,
       codes: {
@@ -312,7 +312,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(v5));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     // sasp progress migrated into law.progress
     expect(state.law.progress['sasp.test.terms.1']).toEqual({ score: 2, lastAskedAtTurn: 0 });
     expect(state.law.progress['sasp.recall.terms.cpz']).toEqual({ score: -2, lastAskedAtTurn: 1 });
@@ -321,7 +321,7 @@ describe('storage migration', () => {
     expect((state as any).penal).toBeUndefined();
   });
 
-  it('reads a v6 payload (migrated to v9) with missing sasp slice', () => {
+  it('reads a v6 payload (migrated to v10) with missing sasp slice', () => {
     const partial = {
       schemaVersion: 6,
       codes: {
@@ -341,7 +341,7 @@ describe('storage migration', () => {
     localStorage.setItem(STORAGE_KEY_FOR_TESTS, JSON.stringify(partial));
     __resetCacheForTests();
     const state = loadState();
-    expect(state.schemaVersion).toBe(9);
+    expect(state.schemaVersion).toBe(10);
     // lea migrated into law
     expect(state.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 1 });
     expect((state as any).sasp).toBeUndefined();
@@ -350,17 +350,17 @@ describe('storage migration', () => {
   });
 });
 
-describe('law slice migrations (v6–v9)', () => {
+describe('law slice migrations (v6–v10)', () => {
   it('initial state has an empty law slice with all filters true', () => {
     const s = loadState();
-    expect(s.schemaVersion).toBe(9);
+    expect(s.schemaVersion).toBe(10);
     expect(s.law.progress).toEqual({});
     expect(s.law.turn).toBe(0);
-    expect(s.law.settings.sourceFilter).toEqual({ lea: true, penal: true, sasp: true });
+    expect((s.law.settings as Record<string, unknown>).sourceFilter).toBeUndefined();
     expect(Object.values(s.law.settings.themeFilter).every(Boolean)).toBe(true);
   });
 
-  it('migrates v6 -> v9 by unioning lea + penal.scenarios + sasp.quiz into law.progress, dropping penal.recall', () => {
+  it('migrates v6 -> v10 by unioning lea + penal.scenarios + sasp.quiz into law.progress, dropping penal.recall', () => {
     const v6 = {
       schemaVersion: 6,
       codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
@@ -375,7 +375,7 @@ describe('law slice migrations (v6–v9)', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(v6));
     __resetCacheForTests();
     const s = loadState();
-    expect(s.schemaVersion).toBe(9);
+    expect(s.schemaVersion).toBe(10);
     expect(s.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 1 });
     expect(s.law.progress['penal.A1']).toEqual({ score: 2, lastAskedAtTurn: 0 });
     expect(s.law.progress['sasp.test.terms.1']).toEqual({ score: -2, lastAskedAtTurn: 0 });
@@ -385,7 +385,7 @@ describe('law slice migrations (v6–v9)', () => {
     expect((s as any).sasp).toBeUndefined();
   });
 
-  it('migrates v7 -> v9 dropping lea, sasp, penal', () => {
+  it('migrates v7 -> v10 dropping lea, sasp, penal', () => {
     const v7 = {
       schemaVersion: 7,
       codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
@@ -401,7 +401,7 @@ describe('law slice migrations (v6–v9)', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(v7));
     __resetCacheForTests();
     const s = loadState();
-    expect(s.schemaVersion).toBe(9);
+    expect(s.schemaVersion).toBe(10);
     expect(s.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 1 });
     expect(s.law.progress['penal.A1']).toEqual({ score: 2, lastAskedAtTurn: 0 });
     expect(s.law.turn).toBe(9);
@@ -410,7 +410,7 @@ describe('law slice migrations (v6–v9)', () => {
     expect((s as any).sasp).toBeUndefined();
   });
 
-  it('migrates v8 payload to v9: drops penal slice, preserves law progress', () => {
+  it('migrates v8 payload to v10: drops penal slice, preserves law progress', () => {
     localStorage.setItem(
       STORAGE_KEY_FOR_TESTS,
       JSON.stringify({
@@ -441,21 +441,76 @@ describe('law slice migrations (v6–v9)', () => {
     );
     __resetCacheForTests();
     const s = loadState();
-    expect(s.schemaVersion).toBe(9);
+    expect(s.schemaVersion).toBe(10);
     expect((s as Record<string, unknown>).penal).toBeUndefined();
     expect(s.law.progress['lea.7']).toEqual({ score: 2, lastAskedAtTurn: 1 });
     expect(s.law.turn).toBe(4);
     expect(s.codes.progress['10-0']).toEqual({ score: 1, lastAskedAtTurn: 2 });
   });
 
-  it('lenient v9 read backfills a missing law slice', () => {
+  it('lenient v10 read backfills a missing law slice', () => {
     const s0 = loadState();
-    const v9 = JSON.parse(JSON.stringify(s0));
-    delete v9.law;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(v9));
+    const v10 = JSON.parse(JSON.stringify(s0));
+    delete v10.law;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(v10));
     __resetCacheForTests();
     const s = loadState();
     expect(s.law.progress).toEqual({});
-    expect(s.law.settings.sourceFilter.lea).toBe(true);
+    expect(s.law.settings.themeFilter.scenky).toBe(true);
+  });
+});
+
+describe('law slice migrations (v10)', () => {
+  it('migrates a v9 payload: drops law.settings.sourceFilter, adds scenky theme', () => {
+    localStorage.setItem(
+      STORAGE_KEY_FOR_TESTS,
+      JSON.stringify({
+        schemaVersion: 9,
+        codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
+        geo: {
+          blind: { progress: {}, turn: 0 },
+          name: { progress: {}, turn: 0 },
+          settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
+        },
+        law: {
+          progress: { 'lea.7': { score: 2, lastAskedAtTurn: 1 } },
+          turn: 5,
+          settings: {
+            sourceFilter: { lea: false, penal: true, sasp: true },
+            themeFilter: {
+              pojmy: false, hodnosti: true, jednani: true, rto: true, vybava: true,
+              zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+            },
+          },
+        },
+      }),
+    );
+    __resetCacheForTests();
+    const s = loadState();
+    expect(s.schemaVersion).toBe(10);
+    expect((s.law.settings as Record<string, unknown>).sourceFilter).toBeUndefined();
+    expect(s.law.settings.themeFilter.scenky).toBe(true);
+    expect(s.law.settings.themeFilter.pojmy).toBe(false); // stávající volby přežijí
+    expect(s.law.progress['lea.7']?.score).toBe(2); // progress přežije
+  });
+
+  it('lenient v10 read backfills missing themeFilter keys', () => {
+    localStorage.setItem(
+      STORAGE_KEY_FOR_TESTS,
+      JSON.stringify({
+        schemaVersion: 10,
+        codes: { progress: {}, turn: 0, settings: { importanceFilter: { mandatory: true, rare: true, unnecessary: true } } },
+        geo: {
+          blind: { progress: {}, turn: 0 },
+          name: { progress: {}, turn: 0 },
+          settings: { categoryFilter: { street: true, highway: true, city: true, state: true } },
+        },
+        law: { progress: {}, turn: 0, settings: { themeFilter: { pojmy: false } } },
+      }),
+    );
+    __resetCacheForTests();
+    const s = loadState();
+    expect(s.law.settings.themeFilter.pojmy).toBe(false);
+    expect(s.law.settings.themeFilter.scenky).toBe(true);
   });
 });

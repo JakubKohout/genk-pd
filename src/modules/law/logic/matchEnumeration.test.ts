@@ -3,17 +3,17 @@ import { keywordMatches, matchEnumerationEntry, matchOrdered } from './matchEnum
 import type { LawEnumeration } from '../data/types';
 
 const ALIAS_Q: LawEnumeration = {
-  id: 'a', source: 'lea', theme: 'paragrafy', prompt: 'p',
+  id: 'a', theme: 'paragrafy', prompt: 'p',
   kind: 'enumeration', matcher: 'alias',
   expected: [{ key: 'i1', label: 'Maják', aliases: ['varovne svetlo'] }],
 };
 const PARA_Q: LawEnumeration = {
-  id: 'b', source: 'penal', theme: 'paragrafy', prompt: 'p',
+  id: 'b', theme: 'paragrafy', prompt: 'p',
   kind: 'enumeration', matcher: 'paragraph',
   expected: [{ key: '25b', label: '§25 b', subId: 'b' }, { key: '27', label: '§27' }],
 };
 const ORDERED: LawEnumeration = {
-  id: 'o', source: 'sasp', theme: 'hodnosti', prompt: 'p',
+  id: 'o', theme: 'hodnosti', prompt: 'p',
   kind: 'enumeration', matcher: 'alias', ordered: true,
   expected: [{ key: 'cap', label: 'Captain' }, { key: 'cad', label: 'Cadet' }],
 };
@@ -53,7 +53,7 @@ describe('matchOrdered', () => {
 });
 
 const KW: LawEnumeration = {
-  id: 'kw', source: 'lea', theme: 'paragrafy', prompt: 'p',
+  id: 'kw', theme: 'paragrafy', prompt: 'p',
   kind: 'enumeration', matcher: 'alias',
   expected: [
     { key: 'a', label: 'činu upřímně litoval', aliases: ['lítost'], keywords: ['litoval', 'litost'] },

@@ -54,7 +54,7 @@ function seedPinningTo(targetId: string): void {
     if (p.id !== targetId) progress[p.id] = { score: 2, lastAskedAtTurn: -10 };
   }
   saveState({
-    schemaVersion: 9,
+    schemaVersion: 10,
     codes: {
       progress: {},
       turn: 0,
@@ -69,10 +69,9 @@ function seedPinningTo(targetId: string): void {
       progress: {},
       turn: 0,
       settings: {
-        sourceFilter: { lea: true, penal: true, sasp: true },
         themeFilter: {
           pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
-          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true, scenky: true,
         },
       },
     },
@@ -142,7 +141,7 @@ describe('<GeoBlindPage />', () => {
     const progress: Record<string, { score: number; lastAskedAtTurn: number }> = {};
     for (const p of POIS) progress[p.id] = { score: 2, lastAskedAtTurn: 0 };
     saveState({
-      schemaVersion: 9,
+      schemaVersion: 10,
       codes: {
         progress: {},
         turn: 0,
@@ -157,10 +156,9 @@ describe('<GeoBlindPage />', () => {
         progress: {},
         turn: 0,
         settings: {
-          sourceFilter: { lea: true, penal: true, sasp: true },
           themeFilter: {
             pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
-            zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+            zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true, scenky: true,
           },
         },
       },

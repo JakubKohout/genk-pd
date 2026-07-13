@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { ProgressEntry, LawSourceFilter, LawThemeFilter, LawThemeKey } from '@/shared/storage';
-import { LAW_SOURCE_KEYS, LAW_THEME_KEYS } from '@/shared/storage';
-import type { LawSource, LawTheme } from '../data/types';
+import type { ProgressEntry, LawThemeFilter, LawThemeKey } from '@/shared/storage';
+import { LAW_THEME_KEYS } from '@/shared/storage';
+import type { LawTheme } from '../data/types';
 
 const SCORE_CLASS: Record<number, string> = {
   [-3]: 'bg-sasp-red text-sasp-ink border-sasp-red',
@@ -11,18 +11,6 @@ const SCORE_CLASS: Record<number, string> = {
   1: 'bg-emerald-700/40 text-sasp-ink border-emerald-600/50',
   2: 'bg-emerald-600/60 text-sasp-ink border-emerald-500/60',
   3: 'bg-emerald-500 text-sasp-bg border-emerald-400',
-};
-
-const SOURCE_LABEL: Record<LawSource, string> = {
-  lea: 'LEA',
-  penal: 'Penal',
-  sasp: 'SASP',
-};
-
-const SOURCE_ABBR: Record<LawSource, string> = {
-  lea: 'L',
-  penal: 'P',
-  sasp: 'S',
 };
 
 const THEME_LABEL: Record<LawTheme, string> = {
@@ -35,11 +23,11 @@ const THEME_LABEL: Record<LawTheme, string> = {
   zadrzeni: 'Zadržení',
   kriminalistika: 'Kriminalistika',
   paragrafy: 'Paragrafy',
+  scenky: 'Scénky',
 };
 
 export interface LawPanelItem {
   id: string;
-  source: LawSource;
   theme: LawTheme;
   /** Compact text shown in the chip (the question title or prompt). */
   label: string;
@@ -48,9 +36,7 @@ export interface LawPanelItem {
 interface Props {
   items: readonly LawPanelItem[];
   progress: Record<string, ProgressEntry>;
-  sourceFilter: LawSourceFilter;
   themeFilter: LawThemeFilter;
-  onSetSource: (key: LawSource, enabled: boolean) => void;
   onSetTheme: (key: LawThemeKey, enabled: boolean) => void;
   currentId?: string;
   /** When provided, chips become clickable and switch to that question. */
@@ -64,14 +50,12 @@ function clampedScoreSum(items: readonly LawPanelItem[], progress: Record<string
 export function LawSidePanel({
   items,
   progress,
-  sourceFilter,
   themeFilter,
-  onSetSource,
   onSetTheme,
   currentId,
   onSelect,
 }: Props) {
-  const filtered = items.filter((it) => sourceFilter[it.source] && themeFilter[it.theme]);
+  const filtered = items.filter((it) => themeFilter[it.theme]);
   const total = filtered.length;
   const pct = total === 0 ? 0 : Math.round((clampedScoreSum(filtered, progress) / (2 * total)) * 100);
   const isComplete = total > 0 && pct === 100;
@@ -109,25 +93,6 @@ export function LawSidePanel({
       aria-label="Přehled zákonů"
     >
       <ProgressHeader pct={pct} isComplete={isComplete} />
-
-      <fieldset className="flex flex-wrap gap-2 text-xs">
-        <legend className="sr-only">Zdroje</legend>
-        {LAW_SOURCE_KEYS.map((source) => (
-          <label
-            key={source}
-            className="flex items-center gap-1.5 cursor-pointer rounded border border-sasp-navy-light px-2 py-1 hover:bg-sasp-navy-light"
-          >
-            <input
-              type="checkbox"
-              checked={sourceFilter[source]}
-              onChange={(e) => onSetSource(source, e.target.checked)}
-              data-testid={`law-filter-source-${source}`}
-              className="accent-sasp-tan"
-            />
-            <span>{SOURCE_LABEL[source]}</span>
-          </label>
-        ))}
-      </fieldset>
 
       <fieldset className="flex flex-wrap gap-2 text-xs">
         <legend className="sr-only">Témata</legend>
@@ -196,9 +161,6 @@ export function LawSidePanel({
                     ].join(' ');
                     const inner = (
                       <>
-                        <span className="font-mono text-[10px] shrink-0 w-3 uppercase text-sasp-ink-dim">
-                          {SOURCE_ABBR[it.source]}
-                        </span>
                         <span className="flex-1 min-w-0 truncate">{it.label}</span>
                         {done && (
                           <span aria-hidden className="text-xs">

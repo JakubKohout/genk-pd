@@ -4,7 +4,7 @@ import type { LawQuestion } from '../data/types';
 
 const FIXTURE: LawQuestion[] = [
   {
-    id: 'sasp.choice.vybava.1', source: 'sasp', theme: 'vybava',
+    id: 'sasp.choice.vybava.1', theme: 'vybava',
     title: 'Taser dosah', kind: 'choice',
     prompt: 'Jaký je dosah?', scenario: 'Na místě zásahu.',
     options: ['10 m', '5 m', '15 m', '20 m', '8 m'],
@@ -12,12 +12,12 @@ const FIXTURE: LawQuestion[] = [
     note: 'Dosah je 10 m.',
   },
   {
-    id: 'sasp.text.zasah.felony-code', source: 'sasp', theme: 'zasah',
+    id: 'sasp.text.zasah.felony-code', theme: 'zasah',
     title: 'Kód felony stopu', kind: 'text',
     prompt: 'Jaký kód?', answer: 'Code 5', aliases: ['kód 5', 'pětka'],
   },
   {
-    id: 'lea.7', source: 'lea', theme: 'paragrafy', title: 'Prokázání',
+    id: 'lea.7', theme: 'paragrafy', title: 'Prokázání',
     kind: 'enumeration', matcher: 'alias', ref: '§7 A',
     prompt: 'Vyjmenuj.',
     expected: [
@@ -26,13 +26,13 @@ const FIXTURE: LawQuestion[] = [
     ],
   },
   {
-    id: 'penal.scenario.A1', source: 'penal', theme: 'paragrafy', title: 'Loupež',
+    id: 'penal.scenario.A1', theme: 'scenky', title: 'Loupež',
     kind: 'enumeration', matcher: 'paragraph', ordered: true,
     prompt: 'Které paragrafy?',
     expected: [{ key: '26a', label: '§26 a', subId: 'a' }],
   },
   {
-    id: 'sasp.match.rto.channels', source: 'sasp', theme: 'rto', title: 'Kanály',
+    id: 'sasp.match.rto.channels', theme: 'rto', title: 'Kanály',
     kind: 'match', prompt: 'Spáruj.',
     leftLabel: 'Kanál', rightLabel: 'Účel',
     pairs: [
@@ -50,9 +50,9 @@ describe('serializeQuestions', () => {
     expect(md).toContain('### Taser dosah `sasp.choice.vybava.1`');
   });
   it('emits meta line with kind, theme, ref and ordered flag', () => {
-    expect(md).toContain('- typ: výběr | téma: vybava');
-    expect(md).toContain('- typ: výčet (aliasy) | téma: paragrafy | ref: §7 A');
-    expect(md).toContain('- typ: výčet (paragrafy) | téma: paragrafy | pořadí závazné: ano');
+    expect(md).toContain('- type: choice | theme: vybava');
+    expect(md).toContain('- type: enumeration-alias | theme: paragrafy | ref: §7 A');
+    expect(md).toContain('- type: enumeration-paragraph | theme: scenky | ordered: true');
   });
   it('emits checkboxes reflecting correctIndices', () => {
     expect(md).toContain('- [x] 10 m');
@@ -65,25 +65,25 @@ describe('serializeQuestions', () => {
     expect(md).toContain('**Odpověď:** Code 5');
     expect(md).toContain('**Aliasy:** kód 5; pětka');
   });
-  it('emits enumeration items with aliasy/keywords/klíč/sub sublines', () => {
+  it('emits enumeration items with aliases/keywords/key/sub sublines', () => {
     expect(md).toContain('1. **stejnokrojem**');
-    expect(md).toContain('   - aliasy: uniforma');
+    expect(md).toContain('   - aliases: uniforma');
     expect(md).toContain('   - keywords: stejnokroj');
-    expect(md).toContain('   - klíč: lea.7.A.1a');
+    expect(md).toContain('   - key: lea.7.A.1a');
     expect(md).toContain('   - sub: a');
   });
-  it('omits aliasy/keywords sublines when absent', () => {
+  it('omits aliases/keywords sublines when absent', () => {
     const item = md.slice(md.indexOf('2. **odznakem**'), md.indexOf('### Loupež'));
-    expect(item).not.toContain('- aliasy:');
+    expect(item).not.toContain('- aliases:');
     expect(item).not.toContain('- keywords:');
   });
   it('emits match table with labels as header', () => {
     expect(md).toContain('| Kanál | Účel |');
     expect(md).toContain('| F1 | hlavní |');
   });
-  it('groups questions under source/theme headings', () => {
-    expect(md).toContain('## SASP — vybava');
-    expect(md).toContain('## LEA — paragrafy');
+  it('groups questions under theme headings', () => {
+    expect(md).toContain('## vybava');
+    expect(md).toContain('## paragrafy');
   });
   it('throws on pipe in match pair text', () => {
     const bad = [{ ...FIXTURE[4], pairs: [{ left: 'a|b', right: 'x' }, { left: 'c', right: 'y' }, { left: 'd', right: 'z' }] }] as LawQuestion[];
@@ -118,5 +118,10 @@ describe('serializeQuestions', () => {
   it('throws on pipe in ref', () => {
     const bad = [{ ...FIXTURE[2], ref: '§7 | A' }] as LawQuestion[];
     expect(() => serializeQuestions(bad)).toThrow(/\|/);
+  });
+  it('legend explains fields including type codes and keywords semantics', () => {
+    expect(md).toContain('enumeration-alias');
+    expect(md).toContain('keywords');
+    expect(md).toContain('NEW');
   });
 });

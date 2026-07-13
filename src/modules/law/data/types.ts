@@ -1,11 +1,9 @@
-import { LAW_SOURCE_KEYS, LAW_THEME_KEYS, type LawSource, type LawTheme } from '@/shared/storage';
-export type { LawSource, LawTheme };
-export const LAW_SOURCES = LAW_SOURCE_KEYS;
+import { LAW_THEME_KEYS, type LawTheme } from '@/shared/storage';
+export type { LawTheme };
 export const LAW_THEMES = LAW_THEME_KEYS;
 
 interface LawBase {
   id: string;
-  source: LawSource;
   theme: LawTheme;
   prompt: string;
   /** Krátký titulek pro chip v LawSidePanel (fallback na prompt). */

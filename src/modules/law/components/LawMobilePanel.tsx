@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import type { ProgressEntry, LawSourceFilter, LawThemeFilter, LawThemeKey } from '@/shared/storage';
-import type { LawSource } from '../data/types';
+import type { ProgressEntry, LawThemeFilter, LawThemeKey } from '@/shared/storage';
 import { LawSidePanel, type LawPanelItem } from './LawSidePanel';
 
 interface Props {
   items: readonly LawPanelItem[];
   progress: Record<string, ProgressEntry>;
-  sourceFilter: LawSourceFilter;
   themeFilter: LawThemeFilter;
-  onSetSource: (key: LawSource, enabled: boolean) => void;
   onSetTheme: (key: LawThemeKey, enabled: boolean) => void;
   currentId?: string;
   onSelect?: (id: string) => void;
@@ -17,9 +14,7 @@ interface Props {
 export function LawMobilePanel({
   items,
   progress,
-  sourceFilter,
   themeFilter,
-  onSetSource,
   onSetTheme,
   currentId,
   onSelect,
@@ -31,7 +26,7 @@ export function LawMobilePanel({
         onSelect(id);
       }
     : undefined;
-  const filtered = items.filter((it) => sourceFilter[it.source] && themeFilter[it.theme]);
+  const filtered = items.filter((it) => themeFilter[it.theme]);
   const total = filtered.length;
   const clampedSum = filtered.reduce(
     (sum, it) => sum + Math.min(2, Math.max(0, progress[it.id]?.score ?? 0)),
@@ -59,9 +54,7 @@ export function LawMobilePanel({
         <LawSidePanel
           items={items}
           progress={progress}
-          sourceFilter={sourceFilter}
           themeFilter={themeFilter}
-          onSetSource={onSetSource}
           onSetTheme={onSetTheme}
           currentId={currentId}
           onSelect={handleSelect}

@@ -1,18 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { LAW_QUESTIONS } from './questions';
-import { LAW_SOURCES, LAW_THEMES } from './types';
+import { LAW_THEMES } from './types';
 import { normalize } from '@/shared/text/normalize';
 import { canonicalAnswerId } from '../logic/canonicalAnswerId';
 import { keywordMatches } from '../logic/matchEnumeration';
 import { PENAL_PARAGRAPHS } from './paragraphs';
 
-const bySource = (s: string) => LAW_QUESTIONS.filter((q) => q.source === s);
-
 describe('LAW_QUESTIONS dataset', () => {
-  it('has expected per-source counts', () => {
-    expect(bySource('lea')).toHaveLength(17);
-    expect(bySource('penal')).toHaveLength(28);
-    expect(bySource('sasp')).toHaveLength(92);
+  it('has expected counts', () => {
     expect(LAW_QUESTIONS).toHaveLength(137);
   });
 
@@ -21,18 +16,9 @@ describe('LAW_QUESTIONS dataset', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('every question has a valid source and theme', () => {
+  it('every question has a valid theme', () => {
     for (const q of LAW_QUESTIONS) {
-      expect(LAW_SOURCES, q.id).toContain(q.source);
       expect(LAW_THEMES, q.id).toContain(q.theme);
-    }
-  });
-
-  it('IDs are prefixed by their source', () => {
-    for (const q of LAW_QUESTIONS) {
-      if (q.source === 'lea') expect(q.id, q.id).toMatch(/^lea\./);
-      if (q.source === 'penal') expect(q.id, q.id).toMatch(/^penal\.scenario\./);
-      if (q.source === 'sasp') expect(q.id, q.id).toMatch(/^sasp\./);
     }
   });
 

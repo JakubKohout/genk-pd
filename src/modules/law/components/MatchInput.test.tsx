@@ -4,7 +4,7 @@ import { MatchInput } from './MatchInput';
 import type { LawMatch } from '../data/types';
 
 const Q: LawMatch = {
-  id: 'm', source: 'sasp', theme: 'hodnosti', prompt: 'p',
+  id: 'm', theme: 'hodnosti', prompt: 'p',
   kind: 'match', leftLabel: 'Divize', rightLabel: 'Znak',
   pairs: [{ left: 'SWAT', right: 'David' }, { left: 'DBI', right: 'William' }],
 };

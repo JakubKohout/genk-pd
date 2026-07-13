@@ -3,7 +3,7 @@ import { checkMatch } from './checkMatch';
 import type { LawMatch } from '../data/types';
 
 const Q: LawMatch = {
-  id: 'x', source: 'sasp', theme: 'hodnosti', prompt: 'p',
+  id: 'x', theme: 'hodnosti', prompt: 'p',
   kind: 'match', leftLabel: 'L', rightLabel: 'R',
   pairs: [{ left: 'SWAT', right: 'David' }, { left: 'DBI', right: 'William' }],
 };

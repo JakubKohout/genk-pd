@@ -44,10 +44,6 @@ export type GeoSlice = {
   };
 };
 
-export const LAW_SOURCE_KEYS = ['lea', 'penal', 'sasp'] as const;
-export type LawSource = (typeof LAW_SOURCE_KEYS)[number];
-export type LawSourceFilter = Record<LawSource, boolean>;
-
 export const LAW_THEME_KEYS = [
   'pojmy',
   'hodnosti',
@@ -58,6 +54,7 @@ export const LAW_THEME_KEYS = [
   'zadrzeni',
   'kriminalistika',
   'paragrafy',
+  'scenky',
 ] as const;
 export type LawThemeKey = (typeof LAW_THEME_KEYS)[number];
 export type LawTheme = LawThemeKey;
@@ -66,11 +63,11 @@ export type LawThemeFilter = Record<LawThemeKey, boolean>;
 export interface LawSlice {
   progress: Record<string, ProgressEntry>;
   turn: number;
-  settings: { sourceFilter: LawSourceFilter; themeFilter: LawThemeFilter };
+  settings: { themeFilter: LawThemeFilter };
 }
 
 export type PersistedState = {
-  schemaVersion: 9;
+  schemaVersion: 10;
   codes: CodesSlice;
   geo: GeoSlice;
   law: LawSlice;
@@ -78,7 +75,6 @@ export type PersistedState = {
 
 function defaultLawSettings(): LawSlice['settings'] {
   return {
-    sourceFilter: Object.fromEntries(LAW_SOURCE_KEYS.map((k) => [k, true])) as LawSourceFilter,
     themeFilter: Object.fromEntries(LAW_THEME_KEYS.map((k) => [k, true])) as LawThemeFilter,
   };
 }
@@ -88,7 +84,7 @@ function emptyLawSlice(): LawSlice {
 }
 
 export const initialState: PersistedState = {
-  schemaVersion: 9,
+  schemaVersion: 10,
   codes: {
     progress: {},
     turn: 0,
@@ -461,12 +457,10 @@ function migrateV6toV7(s: any): StoredV7 {
   };
 }
 
-// v8 → v9: drop penal slice (Penal Recall zrušen). Zároveň slouží jako lenient
-// v9/v8 read — dopočítá chybějící sub-slices z defaults. Starší migrace (v1–v7)
-// ústí sem, takže lea/sasp/penal.scenarios/penal.recall data zahazuje tady.
-function normalizeToV9(s: any): PersistedState {
+// v9/v8 → v10: drop law source filter, + scenky theme; terminál všech řetězů i lenient v10 read.
+function normalizeToV10(s: any): PersistedState {
   return {
-    schemaVersion: 9,
+    schemaVersion: 10,
     codes: {
       progress: s.codes?.progress ?? {},
       turn: s.codes?.turn ?? 0,
@@ -497,10 +491,6 @@ function normalizeToV9(s: any): PersistedState {
       progress: s.law?.progress ?? {},
       turn: s.law?.turn ?? 0,
       settings: {
-        sourceFilter: {
-          ...defaultLawSettings().sourceFilter,
-          ...(s.law?.settings?.sourceFilter ?? {}),
-        },
         themeFilter: {
           ...defaultLawSettings().themeFilter,
           ...(s.law?.settings?.themeFilter ?? {}),
@@ -516,35 +506,38 @@ function readFromStorage(): PersistedState {
   if (!raw) return cloneInitial();
   try {
     const parsed = JSON.parse(raw) as any;
-    if ((parsed?.schemaVersion === 9 || parsed?.schemaVersion === 8) && parsed.codes) {
-      return normalizeToV9(parsed);
+    if (
+      (parsed?.schemaVersion === 10 || parsed?.schemaVersion === 9 || parsed?.schemaVersion === 8) &&
+      parsed.codes
+    ) {
+      return normalizeToV10(parsed);
     }
     if (parsed?.schemaVersion === 7 && parsed.codes) {
-      return normalizeToV9(parsed);
+      return normalizeToV10(parsed);
     }
     if (parsed?.schemaVersion === 6 && parsed.codes) {
-      return normalizeToV9(migrateV6toV7(parsed as StoredV6));
+      return normalizeToV10(migrateV6toV7(parsed as StoredV6));
     }
     if (parsed?.schemaVersion === 5 && parsed.codes) {
-      return normalizeToV9(migrateV6toV7(migrateV5ToV6(parsed as StoredV5)));
+      return normalizeToV10(migrateV6toV7(migrateV5ToV6(parsed as StoredV5)));
     }
     if (parsed?.schemaVersion === 4 && parsed.codes) {
-      return normalizeToV9(migrateV6toV7(migrateV5ToV6(migrateV4ToV5(parsed as StoredV4))));
+      return normalizeToV10(migrateV6toV7(migrateV5ToV6(migrateV4ToV5(parsed as StoredV4))));
     }
     if (parsed?.schemaVersion === 3 && parsed.codes) {
-      return normalizeToV9(
+      return normalizeToV10(
         migrateV6toV7(migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(parsed as StoredV3)))),
       );
     }
     if (parsed?.schemaVersion === 2 && parsed.codes) {
-      return normalizeToV9(
+      return normalizeToV10(
         migrateV6toV7(
           migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(parsed as StoredV2)))),
         ),
       );
     }
     if (parsed?.schemaVersion === 1 && parsed.codes) {
-      return normalizeToV9(
+      return normalizeToV10(
         migrateV6toV7(
           migrateV5ToV6(
             migrateV4ToV5(migrateV3ToV4(migrateV2ToV3(migrateV1ToV2(parsed as StoredV1)))),

@@ -34,9 +34,9 @@ describe('useLawProgress', () => {
   });
   it('reset preserves filter settings', () => {
     const settings = renderHook(() => useLawSettings());
-    act(() => settings.result.current.setSource('lea', false));
+    act(() => settings.result.current.setTheme('rto', false));
     const progress = renderHook(() => useLawProgress());
     act(() => progress.result.current.reset());
-    expect(settings.result.current.sourceFilter.lea).toBe(false);
+    expect(settings.result.current.themeFilter.rto).toBe(false);
   });
 });

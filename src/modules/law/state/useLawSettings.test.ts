@@ -9,12 +9,6 @@ beforeEach(() => {
 });
 
 describe('useLawSettings', () => {
-  it('toggles a source filter', () => {
-    const { result } = renderHook(() => useLawSettings());
-    act(() => result.current.setSource('lea', false));
-    expect(result.current.sourceFilter.lea).toBe(false);
-    expect(result.current.sourceFilter.penal).toBe(true);
-  });
   it('toggles a theme filter', () => {
     const { result } = renderHook(() => useLawSettings());
     act(() => result.current.setTheme('rto', false));

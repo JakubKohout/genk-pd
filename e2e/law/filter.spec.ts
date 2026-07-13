@@ -2,25 +2,20 @@ import { expect, test } from '@playwright/test';
 import { seed } from '../fixtures/seed';
 
 test.describe('Law side panel filters', () => {
-  test('source filter checkbox is rendered and checked by default', async ({ page }) => {
+  test('theme filter checkboxes include scenky and are checked by default', async ({ page }) => {
     await seed(page, { randomSeed: 1 });
     await page.goto('/#/law');
-    // All three sources checked by default
-    await expect(page.getByTestId('law-filter-source-lea')).toBeChecked();
-    await expect(page.getByTestId('law-filter-source-penal')).toBeChecked();
-    await expect(page.getByTestId('law-filter-source-sasp')).toBeChecked();
+    await expect(page.getByTestId('law-filter-theme-scenky')).toBeChecked();
+    await expect(page.getByTestId('law-filter-theme-paragrafy')).toBeChecked();
   });
 
-  test('disabling sasp source hides sasp chips from the panel', async ({ page }) => {
+  test('disabling scenky theme hides scenario chips from the panel', async ({ page }) => {
     await seed(page, { randomSeed: 1 });
     await page.goto('/#/law');
-    // Verify a known sasp chip is visible initially (expand group first — groups are collapsed by default)
-    await page.getByTestId('law-group-pojmy').click();
-    await expect(page.getByTestId('chip-sasp.choice.pojmy.1')).toBeVisible();
-    // Disable sasp source
-    await page.getByTestId('law-filter-source-sasp').uncheck();
-    // The sasp chip should disappear
-    await expect(page.getByTestId('chip-sasp.choice.pojmy.1')).toHaveCount(0);
+    await page.getByTestId('law-group-scenky').click();
+    await expect(page.getByTestId('chip-penal.scenario.A1')).toBeVisible();
+    await page.getByTestId('law-filter-theme-scenky').uncheck();
+    await expect(page.getByTestId('chip-penal.scenario.A1')).toHaveCount(0);
   });
 
   test('theme filter checkboxes are rendered', async ({ page }) => {

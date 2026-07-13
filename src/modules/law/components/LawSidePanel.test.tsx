@@ -6,9 +6,9 @@ import type { LawPanelItem } from './LawSidePanel';
 import { LawSidePanel } from './LawSidePanel';
 
 const ITEMS: LawPanelItem[] = [
-  { id: 'q1', source: 'lea', theme: 'pojmy', label: 'Prokázání příslušnosti' },
-  { id: 'q2', source: 'penal', theme: 'paragrafy', label: 'Krádež vozidla' },
-  { id: 'q3', source: 'sasp', theme: 'rto', label: 'Rádiový kanál' },
+  { id: 'q1', theme: 'pojmy', label: 'Prokázání příslušnosti' },
+  { id: 'q2', theme: 'paragrafy', label: 'Krádež vozidla' },
+  { id: 'q3', theme: 'rto', label: 'Rádiový kanál' },
 ];
 
 const PROGRESS: Record<string, ProgressEntry> = {
@@ -17,7 +17,6 @@ const PROGRESS: Record<string, ProgressEntry> = {
   q3: { score: -1, lastAskedAtTurn: 2 },
 };
 
-const SOURCE_FILTER = { lea: true, penal: true, sasp: true };
 const THEME_FILTER = {
   pojmy: true,
   hodnosti: true,
@@ -28,6 +27,7 @@ const THEME_FILTER = {
   zadrzeni: true,
   kriminalistika: true,
   paragrafy: true,
+  scenky: true,
 };
 
 function renderPanel(overrides: Partial<React.ComponentProps<typeof LawSidePanel>> = {}) {
@@ -35,9 +35,7 @@ function renderPanel(overrides: Partial<React.ComponentProps<typeof LawSidePanel
     <LawSidePanel
       items={ITEMS}
       progress={PROGRESS}
-      sourceFilter={SOURCE_FILTER}
       themeFilter={THEME_FILTER}
-      onSetSource={vi.fn()}
       onSetTheme={vi.fn()}
       {...overrides}
     />,
@@ -86,13 +84,6 @@ describe('<LawSidePanel />', () => {
     expect(screen.queryByTestId('chip-q1')).not.toBeInTheDocument();
   });
 
-  it('chip shows source abbreviation badge', async () => {
-    const user = userEvent.setup();
-    renderPanel();
-    await user.click(screen.getByTestId('law-group-pojmy'));
-    expect(screen.getByTestId('chip-q1')).toHaveTextContent('L');
-  });
-
   it('chip shows mastered data-done', async () => {
     const user = userEvent.setup();
     renderPanel();
@@ -109,14 +100,6 @@ describe('<LawSidePanel />', () => {
     expect(onSelect).toHaveBeenCalledWith('q1');
   });
 
-  it('fires onSetSource when source checkbox toggled', async () => {
-    const user = userEvent.setup();
-    const onSetSource = vi.fn();
-    renderPanel({ onSetSource });
-    await user.click(screen.getByTestId('law-filter-source-lea'));
-    expect(onSetSource).toHaveBeenCalledWith('lea', false);
-  });
-
   it('fires onSetTheme when theme checkbox toggled', async () => {
     const user = userEvent.setup();
     const onSetTheme = vi.fn();
@@ -125,10 +108,9 @@ describe('<LawSidePanel />', () => {
     expect(onSetTheme).toHaveBeenCalledWith('rto', false);
   });
 
-  it('hides a group whose source is fully disabled', () => {
-    renderPanel({ sourceFilter: { lea: false, penal: true, sasp: true } });
-    expect(screen.queryByTestId('law-group-pojmy')).not.toBeInTheDocument();
-    expect(screen.getByTestId('law-group-paragrafy')).toBeInTheDocument();
+  it('renders the scenky theme checkbox, checked by default', () => {
+    renderPanel();
+    expect(screen.getByTestId('law-filter-theme-scenky')).toBeChecked();
   });
 
   it('hides a group whose theme is disabled', () => {

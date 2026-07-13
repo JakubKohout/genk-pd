@@ -33,7 +33,6 @@ function expectedItem(e: LawExpected): string {
 function questionLiteral(q: LawQuestion): string {
   const l: string[] = ['  {'];
   l.push(`    id: ${S(q.id)},`);
-  l.push(`    source: ${S(q.source)},`);
   l.push(`    theme: ${S(q.theme)},`);
   if (q.title) l.push(`    title: ${S(q.title)},`);
   l.push(`    kind: ${S(q.kind)},`);

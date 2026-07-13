@@ -4,13 +4,13 @@ import type { LawQuestion } from '../data/types';
 
 const Q: LawQuestion[] = [
   {
-    id: 'sasp.choice.rto.1', source: 'sasp', theme: 'rto', title: "Znak 'Henry'",
+    id: 'sasp.choice.rto.1', theme: 'rto', title: "Znak 'Henry'",
     kind: 'choice', prompt: 'Jaký znak?',
     options: ['Henry', 'Adam', 'Viktor', 'David', 'Charlie'], correctIndices: [0],
     note: 'Henry.',
   },
   {
-    id: 'lea.7', source: 'lea', theme: 'paragrafy', title: 'Prokázání',
+    id: 'lea.7', theme: 'paragrafy', title: 'Prokázání',
     kind: 'enumeration', matcher: 'alias', prompt: 'Vyjmenuj.',
     expected: [{ key: 'lea.7.A.1a', label: 'stejnokrojem', aliases: ['uniforma'], keywords: ['stejnokroj'] }],
   },

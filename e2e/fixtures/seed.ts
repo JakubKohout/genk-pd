@@ -34,7 +34,7 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
   await page.route('**/*.mxpnl.com/**', (route) => route.abort());
 
   const persisted = {
-    schemaVersion: 9 as const,
+    schemaVersion: 10 as const,
     codes: {
       progress: input.progress ?? {},
       turn: input.turn ?? 0,
@@ -68,10 +68,10 @@ export async function seed(page: Page, input: SeedInput): Promise<void> {
       progress: input.law?.progress ?? {},
       turn: input.law?.turn ?? 0,
       settings: {
-        sourceFilter: { lea: true, penal: true, sasp: true },
         themeFilter: {
           pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
           zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+          scenky: true,
         },
       },
     },
@@ -125,14 +125,24 @@ export function saturateAll(importance: 'mandatory' | 'rare' | 'unnecessary'): S
   return progress;
 }
 
-/**
- * Build a LEA progress map that pins the next question to `targetQuestionId` by saturating
- * all other LEA questions at +3. Target itself starts at 0 (or `targetScore` if given).
- *
- * The full set of LEA question IDs (17 questions) is hard-coded here to avoid runtime imports
- * — this fixture is loaded by Playwright before the app bundle exists.
- */
-export const LEA_QUESTION_IDS = [
+/** Re-exported from generated file (kept in sync with pois.ts via import script). */
+export { GEO_POI_IDS };
+
+export function pinNextGeoPoi(targetId: string, targetScore = 0): SeedProgress {
+  const progress: SeedProgress = {};
+  for (const id of GEO_POI_IDS) {
+    if (id !== targetId) {
+      progress[id] = { score: 2, lastAskedAtTurn: -10 };
+    }
+  }
+  if (targetScore !== 0) {
+    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
+  }
+  return progress;
+}
+
+/** Vsech 137 law question IDs — musi sedet s questions.ts; regeneruje npm run questions:import. */
+export const LAW_QUESTION_IDS = [
   'lea.7',
   'lea.9.A',
   'lea.9.B',
@@ -150,12 +160,6 @@ export const LEA_QUESTION_IDS = [
   'lea.37',
   'lea.zbrojni-prukaz',
   'lea.ridicsky-prukaz',
-] as const;
-
-/**
- * Penal scenario IDs hard-coded for E2E (must match src/modules/law/data/questions.ts).
- */
-export const PENAL_SCENARIO_IDS = [
   'penal.scenario.A1',
   'penal.scenario.A2',
   'penal.scenario.A3',
@@ -184,29 +188,6 @@ export const PENAL_SCENARIO_IDS = [
   'penal.scenario.E7',
   'penal.scenario.E8',
   'penal.scenario.E9',
-] as const;
-
-/** Re-exported from generated file (kept in sync with pois.ts via import script). */
-export { GEO_POI_IDS };
-
-export function pinNextGeoPoi(targetId: string, targetScore = 0): SeedProgress {
-  const progress: SeedProgress = {};
-  for (const id of GEO_POI_IDS) {
-    if (id !== targetId) {
-      progress[id] = { score: 2, lastAskedAtTurn: -10 };
-    }
-  }
-  if (targetScore !== 0) {
-    progress[targetId] = { score: targetScore, lastAskedAtTurn: -10 };
-  }
-  return progress;
-}
-
-/**
- * SASP law pool question IDs — native SASP content (choice/text/enum/match).
- * Must match src/modules/law/data/questions.ts (LAW_QUESTIONS).
- */
-export const SASP_QUESTION_IDS = [
   'sasp.choice.pojmy.1',
   'sasp.choice.pojmy.2',
   'sasp.choice.pojmy.3',
@@ -300,20 +281,6 @@ export const SASP_QUESTION_IDS = [
   'sasp.match.hodnosti.callsigns',
   'sasp.match.kriminalistika.traces',
 ] as const;
-
-/**
- * Unified law quiz question IDs — LEA (enumeration) + Penal scenarios (enumeration) +
- * SASP (choice/text/order) adapted into the law pool.
- * Must stay in sync with the respective source arrays.
- */
-export const LAW_QUESTION_IDS: readonly string[] = [
-  // LEA (17)
-  ...LEA_QUESTION_IDS,
-  // Penal scenarios (28)
-  ...PENAL_SCENARIO_IDS,
-  // SASP (92)
-  ...SASP_QUESTION_IDS,
-];
 
 export function pinNextLawQuestion(targetId: string, targetScore = 0): SeedProgress {
   const progress: SeedProgress = {};

@@ -5,7 +5,6 @@ import type { LawQuestion } from './types';
 export const LAW_QUESTIONS: readonly LawQuestion[] = [
   {
     id: 'lea.7',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Prokázání příslušnosti',
     kind: 'enumeration',
@@ -69,7 +68,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.9.A',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Důvody omezení osobní svobody',
     kind: 'enumeration',
@@ -201,7 +199,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.9.B',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Prostředky omezení osobní svobody',
     kind: 'enumeration',
@@ -261,7 +258,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.10',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Polehčující okolnosti',
     kind: 'enumeration',
@@ -464,7 +460,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.11',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Přitěžující okolnosti',
     kind: 'enumeration',
@@ -628,7 +623,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.12.A',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Umístění do cely',
     kind: 'enumeration',
@@ -685,7 +679,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.12.C',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Oddělené umístění v celách',
     kind: 'enumeration',
@@ -759,7 +752,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.15',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Odebrání zbraně',
     kind: 'enumeration',
@@ -849,7 +841,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.16.B',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Způsoby provedení výzvy',
     kind: 'enumeration',
@@ -958,7 +949,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.17.A',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Vstup do obydlí',
     kind: 'enumeration',
@@ -1076,7 +1066,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.18.A',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Zastavení a prohlídka vozidla',
     kind: 'enumeration',
@@ -1180,7 +1169,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.19.A',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Prohledání osoby',
     kind: 'enumeration',
@@ -1254,7 +1242,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.21.A',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Donucovací prostředky',
     kind: 'enumeration',
@@ -1483,7 +1470,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.23.B',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Použití zbraně',
     kind: 'enumeration',
@@ -1589,7 +1575,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.37',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Operativně pátrací prostředky',
     kind: 'enumeration',
@@ -1691,7 +1676,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.zbrojni-prukaz',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Odebrání zbrojního průkazu',
     kind: 'enumeration',
@@ -1727,7 +1711,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'lea.ridicsky-prukaz',
-    source: 'lea',
     theme: 'paragrafy',
     title: 'Odebrání řidičského průkazu',
     kind: 'enumeration',
@@ -1844,8 +1827,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.A1',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Loupež v obchodě s nožem',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1868,8 +1850,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.A2',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Vloupání do rodinného domu',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1892,8 +1873,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.A3',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Odcizení vozidla bez ŘP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1915,8 +1895,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.A4',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Poškozování aut a vyhrůžka',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1938,8 +1917,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.A5',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Žhářství na benzínové pumpě',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1955,8 +1933,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.A6',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Opakované vloupání do téhož domu',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1974,8 +1951,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B1',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Jízda na červenou bez ŘP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -1996,8 +1972,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B2',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Rychlá jízda 95 mph, první přestupek',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2014,8 +1989,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B3',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Rychlá jízda 110 mph, opakovaně',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2032,8 +2006,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B4',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Jízda pod vlivem alkoholu',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2054,8 +2027,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B5',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Útěk před hlídkou bez ŘP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2078,8 +2050,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B6',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Nedání přednosti, zranění řidiče',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2100,8 +2071,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.B7',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Nezpůsobilé vozidlo bez STK',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2117,8 +2087,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.C1',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Marihuana nalezená ve vozidle',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2135,8 +2104,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.C2',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Pěstírna marihuany ve sklepě',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2153,8 +2121,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.C3',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Prodej kokainu, vytažení zbraně',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2176,8 +2143,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.C4',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Kokain nalezený u řidiče',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2195,8 +2161,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.D2',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Nošení balistické vesty s platným ZP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2214,8 +2179,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.D3',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Neregistrovaná zbraň s platným ZP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2232,8 +2196,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E1',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Rvačka v baru, zlomený nos',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2250,8 +2213,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E2',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Útok baseballovou pálkou',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2269,8 +2231,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E3',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Útok na strážníka při kontrole',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2287,8 +2248,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E4',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Únos ženy z restaurace',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2305,8 +2265,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E5',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Únos s výkupným a výhrůžkou smrtí',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2327,8 +2286,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E6',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Střelba na sanitku a přihlížející',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2355,8 +2313,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E7',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Střelba na hlídku při útěku',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2383,8 +2340,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E8',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Střelba do hrudi před bistrem',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2406,8 +2362,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'penal.scenario.E9',
-    source: 'penal',
-    theme: 'paragrafy',
+    theme: 'scenky',
     title: 'Narušení zajištěného místa činu',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
@@ -2423,7 +2378,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.pojmy.1',
-    source: 'sasp',
     theme: 'pojmy',
     title: 'Loupež vs krádež',
     kind: 'choice',
@@ -2443,7 +2397,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.pojmy.2',
-    source: 'sasp',
     theme: 'pojmy',
     title: 'Prokázání příslušnosti',
     kind: 'choice',
@@ -2465,7 +2418,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.pojmy.3',
-    source: 'sasp',
     theme: 'pojmy',
     title: 'Definice trestného činu',
     kind: 'choice',
@@ -2485,7 +2437,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.pojmy.4',
-    source: 'sasp',
     theme: 'pojmy',
     title: 'Trestný čin vs přestupek',
     kind: 'choice',
@@ -2505,7 +2456,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.pojmy.5',
-    source: 'sasp',
     theme: 'pojmy',
     title: 'Zadržení vs zatčení',
     kind: 'choice',
@@ -2524,7 +2474,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.pojmy.6',
-    source: 'sasp',
     theme: 'pojmy',
     title: 'Podmínky trestní odpovědnosti',
     kind: 'choice',
@@ -2546,7 +2495,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.hodnosti.1',
-    source: 'sasp',
     theme: 'hodnosti',
     title: 'Hodnosti Staff SASP',
     kind: 'choice',
@@ -2568,7 +2516,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.hodnosti.1',
-    source: 'sasp',
     theme: 'hodnosti',
     title: 'Velení dle hodnosti na místě',
     kind: 'choice',
@@ -2588,7 +2535,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.jednani.1',
-    source: 'sasp',
     theme: 'jednani',
     title: 'Sdělení badge number civilistovi',
     kind: 'choice',
@@ -2607,7 +2553,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.jednani.1',
-    source: 'sasp',
     theme: 'jednani',
     title: 'Žádost o badge number kolegy',
     kind: 'choice',
@@ -2627,7 +2572,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.jednani.3',
-    source: 'sasp',
     theme: 'jednani',
     title: 'Povinnost zasáhnout',
     kind: 'choice',
@@ -2646,7 +2590,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.jednani.2',
-    source: 'sasp',
     theme: 'jednani',
     title: 'Pořadová příprava — vstup a pozdrav',
     kind: 'choice',
@@ -2666,7 +2609,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.rto.1',
-    source: 'sasp',
     theme: 'rto',
     title: 'Volací znak detektivní hlídky',
     kind: 'choice',
@@ -2685,7 +2627,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.rto.2',
-    source: 'sasp',
     theme: 'rto',
     title: 'Hlášení zahájení patroly dvojicí',
     kind: 'choice',
@@ -2704,7 +2645,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.rto.3',
-    source: 'sasp',
     theme: 'rto',
     title: 'Hlášení při příchodu do služby',
     kind: 'choice',
@@ -2723,7 +2663,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.rto.1',
-    source: 'sasp',
     theme: 'rto',
     title: 'Zahájení patroly Sergeant + Trooper',
     kind: 'choice',
@@ -2743,7 +2682,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.1',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Taser X26 — dosah a průnik',
     kind: 'choice',
@@ -2762,7 +2700,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.2',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Postup při použití taseru',
     kind: 'choice',
@@ -2781,7 +2718,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.3',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Zákaz použití taseru',
     kind: 'choice',
@@ -2800,7 +2736,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.4',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Teleskopický obušek — cílení',
     kind: 'choice',
@@ -2819,7 +2754,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.5',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Hlášení po výstřelu',
     kind: 'choice',
@@ -2838,7 +2772,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.6',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Priorita před použitím pistole',
     kind: 'choice',
@@ -2857,7 +2790,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.7',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Aktivace Panic A',
     kind: 'choice',
@@ -2876,7 +2808,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.8',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Aktivace Panic B',
     kind: 'choice',
@@ -2895,7 +2826,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.9',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Bodycam — vlastnosti',
     kind: 'choice',
@@ -2916,7 +2846,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.10',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Dashcam — vlastnosti',
     kind: 'choice',
@@ -2937,7 +2866,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.11',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Tint Meter — použití a výbava',
     kind: 'choice',
@@ -2956,7 +2884,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.12',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Odmítnutí krevního testu',
     kind: 'choice',
@@ -2975,7 +2902,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.13',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Alkohol tester jako důkaz',
     kind: 'choice',
@@ -2994,7 +2920,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.vybava.14',
-    source: 'sasp',
     theme: 'vybava',
     title: 'Standardní výbava PD vozu',
     kind: 'choice',
@@ -3018,7 +2943,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.zasah.1',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Hlášení zastavení vozidla',
     kind: 'choice',
@@ -3038,7 +2962,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.zasah.2',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Kontrola bez dokladů',
     kind: 'choice',
@@ -3058,7 +2981,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.zasah.3',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Secondary unit při 10-80',
     kind: 'choice',
@@ -3078,7 +3000,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.zasah.4',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Žádost o PIT manévr',
     kind: 'choice',
@@ -3098,7 +3019,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.zasah.5',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Priorita 10-99A nad 10-11',
     kind: 'choice',
@@ -3118,7 +3038,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.scenario.zasah.6',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Koordinace na místě 10-50',
     kind: 'choice',
@@ -3138,7 +3057,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.1',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Proč nesdělovat přestupek hned',
     kind: 'choice',
@@ -3157,7 +3075,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.2',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Šikmé zastavení PD vozu',
     kind: 'choice',
@@ -3176,7 +3093,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.3',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Suspect vystoupí bez výzvy',
     kind: 'choice',
@@ -3195,7 +3111,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.4',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Osoby samy od sebe vystupují',
     kind: 'choice',
@@ -3214,7 +3129,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.5',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Nesouhlas s pokutou',
     kind: 'choice',
@@ -3233,7 +3147,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.6',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Lhůta na zaplacení pokuty',
     kind: 'choice',
@@ -3252,7 +3165,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.7',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Hlášení ukončení 10-11',
     kind: 'choice',
@@ -3271,7 +3183,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.8',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Ukázání fotografie z radaru',
     kind: 'choice',
@@ -3290,7 +3201,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.9',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Počet jednotek pro felony stop',
     kind: 'choice',
@@ -3309,7 +3219,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.10',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Kdy Code 5 neplatí',
     kind: 'choice',
@@ -3328,7 +3237,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.11',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Vozidlo nezastaví dobrovolně',
     kind: 'choice',
@@ -3347,7 +3255,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.12',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Prohledávání kufru po Code 5',
     kind: 'choice',
@@ -3366,7 +3273,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.13',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Hodnost pro povolení PIT',
     kind: 'choice',
@@ -3385,7 +3291,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.14',
-    source: 'sasp',
     theme: 'zasah',
     title: 'PIT zamítnut — opakování žádosti',
     kind: 'choice',
@@ -3404,7 +3309,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.15',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Podmínky pro povolení PIT',
     kind: 'choice',
@@ -3423,7 +3327,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.16',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Předjíždění při pronásledování',
     kind: 'choice',
@@ -3442,7 +3345,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.17',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Max. počet spike stripů',
     kind: 'choice',
@@ -3461,7 +3363,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.18',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Perimetr v uzavřeném prostoru',
     kind: 'choice',
@@ -3480,7 +3381,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.19',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Chybné jednání při roadblocku',
     kind: 'choice',
@@ -3499,7 +3399,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.20',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Použití roadblocku',
     kind: 'choice',
@@ -3518,7 +3417,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.21',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Postup při breachi',
     kind: 'choice',
@@ -3537,7 +3435,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.22',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Maximální výkupné bez SGT',
     kind: 'choice',
@@ -3556,7 +3453,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.23',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Nepřijatelné požadavky velitele',
     kind: 'choice',
@@ -3575,7 +3471,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.24',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Priorita záchrany rukojmích',
     kind: 'choice',
@@ -3594,7 +3489,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.25',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Pozice vyjednavače',
     kind: 'choice',
@@ -3613,7 +3507,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zasah.26',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Vozidlo samovolně zastaví po 10-80',
     kind: 'choice',
@@ -3632,7 +3525,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.1',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Pravidlo 4P a délka zadržení',
     kind: 'choice',
@@ -3652,7 +3544,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.2',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Co se do lhůty nezapočítává',
     kind: 'choice',
@@ -3675,7 +3566,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.3',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Kdy nelze vést zkrácené řízení',
     kind: 'choice',
@@ -3695,7 +3585,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.4',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Posloupnost instancí při nesouhlasu',
     kind: 'choice',
@@ -3715,7 +3604,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.5',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Poučení o právech',
     kind: 'choice',
@@ -3737,7 +3625,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.6',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Důsledek nepoučení zadrženého',
     kind: 'choice',
@@ -3757,7 +3644,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.7',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Použití zbraně dle §23',
     kind: 'choice',
@@ -3780,7 +3666,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.8',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Výzva před donucovacími prostředky',
     kind: 'choice',
@@ -3800,7 +3685,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.9',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Vazba — rozhodnutí a délka',
     kind: 'choice',
@@ -3821,7 +3705,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.10',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Oddělování a prohlídka v celách',
     kind: 'choice',
@@ -3844,7 +3727,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.11',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Odebrání zbraně a vrácení',
     kind: 'choice',
@@ -3866,7 +3748,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.zadrzeni.12',
-    source: 'sasp',
     theme: 'zadrzeni',
     title: 'Předvedení — délka a výjimky',
     kind: 'choice',
@@ -3885,7 +3766,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.1',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Přímý balistický důkaz',
     kind: 'choice',
@@ -3904,7 +3784,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.2',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Výsledek GSR testu',
     kind: 'choice',
@@ -3923,7 +3802,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.3',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Dosah GSR v prostoru',
     kind: 'choice',
@@ -3942,7 +3820,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.4',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Stopa vs důkaz',
     kind: 'choice',
@@ -3961,7 +3838,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.5',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Neodkladné úkony na místě činu',
     kind: 'choice',
@@ -3983,7 +3859,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.6',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Zánik kriminalistických stop',
     kind: 'choice',
@@ -4004,7 +3879,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.7',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Kriminalisticky relevantní události',
     kind: 'choice',
@@ -4026,7 +3900,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.8',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Přímý vs nepřímý důkaz ze stopy',
     kind: 'choice',
@@ -4045,7 +3918,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.9',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'DNA databáze',
     kind: 'choice',
@@ -4064,7 +3936,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.kriminalistika.10',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Manipulace s biologickými stopami',
     kind: 'choice',
@@ -4083,7 +3954,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.choice.rto.4',
-    source: 'sasp',
     theme: 'rto',
     title: 'Překlad rádiového hlášení',
     kind: 'choice',
@@ -4103,7 +3973,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.text.zasah.felony-code',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Kód felony stopu',
     kind: 'text',
@@ -4118,7 +3987,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.enum.hodnosti.ladder',
-    source: 'sasp',
     theme: 'hodnosti',
     title: 'Žebříček hodností SASP',
     kind: 'enumeration',
@@ -4171,7 +4039,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.enum.zasah.felony-order',
-    source: 'sasp',
     theme: 'zasah',
     title: 'Pořadí vystupování při Code 5',
     kind: 'enumeration',
@@ -4236,7 +4103,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.match.rto.channels',
-    source: 'sasp',
     theme: 'rto',
     title: 'Rádiové kanály a jejich účel',
     kind: 'match',
@@ -4255,7 +4121,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.match.rto.priorities',
-    source: 'sasp',
     theme: 'rto',
     title: 'Priority callů a reakce',
     kind: 'match',
@@ -4271,7 +4136,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.match.hodnosti.callsigns',
-    source: 'sasp',
     theme: 'hodnosti',
     title: 'Divize a jejich volací znaky',
     kind: 'match',
@@ -4289,7 +4153,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
   },
   {
     id: 'sasp.match.kriminalistika.traces',
-    source: 'sasp',
     theme: 'kriminalistika',
     title: 'Druhy stop a co identifikují',
     kind: 'match',

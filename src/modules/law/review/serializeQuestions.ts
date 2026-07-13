@@ -1,27 +1,37 @@
 import type { LawEnumeration, LawQuestion } from '../data/types';
 
-const SOURCE_LABEL: Record<LawQuestion['source'], string> = {
-  lea: 'LEA',
-  penal: 'Penal (scénky)',
-  sasp: 'SASP',
-};
-
 const LEGEND = `# Přehled otázek — Teorie (/law)
 
-> Návod pro recenzenta:
-> - Texty (zadání, scénky, možnosti, vysvětlivky, položky) klidně přepisuj přímo v tomto souboru.
-> - U možností značí [x] správnou odpověď, [ ] špatnou — zaškrtnutí můžeš měnit.
-> - Celou otázku smažeš tak, že do její sekce napíšeš na samostatný řádek slovo SMAZAT.
-> - Víc hodnot (aliasy, keywords) odděluj středníkem.
-> - Řádky "- typ:" a "klíč:"/"sub:" jsou technické — needituj je bez domluvy.
-> - Nové otázky tímto souborem přidat nejde, jen upravovat a mazat.
+> Návod pro recenzenta — co jednotlivá pole znamenají:
+>
+> - Nadpis otázky: \`### Titulek \\\`id\\\`\` — id v backticks je technický klíč, NEEDITUJ ho.
+> - \`type\` — druh otázky (kód, needituj): choice = výběr z možností,
+>   text = volná textová odpověď, enumeration-alias = vyjmenování položek,
+>   enumeration-paragraph = určení paragrafů ke scénce, match = přiřazování dvojic.
+> - \`theme\` — kategorie otázky (kód): pojmy, hodnosti, jednani, rto, vybava,
+>   zasah, zadrzeni, kriminalistika, paragrafy, scenky.
+> - \`ref\` — odkaz na paragraf/zdroj, jen informativní.
+> - \`ordered: true\` — u výčtu záleží na pořadí položek.
+> - Možnosti: [x] = správná odpověď, [ ] = špatná; zaškrtnutí můžeš měnit.
+> - Aliasy (u textových otázek a položek jako \`aliases:\`) — alternativní PŘESNÁ
+>   znění, která se uznávají jako správná odpověď. Odděluj středníkem.
+> - \`keywords:\` — kmeny slov pro tolerantní uznání parafráze (odpověď se uzná,
+>   když kmen obsahuje). Měň jen s rozmyslem — moc obecný kmen uzná i špatnou odpověď.
+> - \`key:\` a \`sub:\` — technické klíče vyhodnocení, NEEDITUJ.
+> - Texty (Zadání, Scénka, možnosti, Vysvětlivka, položky) přepisuj volně.
+> - Smazání otázky: napiš do její sekce na samostatný řádek slovo SMAZAT.
+> - Nová otázka: přidej sekci \`### Titulek \\\`NEW\\\`\` s řádkem
+>   \`- type: … | theme: …\` a tělem podle typu (viz existující otázky stejného
+>   typu). ID se vygeneruje automaticky při importu. U výčtových položek můžeš
+>   \`key:\` vynechat (vygeneruje se), u enumeration-paragraph je povinný
+>   (číslo paragrafu, např. 25b).
 `;
 
 function kindLabel(q: LawQuestion): string {
   if (q.kind === 'enumeration') {
-    return q.matcher === 'paragraph' ? 'výčet (paragrafy)' : 'výčet (aliasy)';
+    return q.matcher === 'paragraph' ? 'enumeration-paragraph' : 'enumeration-alias';
   }
-  return { choice: 'výběr', text: 'text', match: 'přiřazování' }[q.kind];
+  return q.kind;
 }
 
 function assertLine(value: string, what: string, id: string): void {
@@ -33,9 +43,9 @@ function assertNoChar(value: string, ch: string, what: string, id: string): void
 }
 
 function metaLine(q: LawQuestion): string {
-  const parts = [`typ: ${kindLabel(q)}`, `téma: ${q.theme}`];
+  const parts = [`type: ${kindLabel(q)}`, `theme: ${q.theme}`];
   if (q.ref) parts.push(`ref: ${q.ref}`);
-  if (q.kind === 'enumeration' && (q as LawEnumeration).ordered) parts.push('pořadí závazné: ano');
+  if (q.kind === 'enumeration' && (q as LawEnumeration).ordered) parts.push('ordered: true');
   return `- ${parts.join(' | ')}`;
 }
 
@@ -65,7 +75,7 @@ function body(q: LawQuestion): string[] {
           assertLine(alias, 'enumeration alias', q.id);
           assertNoChar(alias, ';', 'enumeration alias', q.id);
         });
-        lines.push(`   - aliasy: ${e.aliases.join('; ')}`);
+        lines.push(`   - aliases: ${e.aliases.join('; ')}`);
       }
       if (e.keywords?.length) {
         e.keywords.forEach((keyword) => {
@@ -75,7 +85,7 @@ function body(q: LawQuestion): string[] {
         lines.push(`   - keywords: ${e.keywords.join('; ')}`);
       }
       assertLine(e.key, 'enumeration key', q.id);
-      lines.push(`   - klíč: ${e.key}`);
+      lines.push(`   - key: ${e.key}`);
       if (e.subId) {
         assertLine(e.subId, 'enumeration subId', q.id);
         lines.push(`   - sub: ${e.subId}`);
@@ -109,7 +119,7 @@ export function serializeQuestions(questions: readonly LawQuestion[]): string {
       assertLine(v, what, q.id);
     }
     if (q.ref) assertNoChar(q.ref, '|', 'ref', q.id);
-    const g = `## ${SOURCE_LABEL[q.source]} — ${q.theme}`;
+    const g = `## ${q.theme}`;
     if (g !== group) {
       group = g;
       out.push(g, '');

@@ -17,7 +17,7 @@ function seedSinglePool(codeId: string): void {
     }
   }
   saveState({
-    schemaVersion: 9,
+    schemaVersion: 10,
     codes: {
       progress,
       turn: 0,
@@ -32,10 +32,9 @@ function seedSinglePool(codeId: string): void {
       progress: {},
       turn: 0,
       settings: {
-        sourceFilter: { lea: true, penal: true, sasp: true },
         themeFilter: {
           pojmy: true, hodnosti: true, jednani: true, rto: true, vybava: true,
-          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true,
+          zasah: true, zadrzeni: true, kriminalistika: true, paragrafy: true, scenky: true,
         },
       },
     },

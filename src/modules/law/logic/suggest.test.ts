@@ -3,11 +3,11 @@ import { suggestText, suggestEnumeration } from './suggest';
 import type { LawText, LawEnumeration } from '../data/types';
 
 const T: LawText = {
-  id: 't', source: 'sasp', theme: 'rto', prompt: 'p',
+  id: 't', theme: 'rto', prompt: 'p',
   kind: 'text', answer: 'Frekvence 1', aliases: ['kanál 1'],
 };
 const E: LawEnumeration = {
-  id: 'e', source: 'lea', theme: 'paragrafy', prompt: 'p',
+  id: 'e', theme: 'paragrafy', prompt: 'p',
   kind: 'enumeration', matcher: 'alias',
   expected: [
     { key: 'a', label: 'Maják', aliases: ['varovne svetlo'] },

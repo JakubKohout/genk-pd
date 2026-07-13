@@ -38,7 +38,6 @@ export function trackCodeAnswered(props: {
 }
 
 export function trackLawAnswered(props: {
-  source: 'lea' | 'penal' | 'sasp';
   kind: 'choice' | 'text' | 'enumeration' | 'match';
   success: boolean;
   question_id: string;

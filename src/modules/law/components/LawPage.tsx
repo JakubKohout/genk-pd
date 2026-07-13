@@ -30,7 +30,6 @@ interface SimpleResult {
 function panelItems(questions: readonly LawQuestion[]): LawPanelItem[] {
   return questions.map((q) => ({
     id: q.id,
-    source: q.source,
     theme: q.theme,
     label: q.title ?? q.prompt,
   }));
@@ -39,7 +38,7 @@ function panelItems(questions: readonly LawQuestion[]): LawPanelItem[] {
 export function LawPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const { progress, turn, recordSubmit, recordSkip, reset } = useLawProgress();
-  const { sourceFilter, themeFilter, setSource, setTheme } = useLawSettings();
+  const { themeFilter, setTheme } = useLawSettings();
 
   const [current, setCurrent] = useState<LawQuestion | null>(null);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -57,10 +56,10 @@ export function LawPage() {
   useEffect(() => {
     if (current !== null) return;
     if (phase !== 'answering') return;
-    setCurrent(pickNextQuestion({ progress, turn }, LAW_QUESTIONS, sourceFilter, themeFilter));
-  }, [current, phase, progress, turn, sourceFilter, themeFilter]);
+    setCurrent(pickNextQuestion({ progress, turn }, LAW_QUESTIONS, themeFilter));
+  }, [current, phase, progress, turn, themeFilter]);
 
-  const isComplete = isLawComplete({ progress, turn }, LAW_QUESTIONS, sourceFilter, themeFilter);
+  const isComplete = isLawComplete({ progress, turn }, LAW_QUESTIONS, themeFilter);
 
   const handleSelect = (id: string) => {
     const selected = LAW_QUESTIONS.find((q) => q.id === id);
@@ -76,9 +75,7 @@ export function LawPage() {
       <LawSidePanel
         items={items}
         progress={progress}
-        sourceFilter={sourceFilter}
         themeFilter={themeFilter}
-        onSetSource={setSource}
         onSetTheme={setTheme}
         currentId={currentId}
         onSelect={handleSelect}
@@ -87,9 +84,7 @@ export function LawPage() {
       <LawMobilePanel
         items={items}
         progress={progress}
-        sourceFilter={sourceFilter}
         themeFilter={themeFilter}
-        onSetSource={setSource}
         onSetTheme={setTheme}
         currentId={currentId}
         onSelect={handleSelect}
@@ -126,28 +121,28 @@ export function LawPage() {
     setChoiceResult({ selected, correct });
     setPhase('revealed');
     recordSubmit(current.id, { perfect: correct });
-    trackLawAnswered({ source: current.source, kind: 'choice', success: correct, question_id: current.id });
+    trackLawAnswered({ kind: 'choice', success: correct, question_id: current.id });
   };
 
   const handleTextSubmit = (_raw: string, correct: boolean) => {
     setSimpleResult({ correct });
     setPhase('revealed');
     recordSubmit(current.id, { perfect: correct });
-    trackLawAnswered({ source: current.source, kind: 'text', success: correct, question_id: current.id });
+    trackLawAnswered({ kind: 'text', success: correct, question_id: current.id });
   };
 
   const handleEnumSubmit = ({ perfect }: { perfect: boolean }) => {
     setSimpleResult({ correct: perfect });
     setPhase('revealed');
     recordSubmit(current.id, { perfect });
-    trackLawAnswered({ source: current.source, kind: 'enumeration', success: perfect, question_id: current.id });
+    trackLawAnswered({ kind: 'enumeration', success: perfect, question_id: current.id });
   };
 
   const handleMatchSubmit = (_assignments: Record<string, string>, correct: boolean) => {
     setSimpleResult({ correct });
     setPhase('revealed');
     recordSubmit(current.id, { perfect: correct });
-    trackLawAnswered({ source: current.source, kind: 'match', success: correct, question_id: current.id });
+    trackLawAnswered({ kind: 'match', success: correct, question_id: current.id });
   };
 
   const handleNext = () => {

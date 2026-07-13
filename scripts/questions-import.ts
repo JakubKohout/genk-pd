@@ -1,19 +1,29 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseQuestionsMd } from '../src/modules/law/review/parseQuestionsMd';
 import { formatQuestionsTs } from '../src/modules/law/review/formatQuestionsTs';
+import { LAW_QUESTIONS } from '../src/modules/law/data/questions';
 
 const mdPath = process.argv[2] ?? 'docs/questions-review.md';
 const { questions, deletedIds } = parseQuestionsMd(readFileSync(mdPath, 'utf8'));
+
+const allIds = questions.map((q) => q.id);
+
+// Cross-check proti aktuálnímu datasetu PŘED jakýmkoliv zápisem — id vygenerované
+// importem (`q<n>`, sentinel NEW) je vždy legitimní nová otázka; `q<n>`, které už
+// v datasetu existuje, je existující otázka. Cokoliv jiného, co v datasetu není,
+// je buď překlep sentinelu (`NEWX` apod.), nebo omylem přepsané ID existující
+// otázky — obojí by jinak potichu osiřelo (ztráta progress hráče). Radši selhat
+// hned, než zapsat cokoliv.
+const currentIds = new Set(LAW_QUESTIONS.map((q) => q.id));
+const unknown = allIds.filter((id) => !currentIds.has(id) && !/^q\d+$/.test(id));
+if (unknown.length > 0) {
+  throw new Error('Neznámá ID (překlep nebo editace ID existující otázky?): ' + unknown.join(', '));
+}
 
 // Spočítat VŠECHNY tři výstupy před prvním zápisem — buď se zapíšou všechny
 // tři, nebo žádný (selhání na 2. souboru by jinak nechalo repo v nekonzistentním
 // stavu s questions.ts přepsaným, ale seed.ts/questions.test.ts starým).
 const questionsTsContent = formatQuestionsTs(questions);
-
-const idsBySource = (src: string) => questions.filter((q) => q.source === src).map((q) => q.id);
-const lea = idsBySource('lea');
-const penal = idsBySource('penal');
-const sasp = idsBySource('sasp');
 
 const arrBody = (ids: string[]) => ids.map((i) => `  '${i}',`).join('\n');
 const replaceArray = (src: string, name: string, ids: string[]): string => {
@@ -23,28 +33,21 @@ const replaceArray = (src: string, name: string, ids: string[]): string => {
 };
 
 let seedContent = readFileSync('e2e/fixtures/seed.ts', 'utf8');
-seedContent = replaceArray(seedContent, 'LEA_QUESTION_IDS', lea);
-seedContent = replaceArray(seedContent, 'PENAL_SCENARIO_IDS', penal);
-seedContent = replaceArray(seedContent, 'SASP_QUESTION_IDS', sasp);
-seedContent = seedContent
-  .replace(/\/\/ LEA \(\d+\)/, `// LEA (${lea.length})`)
-  .replace(/\/\/ Penal scenarios \(\d+\)/, `// Penal scenarios (${penal.length})`)
-  .replace(/\/\/ SASP \(\d+\)/, `// SASP (${sasp.length})`);
+seedContent = replaceArray(seedContent, 'LAW_QUESTION_IDS', allIds);
 
 let testContent = readFileSync('src/modules/law/data/questions.test.ts', 'utf8');
 const replaceCount = (src: string, re: RegExp, n: number): string => {
   if (!re.test(src)) throw new Error(`questions.test.ts: nenašel jsem count assert ${re}`);
   return src.replace(re, `$1${n}$2`);
 };
-testContent = replaceCount(testContent, /(bySource\('lea'\)\)\.toHaveLength\()\d+(\))/, lea.length);
-testContent = replaceCount(testContent, /(bySource\('penal'\)\)\.toHaveLength\()\d+(\))/, penal.length);
-testContent = replaceCount(testContent, /(bySource\('sasp'\)\)\.toHaveLength\()\d+(\))/, sasp.length);
 testContent = replaceCount(testContent, /(expect\(LAW_QUESTIONS\)\.toHaveLength\()\d+(\))/, questions.length);
 
 writeFileSync('src/modules/law/data/questions.ts', questionsTsContent);
 writeFileSync('e2e/fixtures/seed.ts', seedContent);
 writeFileSync('src/modules/law/data/questions.test.ts', testContent);
 
-console.log(`Import hotov: ${questions.length} otázek (${lea.length} LEA + ${penal.length} Penal + ${sasp.length} SASP).`);
+const newIds = allIds.filter((i) => /^q\d+$/.test(i));
+console.log(`Import hotov: ${questions.length} otázek.`);
+if (newIds.length) console.log(`Nové otázky: ${newIds.join(', ')}`);
 if (deletedIds.length > 0) console.log(`Smazáno ${deletedIds.length}: ${deletedIds.join(', ')}`);
 console.log('Zkontroluj git diff a spusť: npm test');

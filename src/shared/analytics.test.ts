@@ -94,20 +94,18 @@ describe('analytics', () => {
 
   it('trackLawAnswered forwards props to mixpanel.track', () => {
     initAnalytics();
-    trackLawAnswered({ source: 'lea', kind: 'choice', success: false, question_id: 'lea.16.B' });
+    trackLawAnswered({ kind: 'choice', success: false, question_id: 'lea.16.B' });
     expect(mp.track).toHaveBeenCalledWith('law_answered', {
-      source: 'lea',
       kind: 'choice',
       success: false,
       question_id: 'lea.16.B',
     });
   });
 
-  it('trackLawAnswered accepts all source/kind combinations', () => {
+  it('trackLawAnswered accepts all kind combinations', () => {
     initAnalytics();
-    trackLawAnswered({ source: 'sasp', kind: 'enumeration', success: true, question_id: 'sasp.x' });
+    trackLawAnswered({ kind: 'enumeration', success: true, question_id: 'sasp.x' });
     expect(mp.track).toHaveBeenCalledWith('law_answered', {
-      source: 'sasp',
       kind: 'enumeration',
       success: true,
       question_id: 'sasp.x',
@@ -175,7 +173,7 @@ describe('analytics', () => {
   it('all track* are silent no-ops before initAnalytics', () => {
     expect(() => {
       trackCodeAnswered({ mode: 'choose', success: false, code_id: '10-99' });
-      trackLawAnswered({ source: 'lea', kind: 'enumeration', success: true, question_id: 'lea.7' });
+      trackLawAnswered({ kind: 'enumeration', success: true, question_id: 'lea.7' });
       trackProgressReset({ module: 'codes' });
       trackCodesCompleted({ scope: 'all' });
       trackGeoAnswered({ mode: 'blind', success: true, poi_id: 'x' });

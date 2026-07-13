@@ -4,7 +4,7 @@ import { ChoiceInput } from './ChoiceInput';
 import type { LawChoice } from '../data/types';
 
 const Q: LawChoice = {
-  id: 'c', source: 'sasp', theme: 'rto', prompt: 'p',
+  id: 'c', theme: 'rto', prompt: 'p',
   kind: 'choice',
   options: ['A', 'B', 'C', 'D', 'E'],
   correctIndices: [0, 2],

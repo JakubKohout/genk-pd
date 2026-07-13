@@ -11,7 +11,7 @@ type Progress = Record<string, { score: number; lastAskedAtTurn: number }>;
 
 function baseState(lawProgress: Progress): PersistedState {
   return {
-    schemaVersion: 9,
+    schemaVersion: 10,
     codes: {
       progress: {},
       turn: 0,
@@ -26,7 +26,6 @@ function baseState(lawProgress: Progress): PersistedState {
       progress: lawProgress,
       turn: 0,
       settings: {
-        sourceFilter: { lea: true, penal: true, sasp: true },
         themeFilter: {
           pojmy: true,
           hodnosti: true,
@@ -37,6 +36,7 @@ function baseState(lawProgress: Progress): PersistedState {
           zadrzeni: true,
           kriminalistika: true,
           paragrafy: true,
+          scenky: true,
         },
       },
     },

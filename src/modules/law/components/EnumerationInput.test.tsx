@@ -4,11 +4,11 @@ import { EnumerationInput } from './EnumerationInput';
 import type { LawEnumeration } from '../data/types';
 
 const ALIAS: LawEnumeration = {
-  id: 'e', source: 'lea', theme: 'paragrafy', prompt: 'p', kind: 'enumeration', matcher: 'alias',
+  id: 'e', theme: 'paragrafy', prompt: 'p', kind: 'enumeration', matcher: 'alias',
   expected: [{ key: 'a', label: 'Maják', aliases: [] }],
 };
 const ORDER: LawEnumeration = {
-  id: 'o', source: 'sasp', theme: 'hodnosti', prompt: 'p', kind: 'enumeration', matcher: 'alias', ordered: true,
+  id: 'o', theme: 'hodnosti', prompt: 'p', kind: 'enumeration', matcher: 'alias', ordered: true,
   expected: [{ key: 'Captain', label: 'Captain' }, { key: 'Cadet', label: 'Cadet' }],
 };
 
@@ -81,7 +81,7 @@ describe('EnumerationInput', () => {
 
   it('shows paragraph-format hint for paragraph matcher questions', () => {
     const PARA: LawEnumeration = {
-      id: 'pq', source: 'penal', theme: 'paragrafy', prompt: 'p',
+      id: 'pq', theme: 'paragrafy', prompt: 'p',
       kind: 'enumeration', matcher: 'paragraph',
       expected: [{ key: '33', label: '§33' }],
     };
