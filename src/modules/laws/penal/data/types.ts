@@ -34,6 +34,8 @@ export interface ExpectedAnswer {
 export interface PenalScenario {
   id: string;
   ref: string;
+  /** Krátký titulek scénky (2-4 slova) pro chip v LawSidePanel. */
+  title?: string;
   prompt: string;
   expected: ExpectedAnswer[];
   educationalNote?: string;

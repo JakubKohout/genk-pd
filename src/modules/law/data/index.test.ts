@@ -6,6 +6,11 @@ import { adaptPenalScenarios } from './adaptPenal';
 import { LAW_SOURCES, LAW_THEMES } from './types';
 
 describe('LAW_QUESTIONS', () => {
+  it('adaptLea sets title from LEA description', () => {
+    const adapted = adaptLeaQuestions();
+    const q = adapted.find((x) => x.id === 'lea.7');
+    expect(q?.title).toBe('Prokázání příslušnosti');
+  });
   it('merges all three sources', () => {
     const expected =
       SASP_LAW_QUESTIONS.length + adaptLeaQuestions().length + adaptPenalScenarios().length;
@@ -22,4 +27,19 @@ describe('LAW_QUESTIONS', () => {
     }
   });
   it.todo('every choice has >=5 options (enforced in phase 2)');
+
+  it('every penal-sourced question has a non-empty title', () => {
+    for (const q of LAW_QUESTIONS) {
+      if (q.source !== 'penal') continue;
+      expect(q.title, q.id).toBeTruthy();
+      expect((q.title ?? '').trim().length, q.id).toBeGreaterThan(0);
+    }
+  });
+  it('every LAW_QUESTION has a non-empty title', () => {
+    for (const q of LAW_QUESTIONS) {
+      expect(q.title, q.id).toBeTruthy();
+      expect((q.title ?? '').trim().length, q.id).toBeGreaterThan(0);
+      expect((q.title ?? '').length, q.id).toBeLessThanOrEqual(40);
+    }
+  });
 });

@@ -393,7 +393,7 @@ export const LAW_QUESTION_IDS: readonly string[] = [
   ...LEA_QUESTION_IDS,
   // Penal scenarios (28)
   ...PENAL_SCENARIO_IDS,
-  // SASP (95)
+  // SASP (94)
   ...SASP_QUESTION_IDS,
 ];
 

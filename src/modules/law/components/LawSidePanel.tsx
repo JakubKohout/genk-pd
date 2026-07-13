@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { ProgressEntry, LawSourceFilter, LawThemeFilter, LawThemeKey } from '@/shared/storage';
 import { LAW_SOURCE_KEYS, LAW_THEME_KEYS } from '@/shared/storage';
 import type { LawSource, LawTheme } from '../data/types';
@@ -18,6 +19,12 @@ const SOURCE_LABEL: Record<LawSource, string> = {
   sasp: 'SASP',
 };
 
+const SOURCE_ABBR: Record<LawSource, string> = {
+  lea: 'L',
+  penal: 'P',
+  sasp: 'S',
+};
+
 const THEME_LABEL: Record<LawTheme, string> = {
   pojmy: 'Pojmy',
   hodnosti: 'Hodnosti',
@@ -30,23 +37,11 @@ const THEME_LABEL: Record<LawTheme, string> = {
   paragrafy: 'Paragrafy',
 };
 
-const THEME_ABBR: Record<LawTheme, string> = {
-  pojmy: 'POJ',
-  hodnosti: 'HOD',
-  jednani: 'ETK',
-  rto: 'RTO',
-  vybava: 'VYB',
-  zasah: 'ZAS',
-  zadrzeni: 'ZAD',
-  kriminalistika: 'KRI',
-  paragrafy: 'PAR',
-};
-
 export interface LawPanelItem {
   id: string;
   source: LawSource;
   theme: LawTheme;
-  /** Compact text shown in the chip (the question prompt). */
+  /** Compact text shown in the chip (the question title or prompt). */
   label: string;
 }
 
@@ -62,6 +57,10 @@ interface Props {
   onSelect?: (id: string) => void;
 }
 
+function clampedScoreSum(items: readonly LawPanelItem[], progress: Record<string, ProgressEntry>) {
+  return items.reduce((sum, it) => sum + Math.min(2, Math.max(0, progress[it.id]?.score ?? 0)), 0);
+}
+
 export function LawSidePanel({
   items,
   progress,
@@ -74,12 +73,34 @@ export function LawSidePanel({
 }: Props) {
   const filtered = items.filter((it) => sourceFilter[it.source] && themeFilter[it.theme]);
   const total = filtered.length;
-  const clampedSum = filtered.reduce(
-    (sum, it) => sum + Math.min(2, Math.max(0, progress[it.id]?.score ?? 0)),
-    0,
-  );
-  const pct = total === 0 ? 0 : Math.round((clampedSum / (2 * total)) * 100);
+  const pct = total === 0 ? 0 : Math.round((clampedScoreSum(filtered, progress) / (2 * total)) * 100);
   const isComplete = total > 0 && pct === 100;
+
+  const groups = LAW_THEME_KEYS.map((theme) => ({
+    theme,
+    items: filtered.filter((it) => it.theme === theme),
+  })).filter((g) => g.items.length > 0);
+
+  const currentTheme = currentId
+    ? filtered.find((it) => it.id === currentId)?.theme
+    : undefined;
+
+  const [expanded, setExpanded] = useState<Set<LawTheme>>(() =>
+    currentTheme ? new Set([currentTheme]) : new Set(),
+  );
+
+  useEffect(() => {
+    if (!currentTheme) return;
+    setExpanded((prev) => (prev.has(currentTheme) ? prev : new Set(prev).add(currentTheme)));
+  }, [currentTheme]);
+
+  const toggle = (theme: LawTheme) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(theme)) next.delete(theme);
+      else next.add(theme);
+      return next;
+    });
 
   return (
     <aside
@@ -127,57 +148,101 @@ export function LawSidePanel({
         ))}
       </fieldset>
 
-      <ul className="flex flex-col gap-1.5 list-none p-0 m-0" role="list">
-        {filtered.map((it) => {
-          const score = progress[it.id]?.score ?? 0;
-          const done = score >= 2;
-          const isCurrent = currentId === it.id;
-          const cls = [
-            'flex w-full items-center gap-3 rounded border px-2.5 py-1.5 text-sm transition text-left',
-            SCORE_CLASS[score] ?? SCORE_CLASS[0]!,
-            isCurrent ? 'ring-2 ring-sasp-tan ring-offset-2 ring-offset-sasp-bg' : '',
-            onSelect ? 'cursor-pointer hover:ring-1 hover:ring-sasp-tan' : '',
-          ].join(' ');
-          const inner = (
-            <>
-              <span className="font-mono text-[10px] shrink-0 w-8 uppercase text-sasp-ink-dim">
-                {THEME_ABBR[it.theme]}
-              </span>
-              <span className="flex-1 min-w-0 truncate">{it.label}</span>
-              {done && <span aria-hidden className="text-xs">✓</span>}
-            </>
-          );
+      <div className="flex flex-col gap-2">
+        {groups.map((g) => {
+          const isOpen = expanded.has(g.theme);
+          const gTotal = g.items.length;
+          const gMastered = g.items.filter((it) => (progress[it.id]?.score ?? 0) >= 2).length;
+          const gPct = Math.round((clampedScoreSum(g.items, progress) / (2 * gTotal)) * 100);
           return (
-            <li key={it.id}>
-              {onSelect ? (
-                <button
-                  type="button"
-                  data-testid={`chip-${it.id}`}
-                  data-score={score}
-                  data-done={done}
-                  title={it.label}
-                  aria-current={isCurrent ? 'true' : undefined}
-                  onClick={() => onSelect(it.id)}
-                  className={cls}
+            <div key={g.theme} className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                data-testid={`law-group-${g.theme}`}
+                aria-expanded={isOpen}
+                onClick={() => toggle(g.theme)}
+                className="flex w-full items-center gap-2 rounded border border-sasp-navy-light px-2.5 py-1.5 text-left text-sm hover:bg-sasp-navy-light"
+              >
+                <span aria-hidden className="w-3 shrink-0 text-xs text-sasp-ink-dim">
+                  {isOpen ? '▾' : '▸'}
+                </span>
+                <span className="flex-1 min-w-0 truncate font-medium">{THEME_LABEL[g.theme]}</span>
+                <span className="shrink-0 text-xs text-sasp-ink-dim">
+                  {gMastered}/{gTotal}
+                </span>
+                <span
+                  aria-hidden
+                  className="h-1.5 w-10 shrink-0 overflow-hidden rounded-full bg-sasp-navy"
                 >
-                  {inner}
-                </button>
-              ) : (
-                <div
-                  data-testid={`chip-${it.id}`}
-                  data-score={score}
-                  data-done={done}
-                  title={it.label}
-                  aria-current={isCurrent ? 'true' : undefined}
-                  className={cls}
-                >
-                  {inner}
-                </div>
+                  <span
+                    data-testid={`law-group-${g.theme}-bar`}
+                    className="block h-full bg-sasp-tan"
+                    style={{ width: `${gPct}%` }}
+                  />
+                </span>
+              </button>
+
+              {isOpen && (
+                <ul className="flex flex-col gap-1.5 list-none p-0 m-0 pl-2" role="list">
+                  {g.items.map((it) => {
+                    const score = progress[it.id]?.score ?? 0;
+                    const done = score >= 2;
+                    const isCurrent = currentId === it.id;
+                    const cls = [
+                      'flex w-full items-center gap-3 rounded border px-2.5 py-1.5 text-sm transition text-left',
+                      SCORE_CLASS[score] ?? SCORE_CLASS[0]!,
+                      isCurrent ? 'ring-2 ring-sasp-tan ring-offset-2 ring-offset-sasp-bg' : '',
+                      onSelect ? 'cursor-pointer hover:ring-1 hover:ring-sasp-tan' : '',
+                    ].join(' ');
+                    const inner = (
+                      <>
+                        <span className="font-mono text-[10px] shrink-0 w-3 uppercase text-sasp-ink-dim">
+                          {SOURCE_ABBR[it.source]}
+                        </span>
+                        <span className="flex-1 min-w-0 truncate">{it.label}</span>
+                        {done && (
+                          <span aria-hidden className="text-xs">
+                            ✓
+                          </span>
+                        )}
+                      </>
+                    );
+                    return (
+                      <li key={it.id}>
+                        {onSelect ? (
+                          <button
+                            type="button"
+                            data-testid={`chip-${it.id}`}
+                            data-score={score}
+                            data-done={done}
+                            title={it.label}
+                            aria-current={isCurrent ? 'true' : undefined}
+                            onClick={() => onSelect(it.id)}
+                            className={cls}
+                          >
+                            {inner}
+                          </button>
+                        ) : (
+                          <div
+                            data-testid={`chip-${it.id}`}
+                            data-score={score}
+                            data-done={done}
+                            title={it.label}
+                            aria-current={isCurrent ? 'true' : undefined}
+                            className={cls}
+                          >
+                            {inner}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
     </aside>
   );
 }

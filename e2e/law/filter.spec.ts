@@ -14,7 +14,8 @@ test.describe('Law side panel filters', () => {
   test('disabling sasp source hides sasp chips from the panel', async ({ page }) => {
     await seed(page, { randomSeed: 1 });
     await page.goto('/#/law');
-    // Verify a known sasp chip is visible initially
+    // Verify a known sasp chip is visible initially (expand group first — groups are collapsed by default)
+    await page.getByTestId('law-group-pojmy').click();
     await expect(page.getByTestId('chip-sasp.choice.pojmy.1')).toBeVisible();
     // Disable sasp source
     await page.getByTestId('law-filter-source-sasp').uncheck();

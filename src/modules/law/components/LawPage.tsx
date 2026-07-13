@@ -27,7 +27,12 @@ interface SimpleResult {
 }
 
 function panelItems(questions: readonly LawQuestion[]): LawPanelItem[] {
-  return questions.map((q) => ({ id: q.id, source: q.source, theme: q.theme, label: q.prompt }));
+  return questions.map((q) => ({
+    id: q.id,
+    source: q.source,
+    theme: q.theme,
+    label: q.title ?? q.prompt,
+  }));
 }
 
 export function LawPage() {

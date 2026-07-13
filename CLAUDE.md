@@ -200,6 +200,10 @@ src/
       data/
         types.ts                    # LawQuestion = discriminated union (LawChoice/LawText/
                                     # LawEnumeration/LawMatch přes `kind`); LawExpected;
+                                    # LawBase nese volitelné `title` (krátký titulek,
+                                    # nepersistuje): LEA odvozeno z `description` přes
+                                    # adaptLea, Penal/SASP autorováno (anti-leak, neuniká
+                                    # odpověď ani paragraf); PenalScenario taky nese `title`.
                                     # LAW_SOURCES=['lea','penal','sasp'],
                                     # LAW_THEMES (9 témat: pojmy/hodnosti/jednani/rto/vybava/
                                     # zasah/zadrzeni/kriminalistika/paragrafy)
@@ -568,7 +572,8 @@ na `**/api*.mixpanel.com/**` a `**/*.mxpnl.com/**` v `seed()`.
 `LEA_QUESTIONS` (17 otázek, 95 položek) v `src/modules/laws/lea/data/questions.ts`.
 Každá otázka má `{ id, prompt, description, ref, items[] }`, každá položka má
 `{ id, quote, aliases[], ref }`. `description` je krátký popis (~20–35 znaků,
-nominalizace) — používá ho `adaptLea.ts` při konverzi do Teorie formátu.
+nominalizace) — používá ho `adaptLea.ts` při konverzi do Teorie formátu jako
+hodnota `title` (zobrazuje se jako chip titulek v LawSidePanel).
 
 `AnswerList` a `AnswerRow` v `src/modules/laws/lea/components/` jsou **sdílené UI
 primitivy** — importuje je `EnumerationInput` (Teorie) i `PenalRecallPage`.
@@ -662,7 +667,11 @@ Sjednocený kvíz LEA + Penal scénky + SASP, render dle `current.kind`:
 `LawSidePanel`:
 - ProgressHeader s testid `law-progress-percent` / `-bar`.
 - 3 source checkboxy (lea/penal/sasp) + 9 theme checkboxy.
-- Chips — source zkratka + prompt, ✓ pro mastered, klik přepne otázku.
+- Chips seskupené do collapsible skupin podle tématu (`law-group-<theme>`,
+  header = caret + téma + zvládnuto/celkem + mini bar). Default sbaleno,
+  auto-expand skupiny s aktivní otázkou; stav rozbalení per-session (useState).
+  Chip = 1znaková značka zdroje (L/P/S) + `title` (krátký titulek místo promptu),
+  ✓ pro mastered, klik přepne otázku.
 - Mobile přes `<details>` v `LawMobilePanel`.
 
 ## Refaktor: sjednocený modul Teorie (HOTOVO)

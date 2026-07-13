@@ -52,4 +52,11 @@ describe('SASP native content (structure)', () => {
       expect(['alias', 'paragraph']).toContain(q.matcher);
     }
   });
+  it('every question has a non-empty title (<= 40 chars)', () => {
+    for (const q of SASP_LAW_QUESTIONS) {
+      expect(q.title, q.id).toBeTruthy();
+      expect((q.title ?? '').trim().length, q.id).toBeGreaterThan(0);
+      expect((q.title ?? '').length, q.id).toBeLessThanOrEqual(40);
+    }
+  });
 });

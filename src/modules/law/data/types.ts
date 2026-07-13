@@ -8,6 +8,8 @@ interface LawBase {
   source: LawSource;
   theme: LawTheme;
   prompt: string;
+  /** Krátký titulek pro chip v LawSidePanel (fallback na prompt). */
+  title?: string;
   ref?: string;
   note?: string;
   scenario?: string;

@@ -8,6 +8,7 @@ function adaptOne(q: Question): LawQuestion {
     source: 'lea',
     theme: 'paragrafy',
     prompt: q.prompt,
+    title: q.description,
     ref: q.ref,
     note: q.description,
     kind: 'enumeration',

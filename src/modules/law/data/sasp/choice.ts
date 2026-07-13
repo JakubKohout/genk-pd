@@ -5,6 +5,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.pojmy.1',
     source: 'sasp',
     theme: 'pojmy',
+    title: 'Loupež vs krádež',
     kind: 'choice',
     prompt: 'Co odlišuje loupež od krádeže?',
     ref: '§9',
@@ -22,6 +23,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.pojmy.2',
     source: 'sasp',
     theme: 'pojmy',
+    title: 'Prokázání příslušnosti',
     kind: 'choice',
     prompt: 'Jakými způsoby může příslušník s.o.s. prokázat svoji příslušnost?',
     ref: '§10',
@@ -39,6 +41,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.pojmy.3',
     source: 'sasp',
     theme: 'pojmy',
+    title: 'Definice trestného činu',
     kind: 'choice',
     prompt: 'Jak zákon definuje trestný čin?',
     ref: '§11',
@@ -56,6 +59,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.pojmy.4',
     source: 'sasp',
     theme: 'pojmy',
+    title: 'Trestný čin vs přestupek',
     kind: 'choice',
     prompt: 'Čím se liší trestný čin od přestupku?',
     ref: '§3',
@@ -73,6 +77,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.pojmy.5',
     source: 'sasp',
     theme: 'pojmy',
+    title: 'Zadržení vs zatčení',
     kind: 'choice',
     prompt: 'Jaký je rozdíl mezi zadržením a zatčením?',
     options: [
@@ -89,6 +94,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.pojmy.6',
     source: 'sasp',
     theme: 'pojmy',
+    title: 'Podmínky trestní odpovědnosti',
     kind: 'choice',
     prompt: 'Která tvrzení o trestní odpovědnosti jsou správná?',
     ref: '§3',
@@ -106,6 +112,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.hodnosti.1',
     source: 'sasp',
     theme: 'hodnosti',
+    title: 'Hodnosti Staff SASP',
     kind: 'choice',
     prompt: 'Která z následujících hodností patří mezi Staff SASP?',
     options: [
@@ -122,6 +129,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.hodnosti.1',
     source: 'sasp',
     theme: 'hodnosti',
+    title: 'Velení dle hodnosti na místě',
     kind: 'choice',
     prompt: 'Kdo ze zúčastněných příslušníků převezme velení na místě zásahu?',
     scenario:
@@ -140,6 +148,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.jednani.1',
     source: 'sasp',
     theme: 'jednani',
+    title: 'Sdělení badge number civilistovi',
     kind: 'choice',
     prompt: 'Co musí příslušník s.o.s. sdělit civilistovi, pokud si to vyžádá?',
     options: [
@@ -156,6 +165,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.jednani.2',
     source: 'sasp',
     theme: 'jednani',
+    title: 'Využití badge number civilistou',
     kind: 'choice',
     prompt: 'K čemu civilista využije badge number příslušníka s.o.s.?',
     options: [
@@ -172,6 +182,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.jednani.1',
     source: 'sasp',
     theme: 'jednani',
+    title: 'Žádost o badge number kolegy',
     kind: 'choice',
     prompt: 'Jak má příslušník správně zareagovat na tuto žádost?',
     scenario:
@@ -190,6 +201,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.jednani.3',
     source: 'sasp',
     theme: 'jednani',
+    title: 'Povinnost zasáhnout',
     kind: 'choice',
     prompt: 'Za jakých okolností má příslušník s.o.s. povinnost zasáhnout?',
     options: [
@@ -206,6 +218,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.jednani.4',
     source: 'sasp',
     theme: 'jednani',
+    title: 'Vstup do místnosti — zaklepání',
     kind: 'choice',
     prompt: 'Co musí příslušník udělat jako první, než vstoupí do místnosti?',
     options: [
@@ -222,6 +235,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.rto.1',
     source: 'sasp',
     theme: 'rto',
+    title: 'Volací znak detektivní hlídky',
     kind: 'choice',
     prompt: 'Jaký volací znak používá hlídka složená ze dvou detektivů?',
     options: [
@@ -238,6 +252,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.rto.2',
     source: 'sasp',
     theme: 'rto',
+    title: 'Hlášení zahájení patroly dvojicí',
     kind: 'choice',
     prompt: 'Jaký volací znak a číslo použije dvojice uniformovaných příslušníků při zahájení patroly?',
     options: [
@@ -254,6 +269,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.rto.3',
     source: 'sasp',
     theme: 'rto',
+    title: 'Hlášení při příchodu do služby',
     kind: 'choice',
     prompt: 'Co příslušník hlásí na rádio ihned po příchodu do služby?',
     options: [
@@ -270,6 +286,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.rto.1',
     source: 'sasp',
     theme: 'rto',
+    title: 'Zahájení patroly Sergeant + Trooper',
     kind: 'choice',
     prompt: 'Jak příslušník správně zahájí tuto patrolu na rádiu?',
     scenario:
@@ -288,6 +305,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.jednani.5',
     source: 'sasp',
     theme: 'jednani',
+    title: 'Zdravení nejvyšší hodnosti',
     kind: 'choice',
     prompt: 'Je-li v místnosti přítomno více hodností, koho příslušník zdraví?',
     options: [
@@ -304,6 +322,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.1',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Taser X26 — dosah a průnik',
     kind: 'choice',
     prompt: 'Jaký je maximální účinný dosah taseru X26 a přes jak silné oblečení dokáže působit?',
     options: [
@@ -320,6 +339,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.2',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Postup při použití taseru',
     kind: 'choice',
     prompt: 'Co příslušník zvolá před použitím taseru a co hlásí po jeho nasazení?',
     options: [
@@ -336,6 +356,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.3',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Zákaz použití taseru',
     kind: 'choice',
     prompt: 'Na koho je použití taseru zakázáno?',
     options: [
@@ -352,6 +373,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.4',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Teleskopický obušek — cílení',
     kind: 'choice',
     prompt: 'Na které části těla se míří teleskopickým obuškem a co je zakázáno?',
     options: [
@@ -368,6 +390,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.5',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Hlášení po výstřelu',
     kind: 'choice',
     prompt: 'Co příslušník hlásí na rádio při použití střelné zbraně?',
     options: [
@@ -384,6 +407,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.6',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Priorita před použitím pistole',
     kind: 'choice',
     prompt: 'Co by měl příslušník preferovat před použitím combat pistol?',
     options: [
@@ -400,6 +424,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.7',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Aktivace Panic A',
     kind: 'choice',
     prompt: 'Kdy příslušník aktivuje Panic A?',
     options: [
@@ -416,6 +441,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.8',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Aktivace Panic B',
     kind: 'choice',
     prompt: 'Kdy příslušník aktivuje Panic B?',
     options: [
@@ -432,6 +458,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.9',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Bodycam — nahrávání a vypnutí',
     kind: 'choice',
     prompt: 'Jak nahrává bodycam a co se stane při jeho vypnutí?',
     options: [
@@ -448,6 +475,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.10',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Dashcam — vypnutí záznamu',
     kind: 'choice',
     prompt: 'Lze dashcam vypnout nebo přerušit záznam?',
     options: [
@@ -464,6 +492,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.11',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Tint Meter — použití a výbava',
     kind: 'choice',
     prompt: 'K čemu slouží Tint Meter a která vozidla jím jsou vybavena?',
     options: [
@@ -480,6 +509,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.12',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Odmítnutí krevního testu',
     kind: 'choice',
     prompt: 'Podezřelý odmítne podrobit se krevnímu vyšetření při podezření na požití alkoholu nebo drog. Jak se na toto odmítnutí pohlíží?',
     options: [
@@ -496,6 +526,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.13',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Alkohol tester jako důkaz',
     kind: 'choice',
     prompt: 'Stačí pozitivní výsledek alkohol testeru z vozidla jako jediný důkaz požití při podezření na jízdu pod vlivem?',
     options: [
@@ -512,6 +543,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.vybava.14',
     source: 'sasp',
     theme: 'vybava',
+    title: 'Standardní výbava PD vozu',
     kind: 'choice',
     prompt: 'Co patří do standardní výbavy PD vozu?',
     options: [
@@ -532,6 +564,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.zasah.1',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Hlášení zastavení vozidla',
     kind: 'choice',
     prompt: 'Jak zní správné hlášení po zastavení vozidla?',
     scenario:
@@ -550,6 +583,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.zasah.2',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Kontrola bez dokladů',
     kind: 'choice',
     prompt: 'Jak příslušník správně postupuje?',
     scenario:
@@ -568,6 +602,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.zasah.3',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Secondary unit při 10-80',
     kind: 'choice',
     prompt: 'Co musí secondary unit průběžně hlásit při tomto pronásledování?',
     scenario:
@@ -586,6 +621,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.zasah.4',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Žádost o PIT manévr',
     kind: 'choice',
     prompt: 'Jaký postup žádosti o PIT manévr je správný?',
     scenario:
@@ -604,6 +640,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.zasah.5',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Priorita 10-99A nad 10-11',
     kind: 'choice',
     prompt: 'Jaká je správná priorita reakce příslušníka?',
     scenario:
@@ -622,6 +659,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.scenario.zasah.6',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Koordinace na místě 10-50',
     kind: 'choice',
     prompt: 'Jak příslušník koordinuje postup a co hlásí po zajištění místa?',
     scenario:
@@ -640,6 +678,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.1',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Proč nesdělovat přestupek hned',
     kind: 'choice',
     prompt: 'Proč se na začátku 10-11 suspect neinformuje o spáchaném přestupku?',
     options: [
@@ -656,6 +695,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.2',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Šikmé zastavení PD vozu',
     kind: 'choice',
     prompt: 'Proč PD vůz zastavuje šikmo (pravé přední světlo na levé zadní světlo zastavovaného vozidla)?',
     options: [
@@ -672,6 +712,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.3',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Suspect vystoupí bez výzvy',
     kind: 'choice',
     prompt: 'Suspect vystoupí z vozidla bez výzvy. Jak příslušník postupuje?',
     options: [
@@ -688,6 +729,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.4',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Osoby samy od sebe vystupují',
     kind: 'choice',
     prompt: 'Co udělá příslušník, pokud při zastavování vozidla začnou osoby samy od sebe vystupovat?',
     options: [
@@ -704,6 +746,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.5',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Nesouhlas s pokutou',
     kind: 'choice',
     prompt: 'Suspect nesouhlasí s pokutou při 10-11. Jak příslušník postupuje?',
     options: [
@@ -720,6 +763,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.6',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Lhůta na zaplacení pokuty',
     kind: 'choice',
     prompt: 'Kolik dní má suspect na zaplacení pokuty?',
     options: [
@@ -736,6 +780,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.7',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Hlášení ukončení 10-11',
     kind: 'choice',
     prompt: 'Jak zní správné hlášení ukončení 10-11?',
     options: [
@@ -752,6 +797,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.8',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Ukázání fotografie z radaru',
     kind: 'choice',
     prompt: 'Kdy příslušník smí ukázat fotografii z radaru?',
     options: [
@@ -768,6 +814,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.9',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Počet jednotek pro felony stop',
     kind: 'choice',
     prompt: 'Kolik jednotek je minimum pro provedení felony stopu? Kolik je ideál?',
     options: [
@@ -784,6 +831,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.10',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Kdy Code 5 neplatí',
     kind: 'choice',
     prompt: 'Ve které z následujících situací se felony stop (Code 5) NEPOUŽÍVÁ?',
     options: [
@@ -800,6 +848,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.11',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Vozidlo nezastaví dobrovolně',
     kind: 'choice',
     prompt: 'Vozidlo po PIT manévru nebo nehodě nezastaví dobrovolně. Jak se postupuje?',
     options: [
@@ -816,6 +865,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.12',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Prohledávání kufru po Code 5',
     kind: 'choice',
     prompt: 'Jak se prohledává kufr vozidla po felony stopu?',
     options: [
@@ -832,6 +882,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.13',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Hodnost pro povolení PIT',
     kind: 'choice',
     prompt: 'Od jaké hodnosti lze udělit povolení k PIT manévru?',
     options: [
@@ -848,6 +899,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.14',
     source: 'sasp',
     theme: 'zasah',
+    title: 'PIT zamítnut — opakování žádosti',
     kind: 'choice',
     prompt: 'PIT manévr byl zamítnut velitelem. Co musí příslušník udělat, aby mohl PIT zkusit?',
     options: [
@@ -864,6 +916,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.15',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Podmínky pro povolení PIT',
     kind: 'choice',
     prompt: 'Za jakých podmínek je PIT manévr obvykle povolen?',
     options: [
@@ -880,6 +933,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.16',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Předjíždění při pronásledování',
     kind: 'choice',
     prompt: 'Za jakých okolností se smí předjíždět při 10-80?',
     options: [
@@ -896,6 +950,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.17',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Max. počet spike stripů',
     kind: 'choice',
     prompt: 'Kolik spike stripů smí mít vozidlo PD na začátku patroly?',
     options: [
@@ -912,6 +967,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.18',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Perimetr v uzavřeném prostoru',
     kind: 'choice',
     prompt: 'Jak se zajišťuje perimetr při hledání suspecta v uzavřeném prostoru?',
     options: [
@@ -928,6 +984,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.19',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Chybné jednání při roadblocku',
     kind: 'choice',
     prompt: 'Které jednání při roadblocku je CHYBNÉ a odporuje zásadám?',
     options: [
@@ -944,6 +1001,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.20',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Použití roadblocku',
     kind: 'choice',
     prompt: 'Ve které ze situací je roadblock vhodným taktickým nástrojem?',
     options: [
@@ -960,6 +1018,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.21',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Postup při breachi',
     kind: 'choice',
     prompt: 'Co se zvolá při breachi a jak jsou rozestaveny jednotky?',
     options: [
@@ -976,6 +1035,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.22',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Maximální výkupné bez SGT',
     kind: 'choice',
     prompt: 'Jaká je maximální výše výkupného, kterou příslušník smí schválit bez souhlasu SGT+?',
     options: [
@@ -992,6 +1052,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.23',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Nepřijatelné požadavky velitele',
     kind: 'choice',
     prompt: 'Na jaké požadavky velitel nikdy nepřistupuje?',
     options: [
@@ -1008,6 +1069,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.24',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Priorita záchrany rukojmích',
     kind: 'choice',
     prompt: 'Jaká je priorita vyjednavače i velitele při zásahu s rukojmím?',
     options: [
@@ -1024,6 +1086,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.25',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Pozice vyjednavače',
     kind: 'choice',
     prompt: 'Kde se musí vyjednavač nacházet a co je zakázáno?',
     options: [
@@ -1040,6 +1103,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zasah.26',
     source: 'sasp',
     theme: 'zasah',
+    title: 'Vozidlo samovolně zastaví po 10-80',
     kind: 'choice',
     prompt: 'Vozidlo po pronásledování zastaví samovolně (bez PIT nebo nehody). Jak se postupuje?',
     options: [
@@ -1059,6 +1123,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.1',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Pravidlo 4P a délka zadržení',
     kind: 'choice',
     prompt: 'Jak zní pravidlo 4P a jakou maximální dobu lze na základě něj osobu omezit na osobní svobodě?',
     options: [
@@ -1076,6 +1141,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.2',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Co se do lhůty nezapočítává',
     kind: 'choice',
     prompt: 'Co se do 3hodinové lhůty zadržení nezapočítává?',
     options: [
@@ -1093,6 +1159,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.3',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Kdy nelze vést zkrácené řízení',
     kind: 'choice',
     prompt: 'Kdy NELZE vést zkrácené řízení?',
     options: [
@@ -1110,6 +1177,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.4',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Posloupnost instancí při nesouhlasu',
     kind: 'choice',
     prompt: 'Osoba nesouhlasí s navrhovaným trestem ve zkráceném řízení. Jaká je správná posloupnost instancí, kam se případ postupuje?',
     options: [
@@ -1127,6 +1195,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.5',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Poučení o právech',
     kind: 'choice',
     prompt: 'Která sdělení musí zaznít při poučení zadržené nebo zatčené osoby o jejích právech?',
     options: [
@@ -1144,6 +1213,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.6',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Důsledek nepoučení zadrženého',
     kind: 'choice',
     prompt: 'Jaký je důsledek toho, že příslušník nepoučí zadrženou osobu o jejích právech?',
     options: [
@@ -1161,6 +1231,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.7',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Použití zbraně dle §23',
     kind: 'choice',
     prompt: 'Ve kterých situacích může příslušník použít zbraň dle §23?',
     options: [
@@ -1178,6 +1249,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.8',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Výzva před donucovacími prostředky',
     kind: 'choice',
     prompt: 'Co musí příslušník udělat před použitím donucovacích prostředků a kdy od tohoto požadavku může upustit?',
     options: [
@@ -1195,6 +1267,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.9',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Vazba — rozhodnutí a délka',
     kind: 'choice',
     prompt: 'Kdo rozhoduje o vazbě a na jak dlouho se schvaluje?',
     options: [
@@ -1211,6 +1284,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.10',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Oddělování a prohlídka v celách',
     kind: 'choice',
     prompt: 'Jak se oddělují osoby umístěné v celách S.O.S. a co musí příslušník provést před umístěním?',
     options: [
@@ -1228,6 +1302,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.11',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Odebrání zbraně a vrácení',
     kind: 'choice',
     prompt: 'Za jakých okolností lze odebrat zbraň a jaká povinnost platí po pominutí důvodu?',
     options: [
@@ -1245,6 +1320,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.zadrzeni.12',
     source: 'sasp',
     theme: 'zadrzeni',
+    title: 'Předvedení — délka a výjimky',
     kind: 'choice',
     prompt: 'Jaká je maximální doba předvedení a co se do ní nezapočítává?',
     options: [
@@ -1264,6 +1340,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.1',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Přímý balistický důkaz',
     kind: 'choice',
     prompt: 'Co je přímý balistický důkaz?',
     options: [
@@ -1280,6 +1357,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.2',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Výsledek GSR testu',
     kind: 'choice',
     prompt: 'Co znamená pozitivní výsledek GSR testu?',
     options: [
@@ -1296,6 +1374,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.3',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Dosah GSR v prostoru',
     kind: 'choice',
     prompt: 'Jak velkou oblast pokrývají povýstřelové zplodiny zachytitelné GSR testem v otevřeném prostoru a v uzavřeném prostoru?',
     options: [
@@ -1312,6 +1391,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.4',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Stopa vs důkaz',
     kind: 'choice',
     prompt: 'Jaký je rozdíl mezi kriminalistickou stopou a důkazem?',
     options: [
@@ -1328,6 +1408,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.5',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Neodkladné úkony na místě činu',
     kind: 'choice',
     prompt: 'Které z následujících úkonů patří mezi neodkladné úkony na místě činu?',
     options: [
@@ -1344,6 +1425,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.6',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Zánik kriminalistických stop',
     kind: 'choice',
     prompt: 'Jakými způsoby může dojít k zániku kriminalistických stop?',
     options: [
@@ -1360,6 +1442,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.7',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Kriminalisticky relevantní události',
     kind: 'choice',
     prompt: 'Které události jsou kriminalisticky relevantní?',
     options: [
@@ -1376,6 +1459,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.8',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Přímý vs nepřímý důkaz ze stopy',
     kind: 'choice',
     prompt: 'Které typy stop jsou obvykle přímým důkazem a které nepřímým?',
     options: [
@@ -1392,6 +1476,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.9',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'DNA databáze',
     kind: 'choice',
     prompt: 'Pro koho je vedena DNA databáze a k čemu slouží?',
     options: [
@@ -1408,6 +1493,7 @@ export const SASP_CHOICE: LawChoice[] = [
     id: 'sasp.choice.kriminalistika.10',
     source: 'sasp',
     theme: 'kriminalistika',
+    title: 'Manipulace s biologickými stopami',
     kind: 'choice',
     prompt: 'Jak se správně manipuluje s biologickými stopami a jak se zajišťují?',
     options: [

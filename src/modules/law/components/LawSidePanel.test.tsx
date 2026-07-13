@@ -6,9 +6,9 @@ import type { LawPanelItem } from './LawSidePanel';
 import { LawSidePanel } from './LawSidePanel';
 
 const ITEMS: LawPanelItem[] = [
-  { id: 'q1', source: 'lea', theme: 'pojmy', label: 'Co je LEA §7?' },
-  { id: 'q2', source: 'penal', theme: 'paragrafy', label: 'Co je penal §1?' },
-  { id: 'q3', source: 'sasp', theme: 'rto', label: 'Jaký je kanál RTO?' },
+  { id: 'q1', source: 'lea', theme: 'pojmy', label: 'Prokázání příslušnosti' },
+  { id: 'q2', source: 'penal', theme: 'paragrafy', label: 'Krádež vozidla' },
+  { id: 'q3', source: 'sasp', theme: 'rto', label: 'Rádiový kanál' },
 ];
 
 const PROGRESS: Record<string, ProgressEntry> = {
@@ -30,51 +30,89 @@ const THEME_FILTER = {
   paragrafy: true,
 };
 
+function renderPanel(overrides: Partial<React.ComponentProps<typeof LawSidePanel>> = {}) {
+  return render(
+    <LawSidePanel
+      items={ITEMS}
+      progress={PROGRESS}
+      sourceFilter={SOURCE_FILTER}
+      themeFilter={THEME_FILTER}
+      onSetSource={vi.fn()}
+      onSetTheme={vi.fn()}
+      {...overrides}
+    />,
+  );
+}
+
 describe('<LawSidePanel />', () => {
-  it('renders law-progress-percent', () => {
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={THEME_FILTER}
-        onSetSource={vi.fn()}
-        onSetTheme={vi.fn()}
-      />,
-    );
-    // q1 score=2 → clamp 2, q2 score=0 → 0, q3 score=-1 → clamp 0
-    // pct = (2+0+0)/(2*3) = 2/6 = 33%
-    expect(screen.getByTestId('law-progress-percent')).toBeInTheDocument();
+  it('renders global progress percent (33%)', () => {
+    renderPanel();
     expect(screen.getByTestId('law-progress-percent').textContent).toBe('33%');
   });
 
-  it('renders law-progress-bar', () => {
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={THEME_FILTER}
-        onSetSource={vi.fn()}
-        onSetTheme={vi.fn()}
-      />,
-    );
+  it('renders global progress bar', () => {
+    renderPanel();
     expect(screen.getByTestId('law-progress-bar')).toBeInTheDocument();
+  });
+
+  it('renders one group header per non-empty filtered theme', () => {
+    renderPanel();
+    expect(screen.getByTestId('law-group-pojmy')).toBeInTheDocument();
+    expect(screen.getByTestId('law-group-paragrafy')).toBeInTheDocument();
+    expect(screen.getByTestId('law-group-rto')).toBeInTheDocument();
+    expect(screen.queryByTestId('law-group-hodnosti')).not.toBeInTheDocument();
+  });
+
+  it('group header shows mastered/total count', () => {
+    renderPanel();
+    expect(screen.getByTestId('law-group-pojmy')).toHaveTextContent('1/1');
+  });
+
+  it('groups are collapsed by default (chips not rendered)', () => {
+    renderPanel();
+    expect(screen.queryByTestId('chip-q1')).not.toBeInTheDocument();
+  });
+
+  it('clicking a group header expands it (chips appear)', async () => {
+    const user = userEvent.setup();
+    renderPanel();
+    await user.click(screen.getByTestId('law-group-pojmy'));
+    expect(screen.getByTestId('chip-q1')).toBeInTheDocument();
+  });
+
+  it('auto-expands the group containing currentId', () => {
+    renderPanel({ currentId: 'q2' });
+    expect(screen.getByTestId('chip-q2')).toBeInTheDocument();
+    expect(screen.queryByTestId('chip-q1')).not.toBeInTheDocument();
+  });
+
+  it('chip shows source abbreviation badge', async () => {
+    const user = userEvent.setup();
+    renderPanel();
+    await user.click(screen.getByTestId('law-group-pojmy'));
+    expect(screen.getByTestId('chip-q1')).toHaveTextContent('L');
+  });
+
+  it('chip shows mastered data-done', async () => {
+    const user = userEvent.setup();
+    renderPanel();
+    await user.click(screen.getByTestId('law-group-pojmy'));
+    expect(screen.getByTestId('chip-q1').getAttribute('data-done')).toBe('true');
+  });
+
+  it('fires onSelect when an expanded chip is clicked', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    renderPanel({ onSelect });
+    await user.click(screen.getByTestId('law-group-pojmy'));
+    await user.click(screen.getByTestId('chip-q1'));
+    expect(onSelect).toHaveBeenCalledWith('q1');
   });
 
   it('fires onSetSource when source checkbox toggled', async () => {
     const user = userEvent.setup();
     const onSetSource = vi.fn();
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={THEME_FILTER}
-        onSetSource={onSetSource}
-        onSetTheme={vi.fn()}
-      />,
-    );
+    renderPanel({ onSetSource });
     await user.click(screen.getByTestId('law-filter-source-lea'));
     expect(onSetSource).toHaveBeenCalledWith('lea', false);
   });
@@ -82,81 +120,25 @@ describe('<LawSidePanel />', () => {
   it('fires onSetTheme when theme checkbox toggled', async () => {
     const user = userEvent.setup();
     const onSetTheme = vi.fn();
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={THEME_FILTER}
-        onSetSource={vi.fn()}
-        onSetTheme={onSetTheme}
-      />,
-    );
+    renderPanel({ onSetTheme });
     await user.click(screen.getByTestId('law-filter-theme-rto'));
     expect(onSetTheme).toHaveBeenCalledWith('rto', false);
   });
 
-  it('fires onSelect when chip clicked', async () => {
-    const user = userEvent.setup();
-    const onSelect = vi.fn();
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={THEME_FILTER}
-        onSetSource={vi.fn()}
-        onSetTheme={vi.fn()}
-        onSelect={onSelect}
-      />,
-    );
-    await user.click(screen.getByTestId('chip-q1'));
-    expect(onSelect).toHaveBeenCalledWith('q1');
+  it('hides a group whose source is fully disabled', () => {
+    renderPanel({ sourceFilter: { lea: false, penal: true, sasp: true } });
+    expect(screen.queryByTestId('law-group-pojmy')).not.toBeInTheDocument();
+    expect(screen.getByTestId('law-group-paragrafy')).toBeInTheDocument();
   });
 
-  it('filters out items whose source is disabled', () => {
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={{ lea: false, penal: true, sasp: true }}
-        themeFilter={THEME_FILTER}
-        onSetSource={vi.fn()}
-        onSetTheme={vi.fn()}
-      />,
-    );
-    expect(screen.queryByTestId('chip-q1')).not.toBeInTheDocument();
-    expect(screen.getByTestId('chip-q2')).toBeInTheDocument();
+  it('hides a group whose theme is disabled', () => {
+    renderPanel({ themeFilter: { ...THEME_FILTER, rto: false } });
+    expect(screen.queryByTestId('law-group-rto')).not.toBeInTheDocument();
+    expect(screen.getByTestId('law-group-pojmy')).toBeInTheDocument();
   });
 
-  it('filters out items whose theme is disabled', () => {
-    const themeFilter = { ...THEME_FILTER, rto: false };
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={themeFilter}
-        onSetSource={vi.fn()}
-        onSetTheme={vi.fn()}
-      />,
-    );
-    expect(screen.queryByTestId('chip-q3')).not.toBeInTheDocument();
-    expect(screen.getByTestId('chip-q1')).toBeInTheDocument();
-  });
-
-  it('shows checkmark on mastered chip', () => {
-    render(
-      <LawSidePanel
-        items={ITEMS}
-        progress={PROGRESS}
-        sourceFilter={SOURCE_FILTER}
-        themeFilter={THEME_FILTER}
-        onSetSource={vi.fn()}
-        onSetTheme={vi.fn()}
-      />,
-    );
-    const chip = screen.getByTestId('chip-q1');
-    expect(chip.getAttribute('data-done')).toBe('true');
+  it('renders a mini progress bar per group', () => {
+    renderPanel();
+    expect(screen.getByTestId('law-group-pojmy-bar')).toBeInTheDocument();
   });
 });

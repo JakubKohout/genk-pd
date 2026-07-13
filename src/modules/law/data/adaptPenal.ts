@@ -11,6 +11,7 @@ function adaptOne(s: PenalScenario): LawQuestion {
     theme: 'paragrafy',
     prompt: SCENARIO_PROMPT,
     ref: s.ref,
+    title: s.title,
     note: s.educationalNote,
     scenario: s.prompt,
     kind: 'enumeration',

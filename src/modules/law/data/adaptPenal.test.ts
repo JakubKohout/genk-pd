@@ -39,4 +39,10 @@ describe('adaptPenal', () => {
       }
     }
   });
+
+  it('propagates scenario title to adapted question', () => {
+    const q = adapted.find((x) => x.id === 'penal.scenario.A1');
+    expect(q).toBeDefined();
+    expect(q!.title).toBe('Loupež v obchodě s nožem');
+  });
 });
