@@ -2519,7 +2519,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'jednani',
     title: 'Sdělení badge number civilistovi',
     kind: 'choice',
-    prompt: 'Co musí příslušník s.o.s. sdělit civilistovi, pokud si to vyžádá?',
+    prompt: 'Co musí příslušník SASP sdělit civilistovi, pokud si to vyžádá?',
     note: 'Na vyžádání je příslušník povinen sdělit pouze vlastní badge number. Jméno ani příjmení sdělovat povinen není; totožnost nebo badge number kolegů sdělovat zakázáno.',
     options: [
       'Číslo svého odznaku (badge number)',
@@ -2556,8 +2556,8 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'jednani',
     title: 'Povinnost zasáhnout',
     kind: 'choice',
-    prompt: 'Za jakých okolností má příslušník s.o.s. povinnost zasáhnout?',
-    note: 'Každý příslušník s.o.s. má povinnost zasáhnout, pokud je svědkem protiprávního jednání — bez ohledu na to, zda je zrovna ve službě nebo mimo ni.',
+    prompt: 'Za jakých okolností má příslušník SASP povinnost zasáhnout?',
+    note: 'Každý příslušník SASP má povinnost zasáhnout, pokud je svědkem protiprávního jednání — bez ohledu na to, zda je zrovna ve službě nebo mimo ni.',
     options: [
       'Vždy, když je svědkem protiprávního jednání, i mimo službu',
       'Pouze pokud je aktuálně ve službě a v uniformě',
@@ -3571,7 +3571,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Osoba nesouhlasí s navrhovaným trestem ve zkráceném řízení. Jaká je správná posloupnost instancí, kam se případ postupuje?',
     ref: '§40',
-    note: 'Při nesouhlasu ve zkráceném řízení: SOS navrhuje trest → nesouhlas → SZ → nesouhlas → státní soud → nesouhlas → vrchní soud (konečné, bez dalšího odvolání).',
+    note: 'Při nesouhlasu ve zkráceném řízení: SASP navrhuje trest → nesouhlas → SZ → nesouhlas → státní soud → nesouhlas → vrchní soud (konečné, bez dalšího odvolání).',
     options: [
       'Státní zástupce → státní soud → vrchní soud',
       'Státní soud → vrchní soud → státní zástupce',
@@ -3628,7 +3628,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zadrzeni',
     title: 'Použití zbraně dle §23',
     kind: 'choice',
-    prompt: 'Ve kterých situacích může příslušník použít zbraň dle §23?',
+    prompt: 'Ve kterých situacích může příslušník použít zbraň?',
     ref: '§23',
     note: 'Zákon §23 vyjmenovává šest situací: nutná obrana/krajní nouze, úkryt nebezpečné osoby, odmítnutí odhodit zbraň, útěk nebezpečné osoby, zastavení vozidla jinak nezastavitelného, výjimečný stav. Pouhé odmítnutí zastavit při kontrole k použití zbraně nestačí.',
     options: [
@@ -3670,9 +3670,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Vazba — rozhodnutí a délka',
     kind: 'choice',
     prompt: 'Která tvrzení o vazbě platí?',
-    note: 'O vazbě rozhoduje soud na žádost SZ nebo s.o.s., schvaluje se na 48 hodin a její prodloužení povoluje jen vrchní soud. Státní zástupce o vazbě sám nerozhoduje (jen o ni žádá) a lhůta není 24 hodin.',
+    note: 'O vazbě rozhoduje soud na žádost SZ nebo SASP, schvaluje se na 48 hodin a její prodloužení povoluje jen vrchní soud. Státní zástupce o vazbě sám nerozhoduje (jen o ni žádá) a lhůta není 24 hodin.',
     options: [
-      'O vazbě rozhoduje soud na žádost SZ nebo s.o.s.',
+      'O vazbě rozhoduje soud na žádost SZ nebo SASP',
       'Vazba se schvaluje na 48 hodin',
       'Prodloužení vazby povoluje pouze vrchní soud',
       'O vazbě rozhoduje státní zástupce samostatně',
@@ -3689,9 +3689,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zadrzeni',
     title: 'Oddělování a prohlídka v celách',
     kind: 'choice',
-    prompt: 'Jak se oddělují osoby umístěné v celách S.O.S. a co musí příslušník provést před umístěním?',
+    prompt: 'Jak se oddělují osoby umístěné v celách SASP a co musí příslušník provést před umístěním?',
     ref: '§15',
-    note: 'Cely S.O.S. (§15): osoby se oddělují dle pohlaví, pod vlivem a agresivní. Před umístěním je povinné osobu prohledat — nikoliv až po umístění do cely.',
+    note: 'Cely SASP (§15): osoby se oddělují dle pohlaví, pod vlivem a agresivní. Před umístěním je povinné osobu prohledat — nikoliv až po umístění do cely.',
     options: [
       'Dle pohlaví',
       'Osoby pod vlivem návykových látek se umísťují odděleně',
@@ -3711,7 +3711,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zadrzeni',
     title: 'Odebrání zbraně a vrácení',
     kind: 'choice',
-    prompt: 'Která tvrzení o odebrání zbraně (§18) platí?',
+    prompt: 'Která tvrzení o odebrání zbraně platí?',
     ref: '§18',
     note: 'Zbraň lze odebrat, pokud není registrovaná, osoba nevlastní ZP, je soudní příkaz, je ilegální nebo může sloužit k TČ. Soudní příkaz je jen jeden z důvodů (ne výhradní) a zbraň se vrací do 24 hodin po pominutí důvodu.',
     options: [
@@ -3907,7 +3907,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     options: [
       'Pro osoby odsouzené za násilné trestné činy; k porovnání DNA z místa činu se suspectem',
       'Pro všechny osoby zadržené déle než 48 hodin; k identifikaci recidivistů',
-      'Pro všechny příslušníky s.o.s.; k vyloučení kontaminace místa činu',
+      'Pro všechny příslušníky SASP; k vyloučení kontaminace místa činu',
       'Pro osoby s platným zbrojním průkazem; k sledování vlastnictví zbraní',
       'DNA databáze není v příručce SASP zmiňována',
     ],
@@ -4096,7 +4096,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
       { left: 'F6', right: 'SWAT' },
       { left: 'F7', right: 'klidové řešení (CPZ)' },
       { left: 'F8', right: 'DBI' },
-      { left: 'F9', right: 'vedení s.o.s.' },
+      { left: 'F9', right: 'vedení SASP' },
       { left: 'F10', right: 'společná frekvence EMS + FD' },
     ],
   },
