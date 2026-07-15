@@ -195,7 +195,6 @@ export const LAW_QUESTION_IDS = [
   'sasp.choice.pojmy.5',
   'sasp.choice.pojmy.6',
   'sasp.choice.hodnosti.1',
-  'sasp.scenario.hodnosti.1',
   'sasp.choice.jednani.1',
   'sasp.scenario.jednani.1',
   'sasp.choice.jednani.3',

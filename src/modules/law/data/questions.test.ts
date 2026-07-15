@@ -8,7 +8,7 @@ import { PENAL_PARAGRAPHS } from './paragraphs';
 
 describe('LAW_QUESTIONS dataset', () => {
   it('has expected counts', () => {
-    expect(LAW_QUESTIONS).toHaveLength(137);
+    expect(LAW_QUESTIONS).toHaveLength(136);
   });
 
   it('has unique IDs', () => {
