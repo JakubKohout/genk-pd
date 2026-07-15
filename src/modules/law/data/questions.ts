@@ -626,7 +626,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Umístění do cely',
     kind: 'enumeration',
-    prompt: 'Jakou osobu může příslušník státní ozbrojené složky umístit do cely předběžného zadržení?',
+    prompt: 'Jakou osobu může příslušník SASP umístit do cely předběžného zadržení?',
     ref: '§12 A',
     note: 'Umístění do cely',
     matcher: 'alias',
@@ -755,7 +755,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Odebrání zbraně',
     kind: 'enumeration',
-    prompt: 'V jakých případech má příslušník státní ozbrojené složky pravomoc odebrat zbraň?',
+    prompt: 'V jakých případech má příslušník SASP pravomoc odebrat zbraň?',
     ref: '§15 A',
     note: 'Odebrání zbraně',
     matcher: 'alias',
@@ -844,7 +844,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Způsoby provedení výzvy',
     kind: 'enumeration',
-    prompt: 'Vyjmenuj způsoby, jakými příslušník státní ozbrojené složky provádí výzvu.',
+    prompt: 'Vyjmenuj způsoby, jakými příslušník SASP provádí výzvu.',
     ref: '§16 B',
     note: 'Způsoby provedení výzvy',
     matcher: 'alias',
@@ -952,7 +952,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Vstup do obydlí',
     kind: 'enumeration',
-    prompt: 'Kdy má příslušník státní ozbrojené složky pravomoc vstoupit do obydlí nebo na pozemek?',
+    prompt: 'Kdy má příslušník SASP pravomoc vstoupit do obydlí nebo na pozemek?',
     ref: '§17 A',
     note: 'Vstup do obydlí',
     matcher: 'alias',
@@ -1069,7 +1069,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Zastavení a prohlídka vozidla',
     kind: 'enumeration',
-    prompt: 'Kdy má příslušník státní ozbrojené složky pravomoc zastavit dopravní prostředek a uskutečnit jeho prohlídku?',
+    prompt: 'Kdy má příslušník SASP pravomoc zastavit dopravní prostředek a uskutečnit jeho prohlídku?',
     ref: '§18 A',
     note: 'Zastavení a prohlídka vozidla',
     matcher: 'alias',
@@ -1172,7 +1172,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Prohledání osoby',
     kind: 'enumeration',
-    prompt: 'Kdy má příslušník státní ozbrojené složky pravomoc prohledat osobu?',
+    prompt: 'Kdy má příslušník SASP pravomoc prohledat osobu?',
     ref: '§19 A',
     note: 'Prohledání osoby',
     matcher: 'alias',
@@ -1473,7 +1473,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'paragrafy',
     title: 'Použití zbraně',
     kind: 'enumeration',
-    prompt: 'Kdy má příslušník státní ozbrojené složky pravomoc použít zbraň?',
+    prompt: 'Kdy má příslušník SASP pravomoc použít zbraň?',
     ref: '§23 B',
     note: 'Použití zbraně',
     matcher: 'alias',
@@ -1716,7 +1716,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'enumeration',
     prompt: 'Kdy se osobě odebírá řidičské oprávnění?',
     ref: '§34, §36, §37, §58 PC',
-    note: 'Odebrání řidičského průkazu',
+    note: 'Zavinění dopravní nehody s těžkou újmou na zdraví má za následek odebrání řidičského oprávnění pro všechny skupiny. V ostatních případech se zákaz řízení vztahuje pouze na tu skupinu vozidel, se kterou bylo protiprávní jednání spácháno.',
     matcher: 'alias',
     expected: [
       {
@@ -1831,9 +1831,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Loupež v obchodě s nožem',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel vešel do obchodu s mlékem na Innocence Boulevard, přiložil prodavači nůž ke krku a nechal si vyplatit 15 000 USD z pokladny. Po krátké výhrůžce odešel a před zásahem hlídky se vzdal.',
+    scenario: 'Pachatel vešel do obchodu s mlékem na Innocence Boulevard, přiložil prodavači nůž ke krku a nechal si vyplatit 15 000 SAD z pokladny. Po krátké výhrůžce odešel a před zásahem hlídky se vzdal.',
     ref: 'A1',
-    note: '§25 Krádež se nepřičítá — krádež je subsumována pod loupež, protože šlo o získání věci násilím / pohrůžkou.',
+    note: '§25 Krádež se nepřičítá — krádež je podřazena loupeži, protože šlo o získání věci násilím / pohrůžkou.',
     matcher: 'paragraph',
     expected: [
       {
@@ -1854,9 +1854,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Vloupání do rodinného domu',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel se vloupal do rodinného domu v Rockford Hills a uvnitř pobíral elektroniku v hodnotě cca 40 000 USD. Pachatel měl do teď čistý trestní rejstřík.',
+    scenario: 'Pachatel se vloupal do rodinného domu v Rockford Hills a uvnitř ukradl elektroniku v hodnotě cca 40 000 SAD. Pachatel měl doteď čistý trestní rejstřík.',
     ref: 'A2',
-    note: 'NPC dům není registrovaný dle 004-21, takže §29a (ne §29c). Hodnota 40 K spadá do 20–200 K → §25b.',
+    note: 'NPC dům není registrovaný dle 004-21 (The Property Act), takže §29a (ne §29c). Hodnota 40 000 SAD spadá do §25 písm. b → krádež v hodnotě od 20.001 SAD do 200.000 SAD.',
     matcher: 'paragraph',
     expected: [
       {
@@ -1877,9 +1877,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Odcizení vozidla bez ŘP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel rozbil okno zaparkované Tampy a odjel s ní. Při zastavení hlídkou v ní jel bez řidičského oprávnění (MDT záznam: dnes už stejnou činnost udělal).',
+    scenario: 'Pachatel rozbil okno zaparkované Tampy a odjel s ní. Při zastavení hlídkou v ní jel bez řidičského oprávnění a zmínil, že využívá vozidlo k přesunu (MDT záznam: dnes už stejnou činnost udělal).',
     ref: 'A3',
-    note: '§27 vs. §25: vozidlo je explicitně řešeno §27 (pokuta 3 K), §25 se nepoužije, i když by hodnota přesáhla 200 K. Opakování bez ŘP v 14 dnech → §35b.',
+    note: '§25 vs §27 → osoba zmínila, že vozidlo používá k přesunu z místa A do B, tudíž se jedná o §27, §25 by se využil v případě, že by se osoba chtěla tímto vozidlem obohatit. Opakováné řízení bez ŘO ve 14 dnech → §35b.',
     matcher: 'paragraph',
     expected: [
       {
@@ -1899,7 +1899,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Poškozování aut a vyhrůžka',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel poškrábal hřebíkem 4 zaparkovaná auta na parkovišti u Cluckin\' Bell, škoda odhadem 8 000 USD. Když ho jeden majitel vozu konfrontoval, vyhrožoval mu zabitím.',
+    scenario: 'Pachatel poškrábal hřebíkem 4 zaparkovaná auta na parkovišti u Cluckin\' Bell, škoda odhadem 8 000 SAD. Když ho jeden majitel vozu konfrontoval, vyhrožoval mu zabitím.',
     ref: 'A4',
     matcher: 'paragraph',
     expected: [
@@ -1939,7 +1939,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Pachatel byl vyveden z opuštěného domu v Sandy Shores před 5 dny (záznam v MDT). Dnes ho hlídka nachází znovu uvnitř téhož domu — vstoupil rozbitým zadním oknem.',
     ref: 'A6',
-    note: '§29b (ne §29c) — dům je NPC, takže není registrovaný dle 004-21, ale je tu jasné opakování v 14denním okně. §29b absorbuje samostatný §29a z prvního vstupu.',
+    note: '§29b (ne §29c) — dům je NPC, takže není registrovaný dle 004-21 (The Property Act), ale je tu jasné opakování ve 14denním okně. §29b absorbuje samostatný §29a z prvního vstupu.',
     matcher: 'paragraph',
     expected: [
       {
@@ -1955,7 +1955,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Jízda na červenou bez ŘP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Hlídka zastavila řidiče po projetí semaforu na červenou na křižovatce Vinewood Blvd. MDT prověření odhalilo, že nemá vydané řidičské oprávnění. Nikdy předtím nic podobného nespáchal.',
+    scenario: 'Hlídka zastavila řidiče po projetí semaforu na červenou na křižovatce Vinewood Blvd. Prověření v MDT odhalilo, že nemá vydané řidičské oprávnění. Nikdy předtím nic podobného nespáchal.',
     ref: 'B1',
     matcher: 'paragraph',
     expected: [
@@ -1976,7 +1976,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Rychlá jízda 95 mph, první přestupek',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Radar zaznamenal řidiče Sultanu jedoucího 95 mph na Senora Highway. MDT záznam neukazuje nic za posledních 14 dní.',
+    scenario: 'Radar zaznamenal řidiče Sultanu jedoucího 95 mph na Senora Freeway. Záznam v MDT neukazuje nic za posledních 14 dní.',
     ref: 'B2',
     matcher: 'paragraph',
     expected: [
@@ -1993,8 +1993,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Rychlá jízda 110 mph, opakovaně',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Stejný řidič zastaven podruhé za 24 hodin za jízdu 110 mph na Senora Highway. V MDT už eviduje 2 obdobné pokuty v posledních 14 dnech.',
+    scenario: 'Stejný řidič byl zastaven podruhé za 24 hodin za jízdu 110 mph na Senora Freeway. V MDT už eviduje 2 obdobné pokuty v posledních 14 dnech.',
     ref: 'B3',
+    note: 'K pokutě bude osobě zablokováno řidičské oprávnění na příslušnou skupinu vozidel.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2010,8 +2011,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Jízda pod vlivem alkoholu',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Hlídka zastavila řidiče za jízdu 51 mph v downtownu. Při kontrole byl cítit alkohol; field sobriety test pozitivní.',
+    scenario: 'Hlídka zastavila řidiče za jízdu 51 mph v downtownu. Při kontrole byl cítit alkohol; field sobriety test byl pozitivní.',
     ref: 'B4',
+    note: 'K pokutě bude osobě zablokováno řidičské oprávnění na příslušnou skupinu vozidel (kvůli §36).',
     matcher: 'paragraph',
     expected: [
       {
@@ -2031,9 +2033,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Útěk před hlídkou bez ŘP',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Hlídka zapnula majáky na řidiče za projetí stop značky. Řidič přidal plyn a 5 minut ujížděl, než se vzdal. MDT odhalilo, že nemá řidičské oprávnění.',
+    scenario: 'Hlídka zapnula majáky na řidiče za projetí stop značky. Řidič přidal plyn a 5 minut ujížděl, než se vzdal. Lustrace v MDT odhalila, že nemá řidičské oprávnění.',
     ref: 'B5',
-    note: '§42 (projetí stop značky) se nepřičítá — útěk jako vážnější čin absorbuje předchozí dopravní přestupek, který ho odstartoval.',
+    note: '§42 (projetí stop značky) se nepřičítá — útěk vozidlem jako vážnější čin absorbuje předchozí dopravní přestupek, který ho odstartoval.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2054,8 +2056,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Nedání přednosti, zranění řidiče',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Řidič nedal přednost na křižovatce a narazil do předjíždějícího vozu. Druhý řidič byl odvezen do nemocnice s pohmožděnou rukou.',
+    scenario: 'Řidič nedal přednost na křižovatce a narazil do projíždějícího vozu. Druhý řidič byl odvezen do nemocnice s pohmožděnou rukou.',
     ref: 'B6',
+    note: 'Pohmožděnina není vážná újma (proto §34 písm. b, nikoliv písm. c). Těžkou ujmou se většinou rozumí zranění s trvalými následky.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2091,7 +2094,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Marihuana nalezená ve vozidle',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Při kontrole vozu bylo nalezeno 15 g marihuany ve vakuum-zataveném sáčku v přihrádce u řidiče.',
+    scenario: 'Při kontrole vozu bylo nalezeno 15 g marihuany v sáčku v přihrádce u řidiče.',
     ref: 'C1',
     matcher: 'paragraph',
     expected: [
@@ -2149,7 +2152,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Při kontrole vozu nalezeno u řidiče 8 g kokainu v sáčku v boční kapse bundy.',
     ref: 'C4',
-    note: '§50 (ne §51) — kokain spadá do drog kategorie A–E mimo marihuanu. §51 pokrývá výhradně marihuanu, která má jinou škálu (přestupek od 6 g, tr. čin od 12 g). Edukační kontrast §50 vs. §51.',
+    note: '§50 (ne §51) — kokain spadá do drog kategorie A–E mimo marihuanu. §51 pokrývá výhradně marihuanu, která má jinou škálu (přestupek od 6 g, tr. čin od 12 g).',
     matcher: 'paragraph',
     expected: [
       {
@@ -2167,7 +2170,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Hlídka při kontrole odhalila, že pachatel má pod bundou balistickou vestu. Předložil platný zbrojní průkaz T1.',
     ref: 'D2',
-    note: 'Hlavní edukační moment: i platný ZP T1/T2/T3 NEUMOŽŇUJE nosit ballistickou vestu. Výjimku má jen on-duty ozbrojený personál. Vesta je oděvní doplněk mimo §3 FA, dle §5d → §46b.',
+    note: 'I platný ZP T1/T2/T3 NEUMOŽŇUJE nosit ballistickou vestu. Výjimku mají jen on-duty příslušníci státních ozbrojených složek a osoby s povolením státních ozbrojených složek. Vesta je oděvní doplněk mimo §3 zákona č. 005-20 (The Firearms Act). Dle §5 písm. d zákona č. 005-20 (The Firearms Act) se osoba dopustila §46 písm. b.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2185,7 +2188,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Při kontrole vozu nalezena u řidiče Pistol pod sedadlem. Řidič předložil platný ZP T1, ale zbraň není v centrální registraci. Sériové číslo je čitelné.',
     ref: 'D3',
-    note: '§47 (ne §46), protože pachatel MÁ ZP — porušuje jen registrační povinnost dle §14 FA, ne licenční. Druhý edukační moment kontrastu §46/§47.',
+    note: '§47 (ne §46), protože pachatel MÁ ZP — porušuje jen registrační povinnost dle §14 zákona č. 005-20 (The Firearms Act), ne licenční.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2200,7 +2203,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Rvačka v baru, zlomený nos',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'V baru Pacific Bluffs se strhla potyčka. Pachatel pěstí udeřil hosta a způsobil mu zlomený nos. Host odvezen na pohotovost.',
+    scenario: 'V baru Pacific Bluffs se strhla potyčka. Pachatel pěstí udeřil hosta a způsobil mu zranění s trvalými následky. Host odvezen na pohotovost.',
     ref: 'E1',
     matcher: 'paragraph',
     expected: [
@@ -2219,7 +2222,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Pachatel po hádce na ulici vytáhl baseballovou pálku a opakovaně udeřil oběť do hlavy. Oběť v bezvědomí, převezena do nemocnice.',
     ref: 'E2',
-    note: '§7 (ne §8) — protože byla použita zbraň. Pálka je zbraň ve smyslu Penal Code (každý předmět způsobilý k útoku).',
+    note: '§7 (ne §8) — protože byla použita zbraň. Baseballová pálka je zbraň. Zbraň = každý předmět způsobilý k útoku.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2252,7 +2255,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Únos ženy z restaurace',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel v noci přepadl ženu při východu z restaurace, vtáhl ji do dodávky a odjel. Po hodině auto zastavil v opuštěné lokalitě, ale oběť stačila utéct.',
+    scenario: 'Pachatel v noci přepadl ženu při východu z restaurace, vtáhl ji do dodávky a odjel. Nic ji neukradl ani ji nezranil. Po hodině auto zastavil v opuštěné lokalitě, ale oběť stačila utéct.',
     ref: 'E4',
     matcher: 'paragraph',
     expected: [
@@ -2269,8 +2272,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Únos s výkupným a výhrůžkou smrtí',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel v noci unesl ženu z parkoviště a v kufru auta jí oznámil, že pokud její rodina nezaplatí 50 000 USD výkupné, zabije ji.',
+    scenario: 'Pachatel v noci unesl ženu z parkoviště a v kufru auta jí oznámil, že pokud její rodina nezaplatí 50 000 SAD výkupné, zabije ji.',
     ref: 'E5',
+    note: 'Pachatel sice naplňuje znaky obou paragrafů - §15 i §16 (vydírá rodinu o výkupné a unesené vyhrožuje smrtí), ale použije se pouze přísnější § 16, který v sobě závažnost celého činu již plně zahrnuje.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2292,6 +2296,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Při výjezdu na 10-32 kvůli střelcům v Davis začali pachatelé střílet po přijíždějící sanitce EMS a dalších 5 lidech z dlouhé střelné zbraně. Záchranář byl střelen do ramene a převezen v kritickém stavu.',
     ref: 'E6',
+    note: '§7 písm. e se vztahuje na členy záchranných složek (nikoliv na úřední osoby, jako jsou například příslušníci statních ozbrojených složek). § 44 písm. b a § 46 písm. b jsou použity proto, že dlouhé zbraně nespadají do zbraní kategorie T1.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2317,8 +2322,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Střelba na hlídku při útěku',
     kind: 'enumeration',
     prompt: 'Které paragrafy se na situaci vztahují?',
-    scenario: 'Pachatel ujížděl 110 mph po Highway 1 před hlídkou SASP, vyklonil se z okna a opakovaně střílel po pronásledujícím vozidle. Žádný policista nezraněn, hlídka pokračovala v pursuitu.',
+    scenario: 'Pachatel ujížděl 110 mph po dálnici před hlídkou SASP, vyklonil se z okna a opakovaně střílel po pronásledujícím vozidle. Žádný policista nezraněn, hlídka pokračovala v pursuitu. Vozidlo bylo pachatele.',
     ref: 'E7',
+    note: 'Překročení rychlosti je zahrnuto v §58. Střelba po příslušnících (i kdyby je nezasáhla) je považována za ublížení na zdraví proti úřední osobě, tj. §7d.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2331,11 +2337,6 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
         label: '§58 b',
         subId: 'b',
       },
-      {
-        key: '44b',
-        label: '§44 b',
-        subId: 'b',
-      },
     ],
   },
   {
@@ -2346,7 +2347,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     prompt: 'Které paragrafy se na situaci vztahují?',
     scenario: 'Po hádce před bistrem pachatel vystřelil třikrát z pistole oběti do hrudi a utekl. Oběť převezena se závažnými zraněními do nemocnice, zachráněna akutní operací. Při dopadení u pachatele nalezena pistole; nemá vydaný zbrojní průkaz.',
     ref: 'E8',
-    note: '§11 (ne §7c úmyslné střelnou) — tři rány do hrudi indikují jasný úmysl zabít. §11 absorbuje §7 v případě prokazatelného úmyslu zabíjet.',
+    note: '§11 (ne §7c úmyslné střelnou zbraní) — tři rány do hrudi indikují jasný úmysl zabít. §11 absorbuje §7 v případě prokazatelného úmyslu zabíjet.',
     matcher: 'paragraph',
     expected: [
       {
@@ -2423,7 +2424,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Jak zákon definuje trestný čin?',
     ref: '§11',
-    note: 'Trestný čin = společensky nebezpečný čin označený zákonem jako trestný čin nebo zločin. Pozor na záměnu s přestupkem (označený zákonem jako přestupek); věk (14 let) ani výše škody nejsou součástí definice.',
+    note: 'Trestný čin = společensky nebezpečný čin označený zákonem jako trestný čin nebo zločin. Pozor na záměnu s přestupkem (označený zákonem jako přestupek); věk ani výše škody nejsou součástí definice.',
     options: [
       'Společensky nebezpečný čin označený zákonem jako trestný čin nebo zločin',
       'Jakékoli protiprávní jednání, za které lze uložit trest odnětí svobody',
@@ -2442,7 +2443,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Čím se liší trestný čin od přestupku?',
     ref: '§3',
-    note: 'Přestupek = protiprávní čin označený zákonem jako přestupek. Trestný čin = protiprávní čin označený zákonem jako trestný čin. Klíčové je zákonné označení, ne úmysl ani výše škody.',
+    note: 'Přestupek = protiprávní čin označený zákonem jako přestupek. Trestný čin = protiprávní čin označený zákonem jako trestný čin. Důležité je zákonné označení, ne úmysl ani výše škody.',
     options: [
       'Trestný čin i přestupek jsou protiprávní činy, ale zákon každý z nich označuje jinak',
       'Přestupek je vždy neúmyslný, trestný čin je vždy úmyslný',
@@ -2460,7 +2461,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Zadržení vs zatčení',
     kind: 'choice',
     prompt: 'Jaký je rozdíl mezi zadržením a zatčením?',
-    note: 'Zadržení = pravidlo 4P (přistižení nebo důvodné podezření) na místě, max. 3 hodiny. Zatčení = soudce vydá zatykač poté, co se osoba nedostaví k hlavnímu líčení.',
+    note: 'Zadržení = pravidlo 4P (přistižení nebo důvodné podezření) na místě, max. doba zadržení 3 hodiny. Zatčení = soudce vydá zatykač poté, co se osoba nedostaví k hlavnímu líčení.',
     options: [
       'Zadržení probíhá na místě podle pravidla 4P; zatčení nařizuje soudce zatykačem',
       'Zatčení probíhá na místě podle pravidla 4P; zadržení nařizuje soudce zatykačem',
@@ -2499,13 +2500,13 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Hodnosti Staff SASP',
     kind: 'choice',
     prompt: 'Která z následujících hodností patří mezi Staff SASP?',
-    note: 'Staff SASP jsou: Captain, Lieutenant, Sergeant II, Sergeant a Detective III. Pozor: řadový Detective (bez III), Senior Trooper i Trainee mezi Staff nepatří.',
+    note: 'Staff SASP jsou: Captain, Lieutenant, Sergeant II, Sergeant a Detective III. Pozor: Detective II, Senior Trooper i Trainee mezi Staff nepatří.',
     options: [
       'Captain',
       'Lieutenant',
       'Sergeant',
       'Senior Trooper',
-      'Detective',
+      'Detective II',
       'Trainee',
     ],
     correctIndices: [
@@ -2520,7 +2521,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Sdělení badge number civilistovi',
     kind: 'choice',
     prompt: 'Co musí příslušník SASP sdělit civilistovi, pokud si to vyžádá?',
-    note: 'Na vyžádání je příslušník povinen sdělit pouze vlastní badge number. Jméno ani příjmení sdělovat povinen není; totožnost nebo badge number kolegů sdělovat zakázáno.',
+    note: 'Na vyžádání je příslušník POVINEN sdělit pouze VLASTNÍ badge number. Jméno ani příjmení není povinen sdělovat; totožnost nebo badge number kolegů je přísně zakázáno sdělovat.',
     options: [
       'Číslo svého odznaku (badge number)',
       'Své jméno a příjmení',
@@ -2538,8 +2539,8 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Žádost o badge number kolegy',
     kind: 'choice',
     prompt: 'Jak má příslušník správně zareagovat na tuto žádost?',
-    scenario: 'Zadržená osoba sedí v cele předběžného zadržení. Obrátí se na přítomného příslušníka se slovy: „Chci podat stížnost na toho druhého policistu, co mě sem přivezl. Dejte mi jeho číslo odznaku."',
-    note: 'Příslušník smí sdělit jen vlastní badge number. Totožnost ani číslo odznaku kolegů sdělovat nesmí — ani na oprávněně znějící žádost, ani se souhlasem kolegy. Stížnost lze podat i bez čísla kolegy.',
+    scenario: 'Zadržená osoba sedí v cele předběžného zadržení. Obrátí se na přítomného příslušníka se slovy: „Chci podat stížnost na toho druhého příslušníka, co mě sem přivezl. Dejte mi jeho číslo odznaku."',
+    note: 'Příslušník smí sdělit jen vlastní badge number. Totožnost ani číslo odznaku kolegů sdělovat nesmí — ani na oprávněně znějící žádost, ani se souhlasem kolegy. Stížnost lze podat i bez badge numberu kolegy.',
     options: [
       'Žádost odmítnout — totožnost ani číslo odznaku kolegů se sdělovat nesmí',
       'Vyhovět a číslo odznaku kolegy sdělit, jde o oprávněnou stížnost',
@@ -2574,14 +2575,14 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'jednani',
     title: 'Pořadová příprava — vstup a pozdrav',
     kind: 'choice',
-    prompt: 'Jak Trooper správně postupuje?',
-    scenario: 'Trooper nese hlášení do kanceláře velitele. Dveře jsou zavřené; uvnitř spolu hovoří Lieutenant, Sergeant a další Trooper.',
+    prompt: 'Jak má Trooper správně postupovat?',
+    scenario: 'Trooper byl seržantem předvolán do kanceláře kapitána. Dveře jsou zavřené; uvnitř spolu hovoří Lieutenant, Sergeant a další Trooper.',
     note: 'Pořadová příprava: před vstupem zaklepat a počkat na vyzvání; v místnosti s více hodnostmi se zdraví nejvyšší přítomná hodnost (zde Lieutenant), bez ohledu na to, kdo předvolal.',
     options: [
       'Zaklepe, počká na vyzvání, vstoupí a pozdraví Lieutenanta',
       'Zaklepe, počká na vyzvání, vstoupí a pozdraví Sergeanta, který ho předvolal',
       'Zaklepe, vstoupí a pozdraví všechny přítomné postupně podle hodnosti',
-      'Vstoupí bez klepání, protože nese služební hlášení, a pozdraví Lieutenanta',
+      'Vstoupí bez klepání, protože byl předvolán, a pozdraví Lieutenanta',
       'Zaklepe, počká na vyzvání, vstoupí a pozdraví přítomného Troopera jako prvního',
     ],
     correctIndices: [
@@ -2594,7 +2595,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Volací znak detektivní hlídky',
     kind: 'choice',
     prompt: 'Jaký volací znak používá hlídka složená ze dvou detektivů?',
-    note: 'Dva detektivové na patrole hlásí volací znak Henry. Viktor je volací znak sólové hlídky, Adam volací znak dvojice uniformovaných příslušníků.',
+    note: 'Dva detektivové na patrole hlásí volací znak Henry. Viktor je volací znak sólové hlídky, Adam volací znak dvojice běžných příslušníků.',
     options: [
       'Henry',
       'Adam',
@@ -2611,10 +2612,10 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'rto',
     title: 'Hlášení zahájení patroly dvojicí',
     kind: 'choice',
-    prompt: 'Jaký volací znak a číslo použije dvojice uniformovaných příslušníků při zahájení patroly?',
-    note: 'Dvojice = volací znak Adam + číslo vyšší hodnosti. Např. Adam-13, pokud má výše postavený příslušník číslo 13.',
+    prompt: 'Jaký volací znak a číslo použije dvojice běžných příslušníků při zahájení patroly?',
+    note: 'Dvojice = volací znak Adam + nejnižší číslo Viktora ve vozidle. Např. Adam-13, pokud se vozidle nachází V-13, V-15 a V-60.',
     options: [
-      'Adam a číslo podle volacího čísla vyšší hodnosti',
+      'Adam a nejnižší číslo volačky Viktor ve vozidle',
       'Viktor a číslo každého příslušníka zvlášť',
       'Henry a číslo nižší hodnosti',
       'Tom a pořadové číslo přidělené dispečinkem',
@@ -2629,8 +2630,8 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'rto',
     title: 'Hlášení při příchodu do služby',
     kind: 'choice',
-    prompt: 'Co příslušník hlásí na rádio ihned po příchodu do služby?',
-    note: 'Po příchodu do služby se hlásí „Tom-1, 10-8" (dispečink, jsem k dispozici). Teprve poté lze žádat o patrolu nebo hlásit zahájení patroly.',
+    prompt: 'Co příslušník hlásí na vysílačku ihned po příchodu do služby?',
+    note: 'Po příchodu do služby se hlásí „Váš volací znak, 10-8" (ve službě, k dispozici). Teprve poté lze žádat o patrolu nebo hlásit zahájení patroly.',
     options: [
       'Tom-1, 10-8',
       'Tom-1, 10-41 jako 10-12',
@@ -2647,15 +2648,15 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'rto',
     title: 'Zahájení patroly Sergeant + Trooper',
     kind: 'choice',
-    prompt: 'Jak příslušník správně zahájí tuto patrolu na rádiu?',
-    scenario: 'Sergeant Torres (č. 27) si bere na doprovod Troopera Nováka (č. 52) na patrolu v oblasti Sandy Shores. Trooper Novák zahajuje hlášení.',
-    note: 'Při dvojici se hlásí volající znak původního příslušníka (Viktor-52), pak přiřazení k Adamu číslem vyšší hodnosti (Adam-27), a poté samo hlášení patroly.',
+    prompt: 'Jak příslušník správně zahájí tuto patrolu na vysílačce?',
+    scenario: 'Sergeant Torres (volačka V-27) si bere kolegu Troopera Reyese (volačka V-52) na patrolu v oblasti Sandy Shores. Trooper Reyes zahajuje hlášení.',
+    note: 'Při dvojici se začíná příslušníkem s nižší volačkou (V-27), následně druhý příslušník (V-52) a z toho vznikne Adam-27. Zahájení patroly se provádí desítkovým kódem 10-41 + oblast.',
     options: [
-      'Tom-1, Viktor-52 jako Adam-27, Adam-27 10-41 Sandy Shores',
-      'Tom-1, Viktor-52, Viktor-52 10-41 Sandy Shores',
-      'Tom-1, Adam-52, Adam-52 10-41 Sandy Shores',
-      'Tom-1, Henry-52 jako Adam-27, Adam-27 10-41 Sandy Shores',
-      'Tom-1, Adam-27, Adam-27 10-41 Sandy Shores',
+      'Viktor-27, Viktor-52 jako Adam-27, Adam-27 10-41 Sandy Shores',
+      'Viktor-27, Viktor-52, jako Viktor-27 10-41 Sandy Shores',
+      'Viktor-52 jako Adam-52, Adam-52 10-41 Sandy Shores',
+      'Viktor-27, William-52 jako Adam-27, Adam-27 10-41 Sandy Shores',
+      'Viktor-27 jako Adam-27, Adam-27 10-41 Sandy Shores',
     ],
     correctIndices: [
       0,
@@ -2703,7 +2704,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Zákaz použití taseru',
     kind: 'choice',
     prompt: 'Na koho je použití taseru zakázáno?',
-    note: 'Manuál výslovně zakazuje použití taseru X26 na těhotné ženy. Jiné skupiny nejsou v příručce takto označeny.',
+    note: 'Taser je zakázán používat na těhotné ženy.',
     options: [
       'Na těhotné ženy',
       'Na osoby mladší 18 let',
@@ -2738,8 +2739,8 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'vybava',
     title: 'Hlášení po výstřelu',
     kind: 'choice',
-    prompt: 'Co příslušník hlásí na rádio při použití střelné zbraně?',
-    note: 'Při použití střelné zbraně je povinné okamžitě nahlásit „shots fired" spolu s vlastní polohou, aby dispečink mohl zkoordinovat podporu.',
+    prompt: 'Co příslušník hlásí na vysílačku při použití střelné zbraně?',
+    note: 'Při použití střelné zbraně je povinné okamžitě nahlásit „shots fired" spolu s vlastní polohou.',
     options: [
       '„Shots fired" a svoji polohu',
       '„Taser deployed" a polohu suspecta',
@@ -2757,7 +2758,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Priorita před použitím pistole',
     kind: 'choice',
     prompt: 'Co by měl příslušník preferovat před použitím combat pistol?',
-    note: 'Combat pistol se používá výhradně v nutné obraně, krajní nouzi nebo dle LEA. Vždy je třeba nejprve zvážit použití taseru nebo obušku.',
+    note: 'Combat pistol se používá výhradně v nutné obraně, krajní nouzi nebo dle §23 LEA. Vždy je třeba nejprve zvážit použití jiného donucovacího prostředku.',
     options: [
       'Taser a teleskopický obušek',
       'Varovný výstřel do vzduchu',
@@ -2775,9 +2776,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Aktivace Panic A',
     kind: 'choice',
     prompt: 'Kdy příslušník aktivuje Panic A?',
-    note: 'Panic A se aktivuje příkazem /panicA při situaci 10-99. Panic B je určen pro dopravní nehody. Dispatch může panic aktivovat i automaticky, ale příslušník ho aktivuje ručně při 10-99.',
+    note: 'Panic A se aktivuje příkazem /panicA při situaci 10-99. Panic B je určen pro dopravní nehody. 10-100 se aktivuje stiskem klávesy E při upadnutí do PK.',
     options: [
-      'Při situaci 10-99 (officer down / ohrožení života)',
+      'Při situaci 10-99 (okamžitá asistence / ohrožení života)',
       'Při dopravní nehodě',
       'Při zahájení pronásledování (10-80)',
       'Při vstupu do rizikové oblasti (hood)',
@@ -2793,7 +2794,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Aktivace Panic B',
     kind: 'choice',
     prompt: 'Kdy příslušník aktivuje Panic B?',
-    note: 'Panic B (/panicB) se aktivuje při dopravní nehodě. Panic A (/panicA) je určen pro 10-99.',
+    note: 'Panic B (/panicB) se aktivuje při dopravní nehodě. Panic A (/panicA) je určen pro okamžitou asistenci.',
     options: [
       'Při dopravní nehodě',
       'Při situaci 10-99 (officer down)',
@@ -2811,13 +2812,13 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Bodycam — vlastnosti',
     kind: 'choice',
     prompt: 'Která tvrzení o bodycamu platí?',
-    note: 'Bodycam nahrává nepřetržitě, jeho vypnutí se loguje (lze se dotazovat proč) a v autě i na stanici se záznam automaticky odesílá na cloud. Vypnout ho lze (proto se vypnutí loguje) a stahování záznamů je povoleno až od hodnosti Sergeant výše.',
+    note: 'Bodycam nahrává nepřetržitě, jeho vypnutí se loguje (lze se dotazovat proč) a v autě i na stanici se záznam automaticky odesílá na cloud. Vypnout ho lze (proto se vypnutí loguje) a stahování záznamů je povoleno až od hodnosti Sergeant výše, pokud se nejedná o řešení protiprávního jednání - tam je stažení BC povoleno bez schválení.',
     options: [
       'Nahrává nepřetržitě',
       'Vypnutí se loguje — příslušník může být dotázán, proč kameru vypnul',
       'V autě a na stanici se záznam automaticky odesílá na cloud',
       'Bodycam nelze vypnout — nahrává trvale bez možnosti přerušení',
-      'Stahovat záznamy může kdokoliv od hodnosti Trooper výše',
+      'Stahovat záznamy může kdokoliv a kdykoliv od hodnosti Trooper výše',
     ],
     correctIndices: [
       0,
@@ -2831,7 +2832,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Dashcam — vlastnosti',
     kind: 'choice',
     prompt: 'Která tvrzení o dashcamu platí?',
-    note: 'Dashcam je kamera vpředu i vzadu vozu, nahrává stále a nejde vypnout; data se odesílají na cloud. Vypnout ho nelze a stahování záznamů je povoleno až od hodnosti Sergeant výše.',
+    note: 'Dashcam je kamera vpředu i vzadu vozu, nahrává stále a nejde vypnout; data se odesílají na cloud. Vypnout ho nelze a stahování záznamů je povoleno až od hodnosti Sergeant výše, pokud se nejedná o řešení protiprávního jednání - tam je stažení DC povoleno bez schválení.',
     options: [
       'Snímá prostor před vozem i za ním',
       'Nahrává trvale a nelze ho vypnout',
@@ -2905,7 +2906,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Standardní výbava PD vozu',
     kind: 'choice',
     prompt: 'Co patří do standardní výbavy PD vozu?',
-    note: 'Každé PD vozidlo má alkohol tester, dashcam (kamera vpředu i vzadu), taser, obušek a max. 2 spike stripy. Tint Meter je výbava SGT a TEU vozidel. Bodycam je osobní výbava příslušníka, ne vozidla.',
+    note: 'Každé PD vozidlo má alkohol tester, dashcam (kamera vpředu i vzadu), taser, obušek a max. 2 spike stripy (+ další výbava). Tint Meter je výbava SGT a TEU vozidel. Bodycam je osobní výbava příslušníka, ne vozidla.',
     options: [
       'Alkohol tester',
       'Dashcam',
@@ -2928,14 +2929,14 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Hlášení zastavení vozidla',
     kind: 'choice',
     prompt: 'Jak zní správné hlášení po zastavení vozidla?',
-    scenario: 'Trooper Kovac zastaví na Integrity Way černý pickup. SPZ je platná, řidič nespolupracuje.',
-    note: 'Hlášení 10-11 se hlásí vlastním volacím znakem, kódem a polohou s popisem vozidla — bez oslovení dispečinku (Tom-1 se používá např. při nástupu do služby nebo žádosti o patrolu, ne u běžného 10-11). 10-15 znamená převoz zadržené osoby, Code 5 je felony stop.',
+    scenario: 'Trooper Doe (volačka V-44) zastaví na Integrity Way černý pickup. SPZ je platná, řidič nespolupracuje.',
+    note: 'Hlášení 10-11 se hlásí vlastním volacím znakem, kódem a polohou s popisem vozidla. Code 5 je felony stop.',
     options: [
       'Viktor-44, 10-11 Integrity Way, černý pickup',
-      'Tom-1, Viktor-44, 10-11 Integrity Way, černý pickup',
-      'Tom-1, Viktor-44, 10-15, Integrity Way',
+      'Adam-44, 10-11 Integrity Way, černý pickup',
+      'Trooper Doe, 10-11, Integrity Way, černý pickup',
       'Viktor-44, Code 5, Integrity Way, černý pickup',
-      'Tom-1, 10-11 Integrity Way, Viktor-44',
+      'Viktor-44, 10-11',
     ],
     correctIndices: [
       0,
@@ -2947,10 +2948,10 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Kontrola bez dokladů',
     kind: 'choice',
     prompt: 'Jak příslušník správně postupuje?',
-    scenario: 'Při 10-11 na Elysian Fields Fwy řidič tvrdí, že nemá u sebe žádné doklady. Odmítá sdělit jméno i cokoliv jiného.',
-    note: 'Pokud osoba u 10-11 nemá doklady, závisí postup na úvaze zasahujícího: vyřešit na místě (např. ověřit VIN), nebo zadrženou osobu odvézt na stanici. Vždy se jedná přiměřeně.',
+    scenario: 'Při 10-11 na Elysian Fields Fwy řidič tvrdí, že u sebe nemá žádné doklady. Ve vozidle odmítá sdělit jméno i cokoliv jiného.',
+    note: 'Pokud osoba u 10-11 nemá doklady, závisí postup na úvaze příslušníka: vyřešit na místě (nechat si osobu vystoupit a počkat, zda jméno sdělí - pokud ano, ověří si ho skrz MDT), nebo osobu zadržet a převést na stanici, kde provede ztotožnění skrz čtečku otisků prstů. Vždy se jedná přiměřeně.',
     options: [
-      'Příslušník posoudí situaci a rozhodne, zda vyřeší na místě, nebo osobu zadrží a odveze na stanici',
+      'Příslušník posoudí situaci a rozhodne, zda to vyřeší na místě, nebo osobu zadrží a odveze na stanici',
       'Příslušník musí osobu okamžitě propustit, protože bez dokladů nelze totožnost ověřit',
       'Příslušník okamžitě vydá příkaz k zatčení za neuposlechnutí výzvy',
       'Příslušník osobu vždy zadrží a odveze na stanici — řešení na místě není u chybějících dokladů přípustné',
@@ -2967,9 +2968,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Co musí secondary unit průběžně hlásit při tomto pronásledování?',
     scenario: 'Viktor-31 zahájil 10-80 na žlutém sporťáku jedoucím kolem 90 mph na Route 68 směrem na Grapeseed. Trooper Ibáñez se připojuje jako secondary.',
-    note: 'Secondary unit přebírá průběžné hlášení pozice, směru, rychlosti, popisu vozidla, SPZ a počtu osob. Primary se může soustředit na řízení. Air unit přebírá hlášení, pokud je dostupný.',
+    note: 'Secondary unit přebírá průběžné hlášení pozice a směru. Dále může hlásit rychlost, popis vozidla, SPZ a počet osob. Primary se může soustředit na řízení. Air unit přebírá hlášení, pokud je dostupný.',
     options: [
-      'Polohu, směr jízdy, rychlost, popis vozidla, SPZ a počet osob ve vozidle',
+      'Polohu a směr jízdy. Dále může hlásit rychlost, popis vozidla, SPZ a počet osob ve vozidle',
       'Jen polohu a směr — ostatní detaily hlásí primary unit',
       'Jen SPZ a popis vozidla, aby nezatěžoval kanál',
       'Polohu a rychlost; popis vozidla hlásí dispečink z databáze',
@@ -2986,7 +2987,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Jaký postup žádosti o PIT manévr je správný?',
     scenario: 'Viktor-22 pronásleduje stříbrné SUV na Senora Fwy. SUV kličkuje a vjíždí do protisměru. Rychlost kolem 55 mph. Příslušník chce provést PIT.',
-    note: 'Žádost o PIT: uvést průměrnou rychlost a zdůvodnit ohrožení. Povolení dává SGT+. Žádá se jen jednou (pokud se podmínky nezmění). Při ohrožení protisměrem/kličkováním jsou podmínky PIT splněny.',
+    note: 'Žádost o PIT: uvést průměrnou rychlost a zdůvodnit ohrožení. Povolení dává SGT+. Žádá se jen jednou (pokud se podmínky nezmění).',
     options: [
       'Hlásit průměrnou rychlost, že vozidlo ohrožuje dopravu, a požádat SGT+ o povolení',
       'Provést PIT ihned, hlásit až po provedení',
@@ -3024,9 +3025,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Jak příslušník koordinuje postup a co hlásí po zajištění místa?',
     scenario: 'Na Panorama Dr dojde k 10-50 s těžkými zraněními. EMS a FD jsou již na místě. TEU přijíždí za účelem vyšetření.',
-    note: 'SASP na 10-50: zajistit perimetr a bezpečnost provozu, EMS ošetřuje zraněné, FD řídí nebezpečí (požár, únik). TEU vyšetřuje příčinu. Hlásit 10-50 a polohu.',
+    note: 'SASP na 10-50: zajistit perimetr a bezpečnost provozu, EMS ošetřuje zraněné, FD řídí nebezpečí (požár, únik). TEU vyšetřuje příčinu.',
     options: [
-      'Zajistit perimetr a dopravu; nechat EMS ošetřit zraněné, FD řídit nebezpečí; po stabilizaci koordinovat s TEU vyšetření; hlásit 10-50 + polohu',
+      'Zajistit perimetr a dopravu; nechat EMS ošetřit zraněné, FD řídit nebezpečí; po stabilizaci koordinovat s TEU vyšetření',
       'Zajistit perimetr, ošetření zraněných řídit sám a EMS nechat jen asistovat; s TEU vyšetření nekoordinovat',
       'Vyčkat, až FD i EMS opustí místo; teprve poté zajistit perimetr a začít řídit provoz a vyšetření',
       'Přednostně odvézt zraněné vlastním vozem do nemocnice a zajištění perimetru přenechat TEU',
@@ -3096,7 +3097,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Osoby samy od sebe vystupují',
     kind: 'choice',
     prompt: 'Co udělá příslušník, pokud při zastavování vozidla začnou osoby samy od sebe vystupovat?',
-    note: 'Pokud osoby začnou samy vystupovat → příslušník taktéž vystoupí a volá 10-32 (osoba je ozbrojená). Jde o prevenci napadení.',
+    note: 'Pokud osoby začnou samy vystupovat → příslušník taktéž vystoupí a volá 10-32. Jde o prevenci napadení.',
     options: [
       'Příslušník také vystoupí a volá 10-32 — prevence napadení',
       'Zůstane ve vozidle a čeká, dokud osoby opět nesednou',
@@ -3114,7 +3115,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Nesouhlas s pokutou',
     kind: 'choice',
     prompt: 'Suspect nesouhlasí s pokutou při 10-11. Jak příslušník postupuje?',
-    note: 'Nesouhlas s pokutou = příslušník pokutu NEnapíše, zadrží suspecta a odveze na stanici. Neprodleně oznámí obvinění a doloží důkazy.',
+    note: 'Nesouhlas s pokutou = příslušník pokutu NEnapíše, zadrží suspecta a odveze na stanici. Neprodleně oznámí obvinění a doloží důkazy. Při nesouhlasu po doložení důkazů se kontaktuje státní zastupitelsví.',
     options: [
       'Pokutu nevypisuje, omezí suspecta na osobní svobodě, zadrží ho a odveze na stanici',
       'Pokutu vypisuje bez ohledu na souhlas — souhlas se nevyžaduje',
@@ -3132,13 +3133,13 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Lhůta na zaplacení pokuty',
     kind: 'choice',
     prompt: 'Kolik dní má suspect na zaplacení pokuty?',
-    note: 'Standardní lhůta na zaplacení pokuty jsou 14 dní od jejího vystavení.',
+    note: 'Standardní lhůta na zaplacení pokuty je 14 kalendářních dní od jejího vystavení.',
     options: [
-      '14 dní',
+      '14 kalendářních dní',
       '7 dní',
-      '30 dní',
+      '14 pracovních dní',
       '24 hodin',
-      '60 dní',
+      '28 dní',
     ],
     correctIndices: [
       0,
@@ -3156,7 +3157,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
       'Tom-1, Viktor-15, 10-11 ukončena',
       'Viktor-15, Code 4',
       'Tom-1, 10-98 Viktor-15',
-      'Viktor-15, 10-11 zakončena, Code 2',
+      'Viktor-15, 10-11 zakončena, Code 1',
     ],
     correctIndices: [
       0,
@@ -3168,7 +3169,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Ukázání fotografie z radaru',
     kind: 'choice',
     prompt: 'Kdy příslušník smí ukázat fotografii z radaru?',
-    note: 'Fotku z radaru lze ukázat suspect až na stanici, ne přímo na místě 10-11.',
+    note: 'Fotku z radaru lze ukázat suspect až na stanici (je to náš důkaz v případě nesouhlasu), ne přímo na místě 10-11.',
     options: [
       'Až na stanici',
       'Ihned na místě 10-11 jako důkaz',
@@ -3222,7 +3223,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Vozidlo nezastaví dobrovolně',
     kind: 'choice',
     prompt: 'Vozidlo po PIT manévru nebo nehodě nezastaví dobrovolně. Jak se postupuje?',
-    note: 'Code 5 se provádí jen pokud vozidlo zastaví samovolně. Pokud nezastaví dobrovolně (PIT, nehoda), osoby se rovnou vytahují z vozidla — pokud to dovoluje jejich zdravotní stav.',
+    note: 'Code 5 se provádí jen pokud vozidlo zastaví dobrovolně. Pokud nezastaví dobrovolně (PIT, nehoda), tak se provádí box a osoby se rovnou vytahují z vozidla — pokud to dovoluje jejich zdravotní stav.',
     options: [
       'Osoby se vytahují přímo z vozidla bez provádění Code 5',
       'Vždy se provede Code 5, aby byl postup standardizovaný',
@@ -3258,7 +3259,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Hodnost pro povolení PIT',
     kind: 'choice',
     prompt: 'Od jaké hodnosti lze udělit povolení k PIT manévru?',
-    note: 'Povolení k PIT manévru uděluje Sergeant (SGT) nebo vyšší hodnost. Řadoví příslušníci (Trooper, Junior Trooper) povolení udělit nemohou.',
+    note: 'Povolení k PIT manévru uděluje Sergeant (SGT) nebo vyšší hodnost. Řadoví příslušníci (Trooper, Junior Trooper) povolení udělit nemohou. Výjimka může nastat v případě, kdy je PIT manévr nutný, ale není přítomen žádný člen Staffu.',
     options: [
       'SGT nebo vyšší hodnost',
       'Jakýkoli příslušník na místě',
@@ -3275,13 +3276,13 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zasah',
     title: 'PIT zamítnut — opakování žádosti',
     kind: 'choice',
-    prompt: 'PIT manévr byl zamítnut velitelem. Co musí příslušník udělat, aby mohl PIT zkusit?',
-    note: 'Zamítnutý PIT = musí se žádat znovu. Pokud byl PIT jen neúspěšný (nezamítnutý), není třeba nová žádost. Podmínky se musí posoudit znovu při každém zamítnutí.',
+    prompt: 'PIT manévr byl zamítnut. Co musí příslušník udělat, aby mohl PIT manévr provést?',
+    note: 'Zamítnutý PIT = musí se čekat na změnu podmínek, protože do té doby se jedná o stejnou situaci, která už zamítnutá byla. Při změně podmínek lze zažádat znovu.',
     options: [
-      'Žádat znovu, protože zamítnutí platí jen do změny podmínek nebo výslovně jen pro daný okamžik',
+      'Respektovat zamítnutí, pokračovat v 10-80 a čekat na změnu podmínek. Při změně lze zažádat znovu.',
       'Může PIT provést bez dalšího povolení, protože jde o urgentní situaci',
       'Nemusí žádat znovu — zamítnutí je bezpředmětné, pokud ohrožení pokračuje',
-      'Požádat jiného SGT+ — zamítnutí jednoho velitele neplatí pro ostatní',
+      'Požádat jiného SGT+ — zamítnutí jednoho nemusí platit u jiných',
       'Nemůže PIT nikdy provést, pokud byl jednou zamítnut',
     ],
     correctIndices: [
@@ -3294,9 +3295,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Podmínky pro povolení PIT',
     kind: 'choice',
     prompt: 'Za jakých podmínek je PIT manévr obvykle povolen?',
-    note: 'PIT se obvykle povoluje, pokud suspect jede do protisměru nebo kličkuje. Obvykle se neprovádí ve městě nebo hustě obydlených oblastech.',
+    note: 'PIT se obvykle povoluje, pokud suspect jezdí v protisměru nebo opakovaně kličkuje. Neprovádí se ve městě nebo hustě obydlených oblastech.',
     options: [
-      'Suspect jede do protisměru nebo kličkuje a ohrožuje dopravu',
+      'Suspect silně ohrožuje dopravu a civilisty, například kličkováním, jízdou v protisměru',
       'Suspect překročil rychlost o více než 30 mph',
       'Suspect projel červenou a nereagoval na výzvu',
       'PIT lze vždy použít, pokud trval pronásledování déle než 5 minut',
@@ -3312,7 +3313,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Předjíždění při pronásledování',
     kind: 'choice',
     prompt: 'Za jakých okolností se smí předjíždět při 10-80?',
-    note: 'Výchozí pravidlo: nepředjíždíme. Výjimka: suspect ve velmi rychlém vozidle a primary unit nestačí. Každé předjetí se hlásí na rádio.',
+    note: 'Výchozí pravidlo: nepředjíždíme. Výjimka: suspect ve velmi rychlém vozidle a primary unit nestačí. Každé předjetí se hlásí na vysílačku.',
     options: [
       'Pokud má suspect velmi rychlé vozidlo a primary unit nestačí udržet tempo',
       'Při každém pronásledování delším než 2 minuty',
@@ -3329,8 +3330,8 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zasah',
     title: 'Max. počet spike stripů',
     kind: 'choice',
-    prompt: 'Kolik spike stripů smí mít vozidlo PD na začátku patroly?',
-    note: 'Maximálně 2 spike stripy ve vozidle před začátkem patroly. Jejich přesná poloha při použití se hlásí.',
+    prompt: 'Kolik spike stripů musí mít vozidlo PD na začátku patroly?',
+    note: 'Povinná výbava jsou 2 spike stripy ve vozidle před začátkem patroly. Jejich přesná poloha při použití se hlásí.',
     options: [
       '2',
       '1',
@@ -3348,9 +3349,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Perimetr v uzavřeném prostoru',
     kind: 'choice',
     prompt: 'Jak se zajišťuje perimetr při hledání suspecta v uzavřeném prostoru?',
-    note: 'Perimetr se zajišťuje po úhlopříčkách SZ–JV. Minimálně 2 jednotky zajišťují perimetr, ostatní prohledávají.',
+    note: 'Perimetr se zajišťuje po úhlopříčkách. Minimálně 2 jednotky zajišťují perimetr, ostatní prohledávají.',
     options: [
-      'Po úhlopříčkách (Severozápad–Jihovýchod), minimálně 2 jednotky',
+      'Po úhlopříčkách (např. Severozápad–Jihovýchod), minimálně 2 jednotky',
       'V kruhu kolem objektu, minimálně 4 jednotky',
       'Podél hlavních ulic, minimálně 1 jednotka',
       'Dle uvážení velitele zásahu bez pevného pravidla',
@@ -3366,7 +3367,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Chybné jednání při roadblocku',
     kind: 'choice',
     prompt: 'Které jednání při roadblocku je CHYBNÉ a odporuje zásadám?',
-    note: 'Zásady roadblocku: nahlásit pruh a nikdy s vozidlem nehýbat. Pohyb vozidla po nastavení je zakázán — správné jsou nahlášení pruhu, pevná pozice, bezpečnostní ohled a doplněk spiků (max. 2).',
+    note: 'Zásady roadblocku: nahlásit směr a polohu a nikdy s vozidlem nehýbat. Pohyb vozidla po zastavení je zakázán — správné je nahlásit směr, příp. polohu a čekat na průjezd celé kolony 10-80 kolem roadblocku.',
     options: [
       'Vozidlem podle potřeby posunout, aby se zúžil průjezdný prostor',
       'Nahlásit pruh, ve kterém je roadblock postaven',
@@ -3383,10 +3384,10 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zasah',
     title: 'Použití roadblocku',
     kind: 'choice',
-    prompt: 'Ve které ze situací je roadblock vhodným taktickým nástrojem?',
-    note: 'Roadblock = zablokování cesty vozidlem za účelem zastavení ujíždějícího suspecta. Pro odklon provozu, perimetr nebo označení nebezpečného úseku se roadblock nepoužívá.',
+    prompt: 'Ve které ze situací je roadblock vhodným donucovacím prostředkem při 10-80?',
+    note: 'Roadblock = zablokování cesty vozidlem za účelem zastavení ujíždějícího suspecta nebo změny směru ujíždějícího suspecta. Ostatní možnosti se nevztahují na 10-80.',
     options: [
-      'Suspect ujíždí na vozidlu a je potřeba mu fyzicky zablokovat cestu',
+      'Suspect ujíždí s vozidlem a je potřeba mu fyzicky zablokovat cestu nebo změnit jeho směr',
       'Na místě dopravní nehody je potřeba odklon provozu',
       'EMS potřebuje chráněný koridor k pacientovi',
       'Příslušníci zajišťují perimetr kolem budovy se suspectem uvnitř',
@@ -3402,12 +3403,12 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Postup při breachi',
     kind: 'choice',
     prompt: 'Co se zvolá při breachi a jak jsou rozestaveny jednotky?',
-    note: 'Před breachem 3× „BREACH BREACH BREACH", poté vniknout. Dvě jednotky stojí na opačných stranách dveří. Pozor na crossfire.',
+    note: 'Před breachem 3× zvolat BREACH - „BREACH BREACH BREACH", poté vniknout. Dvě jednotky stojí na opačných stranách dveří. Nutno dávat pozor na crossfire.',
     options: [
-      '3× „BREACH BREACH BREACH"; 2 jednotky na opačných stranách dveří',
-      '1× „BREACH"; jednotky vstoupí současně z jedné strany',
-      '3× „BREACH BREACH BREACH"; všechny jednotky nastoupí za sebou',
-      '2× „POLICE POLICE"; 2 jednotky na stejné straně dveří',
+      '3× zvolat BREACH - „BREACH BREACH BREACH"; 2 jednotky na opačných stranách dveří',
+      '1× zvolat BREACH - „BREACH"; jednotky vstoupí současně z jedné strany',
+      '3× zvolat BREACH - „BREACH BREACH BREACH"; všechny jednotky nastoupí za sebou',
+      '2× zvolat POLICIE- „POLICE POLICE"; 2 jednotky na stejné straně dveří',
       'Nic se nevolá — breach se provádí v tichosti',
     ],
     correctIndices: [
@@ -3420,7 +3421,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Maximální výkupné bez SGT',
     kind: 'choice',
     prompt: 'Jaká je maximální výše výkupného, kterou příslušník smí schválit bez souhlasu SGT+?',
-    note: 'Poměr 1 rukojmí = max. 2 000 SAD. Nad tuto částku musí schválit SGT+. Vždy se snaží sjednat nižší částku než maximum.',
+    note: 'Poměr 1 rukojmí = max. 2 000 SAD. Nad tuto částku musí schválit SGT+. Vždy se ale snažíme sjednat nižší částku, než tu nejvyšší možnou.',
     options: [
       '2 000 SAD',
       '500 SAD',
@@ -3474,10 +3475,10 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Pozice vyjednavače',
     kind: 'choice',
     prompt: 'Kde se musí vyjednavač nacházet a co je zakázáno?',
-    note: 'Vyjednavač: skrytý za budovou, ne ve stejném prostoru jako suspecti. Nikdy se neotáčí zády k suspectovi.',
+    note: 'Vyjednavač: skrytý za budovou u dveří, ne ve stejném prostoru jako suspecti. Nikdy se neotáčí zády k suspectovi, ani při komunikaci na vysílačku.',
     options: [
-      'Skrytý za budovou; nikdy nesmí otočit záda k suspectovi',
-      'Před budovou viditelně, aby suspect věděl, s kým komunikuje',
+      'Skrytý za budovou u dveří; nikdy nesmí otočit záda k suspectovi',
+      'Přímo před dveřmi, aby suspect věděl, s kým komunikuje',
       'Uvnitř budovy hned za dveřmi',
       'Ve vozidle vzdáleném min. 50 m',
       'Vedle velitele, aby koordinace byla rychlejší',
@@ -3492,9 +3493,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Vozidlo samovolně zastaví po 10-80',
     kind: 'choice',
     prompt: 'Vozidlo po pronásledování zastaví samovolně (bez PIT nebo nehody). Jak se postupuje?',
-    note: 'Pokud vozidlo po pronásledování zastaví samovolně, VŽDY se provede Code 5, nikdy 10-11. Situace po 10-80 je vždy riziková.',
+    note: 'Pokud vozidlo po pronásledování zastaví samovolně, VŽDY se provede Code 5, nikdy box ani 10-11. Situace po 10-80 je vždy riziková.',
     options: [
-      'Vždy Code 5 — nikdy 10-11',
+      'Vždy Code 5 — nikdy box ani 10-11',
       'Standardní 10-11 — vozidlo zastavilo klidně',
       'Záleží na uvážení velícího příslušníka',
       'Felony stop jen pokud jde o dříve známého suspecta',
@@ -3511,10 +3512,10 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Jak zní pravidlo 4P a jakou maximální dobu lze na základě něj osobu omezit na osobní svobodě?',
     ref: '§29 LEA',
-    note: 'Pravidlo 4P = Před/Při/Po Protiprávním jednání. Čas 3 hodiny se počítá od okamžiku zadržení, nikoliv od umístění do CPZ.',
+    note: 'Pravidlo 4P = Bezprostředně Před/Při/Po Protiprávním jednání. Nebylo-li zadržení provedeno bezprostředně PO spácháném činu, tak je nutný souhlas se zadržením. Čas 3 hodiny se počítá od okamžiku zadržení, nikoliv od umístění do CPZ.',
     options: [
+      'Před / Při / bezprostředně Po Protiprávním jednání; max. 3 hodiny od okamžiku zadržení',
       'Před / Při / Po Protiprávním jednání; max. 3 hodiny od okamžiku zadržení',
-      'Před / Při / Po Protiprávním jednání; max. 6 hodin od umístění do CPZ',
       'Přistižení / Pronásledování / Přijetí / Provedení; max. 3 hodiny od umístění do CPZ',
       'Přistižení / Podezření / Pohyb / Provedení; max. 2 hodiny od zadržení',
       'Před / Při / Po Protiprávním jednání; max. 12 hodin od zadržení',
@@ -3552,9 +3553,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Kdy NELZE vést zkrácené řízení?',
     ref: '§40',
-    note: 'Zkrácené řízení nelze vést, pokud součet nejnižšího možného trestu za všechny trestné činy přesahuje 20 let. V takovém případě je nutné kontaktovat SZ s připraveným obviněním a důkazním materiálem. Nesouhlas osoby s trestem řízení nebrání — vede se dál a postupuje instancemi (SZ → soud).',
+    note: 'Zkrácené řízení nelze vést, pokud součet nejnižší možné hranice navrženého trestu za všechny trestné činy přesahuje 20 let. V takovém případě je nutné kontaktovat SZ s připraveným obviněním a důkazním materiálem. Nesouhlas osoby s trestem řízení nebrání — vede se dál a postupuje instancemi (SZ → Státní soud → Vrchní soud).',
     options: [
-      'Pokud součet nejnižších možných trestů přesahuje 20 let',
+      'Pokud součet nejnižších možných hranic navržených trestů přesahuje 20 let',
       'Pokud osoba odmítne vypovídat',
       'Pokud osoba nemá právního zástupce',
       'Pokud případ nebyl zdokumentován na bodycamu',
@@ -3576,7 +3577,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
       'Státní zástupce → státní soud → vrchní soud',
       'Státní soud → vrchní soud → státní zástupce',
       'Vrchní soud → státní soud → státní zástupce',
-      'Státní zástupce → vrchní soud (bez meziinstancí)',
+      'Státní zástupce → vrchní soud',
       'Soud → státní zástupce → vrchní soud',
     ],
     correctIndices: [
@@ -3590,10 +3591,10 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Která sdělení musí zaznít při poučení zadržené nebo zatčené osoby o jejích právech?',
     ref: '§11',
-    note: 'Poučení o právech (§11) musí obsahovat tři části: právo nevypovídat, upozornění, že výpověď může být použita proti osobě, a právo na advokáta. Sdělení musí být slyšet na bodycamu nebo dashcamu.',
+    note: 'Poučení o právech (§11 zákona č. 006-19, tj. LEA) zní “Máte právo nevypovídat, cokoliv co řeknete, může být použito proti vám. Máte právo na advokáta.”. Sdělení musí být slyšet na bodycamu nebo dashcamu. Při nesdělení práv není možné výpoveď osoby použít jako důkaz.',
     options: [
       'Máte právo nevypovídat',
-      'Vše, co řeknete, může být použito proti vám',
+      'Cokoliv, co řeknete, může být použito proti vám',
       'Máte právo na advokáta',
       'Máte právo na tlumočníka, pokud nemluvíte česky',
       'Zadržení potrvá maximálně 3 hodiny',
@@ -3630,13 +3631,13 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Ve kterých situacích může příslušník použít zbraň?',
     ref: '§23',
-    note: 'Zákon §23 vyjmenovává šest situací: nutná obrana/krajní nouze, úkryt nebezpečné osoby, odmítnutí odhodit zbraň, útěk nebezpečné osoby, zastavení vozidla jinak nezastavitelného, výjimečný stav. Pouhé odmítnutí zastavit při kontrole k použití zbraně nestačí.',
+    note: 'Zákon §23 vyjmenovává šest situací: nutná obrana/krajní nouze, úkryt nebezpečné osoby, odmítnutí odhodit zbraň, útěk nebezpečné osoby, zastavení vozidla jinak nezastavitelného, výjimečný stav. Pouhé odmítnutí zastavit při výzvě k zastavení vozidla k použití zbraně nestačí.',
     options: [
       'Chrání sebe nebo jiné před bezprostředním útokem (nutná obrana nebo krajní nouze)',
       'Nebezpečná osoba se ukrývá a odmítá opustit svůj kryt',
-      'Nebezpečná osoba odmítá odhodit svou zbraň',
+      'Ozbrojená osoba odmítá odhodit zbraň',
       'Nebezpečná osoba se snaží utéct a nelze ji zastavit jiným způsobem',
-      'Osoba odmítla zastavit při první výzvě ke kontrole',
+      'Osoba odmítla zastavit při první výzvě k zastavení vozidla',
     ],
     correctIndices: [
       0,
@@ -3652,7 +3653,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Co musí příslušník udělat před použitím donucovacích prostředků a kdy od tohoto požadavku může upustit?',
     ref: '§21',
-    note: 'Před použitím donucovacích prostředků i zbraně je povinná výzva. Od výzvy lze upustit pouze v případě bezprostředního ohrožení života — jinak je výzva povinná vždy.',
+    note: 'Před použitím donucovacích prostředků i zbraně je povinná výzva k ukončení protiprávního jednání. Od výzvy lze upustit pouze v případě bezprostředního ohrožení života — jinak je výzva povinná vždy.',
     options: [
       'Vyzvat osobu k zanechání protizákonného jednání; lze upustit při bezprostředním ohrožení života',
       'Vyzvat osobu k zanechání protizákonného jednání; od výzvy nelze nikdy upustit',
@@ -3670,11 +3671,11 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Vazba — rozhodnutí a délka',
     kind: 'choice',
     prompt: 'Která tvrzení o vazbě platí?',
-    note: 'O vazbě rozhoduje soud na žádost SZ nebo SASP, schvaluje se na 48 hodin a její prodloužení povoluje jen vrchní soud. Státní zástupce o vazbě sám nerozhoduje (jen o ni žádá) a lhůta není 24 hodin.',
+    note: 'O vazbě rozhoduje soud na žádost SZ nebo státní ozbrojené složky, schvaluje se na 48 hodin a její prodloužení musí schválit člen vrchního soudu. Státní zástupce o vazbě sám nerozhoduje (jen o ni žádá) a lhůta není 24 hodin.',
     options: [
-      'O vazbě rozhoduje soud na žádost SZ nebo SASP',
+      'O vazbě rozhoduje soud na žádost SZ nebo státní ozbrojené složky',
       'Vazba se schvaluje na 48 hodin',
-      'Prodloužení vazby povoluje pouze vrchní soud',
+      'Prodloužení vazby musí schválit člen vrchního soudu',
       'O vazbě rozhoduje státní zástupce samostatně',
       'Vazba se schvaluje na 24 hodin',
     ],
@@ -3689,9 +3690,9 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zadrzeni',
     title: 'Oddělování a prohlídka v celách',
     kind: 'choice',
-    prompt: 'Jak se oddělují osoby umístěné v celách SASP a co musí příslušník provést před umístěním?',
+    prompt: 'Jak se oddělují osoby umístěné v celách státních ozbrojených složek a co musí příslušník provést před umístěním?',
     ref: '§15',
-    note: 'Cely SASP (§15): osoby se oddělují dle pohlaví, pod vlivem a agresivní. Před umístěním je povinné osobu prohledat — nikoliv až po umístění do cely.',
+    note: 'Cely státních ozbrojených složek (§12 zákona č. 006-19, tj. LEA): osoby se oddělují dle pohlaví, pod vlivem a agresivní. Před umístěním je povinné osobu prohledat — nikoliv až po umístění do cely.',
     options: [
       'Dle pohlaví',
       'Osoby pod vlivem návykových látek se umísťují odděleně',
@@ -3733,7 +3734,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Předvedení — délka a výjimky',
     kind: 'choice',
     prompt: 'Jaká je maximální doba předvedení a co se do ní nezapočítává?',
-    note: 'Předvedení: max. 1 hodina. Do lhůty se nezapočítává výslech a čekání na právníka. Předvedení povoluje Staff, musí být prokazatelné (bodycam, intranet).',
+    note: 'Předvedení: max. 1 hodina. Do lhůty se nezapočítává výslech a čekání na právníka. Předvádímé například v případě, že se osoba nedostaví na předvolání.',
     options: [
       '1 hodina; nezapočítává se výslech a čekání na právníka',
       '3 hodiny; nezapočítává se výslech a čekání na právníka',
@@ -3940,13 +3941,13 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     kind: 'choice',
     prompt: 'Co hlášení znamená?',
     scenario: 'Na kanálu 1 zazní: „William-44, 10-11 Route 68, 10-32 pozitivní."',
-    note: 'William je volací znak DBI (detektiv). 10-11 = dopravní kontrola, 10-32 pozitivní = osoba je ozbrojená. Pronásledování je 10-80, posily se žádají jinak.',
+    note: 'William je volací znak DBI (detektiv). 10-11 = traffic stop, 10-32 pozitivní = je vyžadována asistence kolegů. Pronásledování je 10-80.',
     options: [
-      'Detektiv č. 44 hlásí dispečinku dopravní kontrolu na Route 68, osoba je ozbrojena',
-      'Detektiv č. 44 hlásí dispečinku pronásledování na Route 68, osoba je ozbrojena',
-      'Uniformovaná dvojice č. 44 hlásí dopravní kontrolu na Route 68, osoba je ozbrojena',
-      'Detektiv č. 44 hlásí dispečinku dopravní kontrolu na Route 68 a žádá posily',
-      'Detektiv č. 44 hlásí dispečinku dopravní kontrolu na Route 68, osoba je pod vlivem',
+      'Detektiv č. 44 hlásí na vysílačce traffic stop na Route 68 a vyžaduje asistenci',
+      'Detektiv č. 44 hlásí na vysílačce pronásledování na Route 68 a vyžaduje asistenci',
+      'Bežná dvojice příslušníků č. 44 hlásí traffic stop na Route 68 a vyžaduje asistenci',
+      'Detektiv č. 44 hlásí na vysílačce dopravní nehodu na Route 68 a vyžaduje asistenci',
+      'Detektiv č. 44 hlásí na vysílačce traffic stop na Route 68, osoba je pod vlivem',
     ],
     correctIndices: [
       0,
@@ -3957,7 +3958,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'zasah',
     title: 'Kód felony stopu',
     kind: 'text',
-    prompt: 'Jaký rádiový kód se hlásí při zahájení felony stopu?',
+    prompt: 'Jaký kód se hlásí při zahájení felony stopu?',
     note: 'Felony stop se zahajuje hlášením „Code 5" a polohou. Např. „Viktor-15, Code 5, letiště Sandy Shores, červený sedan, 10-32 pozitivní."',
     answer: 'Code 5',
     aliases: [
@@ -3971,8 +3972,8 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     theme: 'hodnosti',
     title: 'Žebříček hodností SASP',
     kind: 'enumeration',
-    prompt: 'Vypiš hodnosti SASP od nejvyšší po nejnižší (bez detektivní DBI větve).',
-    note: 'Pořadí: Captain → Lieutenant → Sergeant II → Sergeant → Lead Senior Trooper → Senior Trooper → Trooper → Junior Trooper → Trainee → Cadet. Detektivní větev (Detective III / Detective II / Detective) patří pod DBI a do tohoto žebříčku nespadá.',
+    prompt: 'Vypiš hodnosti SASP od nejvyšší po nejnižší (detektivy nevypisuj).',
+    note: 'Pořadí: Captain → Lieutenant → Sergeant II → Sergeant → Lead Senior Trooper → Senior Trooper → Trooper → Junior Trooper → Trainee → Cadet. Cadet je členem SAPA, ostatní hodnosti jsou členy SASP.',
     matcher: 'alias',
     ordered: true,
     expected: [
@@ -4024,7 +4025,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
     title: 'Pořadí vystupování při Code 5',
     kind: 'enumeration',
     prompt: 'Vypiš správné pořadí, ve kterém osoby vystupují z vozidla při felony stopu.',
-    note: 'Pořadí při felony stopu: Řidič → Spolujezdec → Pasažér za řidičem → Pasažér za spolujezdcem.',
+    note: 'Pořadí při felony stopu: Řidič → Spolujezdec → Pasažér za řidičem → Pasažér za spolujezdcem. Zjednodušeně: od řidiče do písmene Z.',
     matcher: 'alias',
     ordered: true,
     expected: [
@@ -4094,7 +4095,7 @@ export const LAW_QUESTIONS: readonly LawQuestion[] = [
       { left: 'F1', right: 'hlavní PD kanál (služba)' },
       { left: 'F4/F5', right: 'výcviky' },
       { left: 'F6', right: 'SWAT' },
-      { left: 'F7', right: 'klidové řešení (CPZ)' },
+      { left: 'F7', right: 'klidové řešení (např. CPZ)' },
       { left: 'F8', right: 'DBI' },
       { left: 'F9', right: 'vedení SASP' },
       { left: 'F10', right: 'společná frekvence EMS + FD' },
