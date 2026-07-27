@@ -372,6 +372,10 @@ missing keys from initialState (each true) — this includes computing the missi
 
 ### Codes scoring
 
+Default `importanceFilter` (fresh state / backfill of missing keys in `normalizeToV10`)
+= **only `mandatory`**; `rare` and `unnecessary` are opt-in via the checkboxes.
+Users with an already persisted filter keep their own values.
+
 Score `-2..+2`, shared between both modes. Delta ±1 per answer. A code at `+2` drops out
 of the pool. Empty pool → `<CongratsBanner />`. Reset clears `progress` and `turn`,
 **preserves** settings.

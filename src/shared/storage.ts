@@ -89,10 +89,11 @@ export const initialState: PersistedState = {
     progress: {},
     turn: 0,
     settings: {
+      // Default = only the mandatory codes; rare/unnecessary are opt-in.
       importanceFilter: {
         mandatory: true,
-        rare: true,
-        unnecessary: true,
+        rare: false,
+        unnecessary: false,
       },
     },
   },

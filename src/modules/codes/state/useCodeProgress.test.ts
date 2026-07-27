@@ -84,12 +84,12 @@ describe('useCodeProgress', () => {
 });
 
 describe('useSettings', () => {
-  it('starts with defaults: all categories enabled', () => {
+  it('starts with defaults: only mandatory enabled', () => {
     const { result } = renderHook(() => useSettings());
     expect(result.current.importanceFilter).toEqual({
       mandatory: true,
-      rare: true,
-      unnecessary: true,
+      rare: false,
+      unnecessary: false,
     });
   });
 
